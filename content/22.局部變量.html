@@ -1,0 +1,988 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>22.局部變量</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="../highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="../tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "../";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "../searchindex.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title"></h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="22區域性變數-local-variables"><a class="header" href="#22區域性變數-local-variables">22.區域性變數 Local Variables</a></h1>
+<blockquote>
+<p>And as imagination bodies forth
+The forms of things unknown, the poet’s pen
+Turns them to shapes and gives to airy nothing
+A local habitation and a name.</p>
+<p>​																		  —— William Shakespeare, <em>A Midsummer Night’s Dream</em></p>
+</blockquote>
+<p><em>隨著想象力的不斷湧現</em></p>
+<p><em>未知事物的形式，詩人的筆</em></p>
+<p><em>把它們變成形狀，變成虛無</em></p>
+<p><em>當地的居住地和名字。</em></p>
+<p>（威廉·莎士比亞《仲夏夜之夢》）</p>
+<blockquote>
+<p>The <a href="http://www.craftinginterpreters.com/global-variables.html">last chapter</a> introduced variables to clox, but only of the global variety. In this chapter, we’ll extend that to support blocks, block scope, and local variables. In jlox, we managed to pack all of that and globals into one chapter. For clox, that’s two chapters worth of work partially because, frankly, everything takes more effort in C.</p>
+</blockquote>
+<p>上一章介紹了clox中的變數，但是隻介紹了全域性變數。在本章中，我們將進一步支援塊、塊作用域和區域性變數。在jlox中，我們設法將所有這些內容和全域性變數打包成一章。對於clox來說，這需要兩章的工作量，坦率的說，部分原因是在C語言中一切都要花費更多的精力。</p>
+<blockquote>
+<p>But an even more important reason is that our approach to local variables will be quite different from how we implemented globals. Global variables are late bound in Lox. “Late” in this context means “resolved after compile time”. That’s good for keeping the compiler simple, but not great for performance. Local variables are one of the most-used parts of a language. If locals are slow, <em>everything</em> is slow. So we want a strategy for local variables that’s as efficient as possible.</p>
+</blockquote>
+<p>但更重要的原因是，我們處理區域性變數的方法與我們實現全域性變數的方法截然不同。全域性變數在Lox中是後期繫結的。這裡的“後期”是指“在編譯後分析”。這有利於保持編譯器的簡單性，但不利於效能。區域性變數是語言中最常用的部分之一。如果區域性變數很慢，那麼<em>一切</em>都是緩慢的。因此，對於區域性變數，我們希望採取儘可能高效的策略<sup class="footnote-reference" id="fr-1-1"><a href="#footnote-1">1</a></sup>。</p>
+<blockquote>
+<p>Fortunately, lexical scoping is here to help us. As the name implies, lexical scope means we can resolve a local variable just by looking at the text of the program—locals are <em>not</em> late bound. Any processing work we do in the compiler is work we <em>don’t</em> have to do at runtime, so our implementation of local variables will lean heavily on the compiler.</p>
+</blockquote>
+<p>幸運的是，詞法作用域可以幫助我們。顧名思義，詞法作用域意味著我們可以透過檢視程式文字來解析區域性變數——區域性變數<em>不是</em>後期繫結的。我們在編譯器中所做的任何處理工作都不必在執行時完成，因此區域性變數的實現將在很大程度上依賴於編譯器。</p>
+<blockquote>
+<h2 id="22--1-representing-local-variables"><a class="header" href="#22--1-representing-local-variables">22 . 1 Representing Local Variables</a></h2>
+</blockquote>
+<h2 id="221-表示區域性變數"><a class="header" href="#221-表示區域性變數">22.1 表示區域性變數</a></h2>
+<blockquote>
+<p>The nice thing about hacking on a programming language in modern times is there’s a long lineage of other languages to learn from. So how do C and Java manage their local variables? Why, on the stack, of course! They typically use the native stack mechanisms supported by the chip and OS. That’s a little too low level for us, but inside the virtual world of clox, we have our own stack we can use.</p>
+</blockquote>
+<p>在現代，實現一門程式語言的好處是，可以參考已經發展了很長時間的其它語言。那麼，C和Java是如何管理它們的區域性變數的呢？當然是在堆疊上！它們通常使用晶片和作業系統支援的本地堆疊機制。這對我們來說有點太底層了，但是在clox的虛擬世界中，我們有自己的堆疊可以使用。</p>
+<blockquote>
+<p>Right now, we only use it for holding on to <strong>temporaries</strong>—short-lived blobs of data that we need to remember while computing an expression. As long as we don’t get in the way of those, we can stuff our local variables onto the stack too. This is great for performance. Allocating space for a new local requires only incrementing the <code>stackTop</code> pointer, and freeing is likewise a decrement. Accessing a variable from a known stack slot is an indexed array lookup.</p>
+</blockquote>
+<p>現在，我們只使用它來儲存<strong>臨時變數</strong>——我們在計算表示式時需要記住的短期資料塊。只要我們不妨礙這些資料，我們也可以把區域性變數塞到棧中。這對效能很有幫助。為一個新的區域性變數分配空間只需要遞增<code>stackTop</code>指標，而釋放也同樣是遞減的過程。從已知的棧槽訪問變數是一種索引陣列的查詢。</p>
+<blockquote>
+<p>We do need to be careful, though. The VM expects the stack to behave like, well, a stack. We have to be OK with allocating new locals only on the top of the stack, and we have to accept that we can discard a local only when nothing is above it on the stack. Also, we need to make sure temporaries don’t interfere.</p>
+</blockquote>
+<p>不過，我們確實需要小心。虛擬機器希望棧的行為就像，嗯，一個棧。我們必須接受只能在棧頂分配新的區域性變數，而且我們必須接受只有區域性變數上方的棧槽沒有資料時，才能丟棄該變數。此外，我們還需要保證臨時變數不受幹擾。</p>
+<blockquote>
+<p>Conveniently, the design of Lox is in harmony with these constraints. New locals are always created by declaration statements. Statements don’t nest inside expressions, so there are never any temporaries on the stack when a statement begins executing. Blocks are strictly nested. When a block ends, it always takes the innermost, most recently declared locals with it. Since those are also the locals that came into scope last, they should be on top of the stack where we need them.</p>
+</blockquote>
+<p>方便的是，Lox的設計與這些約束條件是一致的<sup class="footnote-reference" id="fr-2-1"><a href="#footnote-2">2</a></sup>。新的區域性變數總是透過宣告語句建立的。語句不會巢狀在表示式內，所以當一個語句開始執行時，棧中沒有任何臨時變數。程式碼塊是嚴格巢狀的。當一個塊結束時，它總會帶走最內部、最近宣告的區域性變數。因為這些也是最後進入作用域的區域性變數，所以它們應該位於棧頂（我們期望它所在的位置）。</p>
+<blockquote>
+<p>Step through this example program and watch how the local variables come in and go out of scope:</p>
+</blockquote>
+<p>逐步執行這段示例程式碼，檢視區域性變數是如何進入和離開作用域的：</p>
+<p><img src="22.%E5%8D%80%E5%9F%9F%E6%80%A7%E8%AE%8A%E6%95%B8/scopes.png" alt="A series of local variables come into and out of scope in a stack-like fashion." /></p>
+<blockquote>
+<p>See how they fit a stack perfectly? It seems that the stack will work for storing locals at runtime. But we can go further than that. Not only do we know <em>that</em> they will be on the stack, but we can even pin down precisely <em>where</em> they will be on the stack. Since the compiler knows exactly which local variables are in scope at any point in time, it can effectively simulate the stack during compilation and note where in the stack each variable lives.</p>
+</blockquote>
+<p>看到它們如何完美地適應堆疊了嗎？看來，棧可以在執行時儲存區域性變數。但是我們可以更進一步。我們不僅知道它們會在棧上，而且我們甚至可以確定它們在棧上的精確位置。因為編譯器確切地知道任何時間點上有哪些區域性變數在作用域中，因此它可以在編譯過程中有效地模擬堆疊，並注意每個變數在棧中的位置。</p>
+<blockquote>
+<p>We’ll take advantage of this by using these stack offsets as operands for the bytecode instructions that read and store local variables. This makes working with locals deliciously fast—as simple as indexing into an array.</p>
+</blockquote>
+<p>我們將利用這一點，對於讀取和儲存區域性變數的位元組碼指令，把這些棧偏移量作為其運算元。這使得區域性變數非常快——就像索引陣列一樣簡單<sup class="footnote-reference" id="fr-3-1"><a href="#footnote-3">3</a></sup>。</p>
+<blockquote>
+<p>There’s a lot of state we need to track in the compiler to make this whole thing go, so let’s get started there. In jlox, we used a linked chain of “environment” HashMaps to track which local variables were currently in scope. That’s sort of the classic, schoolbook way of representing lexical scope. For clox, as usual, we’re going a little closer to the metal. All of the state lives in a new struct.</p>
+</blockquote>
+<p>我們需要在編譯器中跟蹤大量狀態，以使整個程式執行起來，讓我們就從那裡開始。在jlox中，我們使用“環境”HashMap鏈來跟蹤當前在作用域中的區域性變數。這是一種經典的、教科書式的詞法作用域表示方式。對於clox，像往常一樣，我們更接近於硬體。所有的狀態都儲存了一個新的結構體中。</p>
+<p><em><u>compiler.c，在結構體ParseRule後新增程式碼：</u></em></p>
+<pre><code class="language-c">} ParseRule;
+// 新增部分開始
+typedef struct {
+  Local locals[UINT8_COUNT];
+  int localCount;
+  int scopeDepth;
+} Compiler;
+// 新增部分結束
+Parser parser;
+</code></pre>
+<blockquote>
+<p>We have a simple, flat array of all locals that are in scope during each point in the compilation process. They are ordered in the array in the order that their declarations appear in the code. Since the instruction operand we’ll use to encode a local is a single byte, our VM has a hard limit on the number of locals that can be in scope at once. That means we can also give the locals array a fixed size.</p>
+</blockquote>
+<p>我們有一個簡單、扁平的陣列，其中包含了編譯過程中每個時間點上處於作用域內的所有區域性變數<sup class="footnote-reference" id="fr-4-1"><a href="#footnote-4">4</a></sup>。它們在陣列中的順序與它們的宣告在程式碼中出現的順序相同。由於我們用來編碼區域性變數的指令運算元是一個位元組，所以我們的虛擬機器對同時處於作用域內的區域性變數的數量有一個硬性限制。這意味著我們也可以給區域性變數陣列一個固定的大小。</p>
+<p><em><u>common.h，新增程式碼：</u></em></p>
+<pre><code class="language-c">#define DEBUG_TRACE_EXECUTION
+// 新增部分開始
+#define UINT8_COUNT (UINT8_MAX + 1)
+// 新增部分結束
+#endif
+</code></pre>
+<blockquote>
+<p>Back in the Compiler struct, the <code>localCount</code> field tracks how many locals are in scope—how many of those array slots are in use. We also track the “scope depth”. This is the number of blocks surrounding the current bit of code we’re compiling.</p>
+</blockquote>
+<p>回到Compiler結構體中，<code>localCount</code>欄位記錄了作用域中有多少區域性變數——有多少個陣列槽在使用。我們還會跟蹤“作用域深度”。這指的是我們正在編譯的當前程式碼外圍的程式碼塊數量。</p>
+<blockquote>
+<p>Our Java interpreter used a chain of maps to keep each block’s variables separate from other blocks’. This time, we’ll simply number variables with the level of nesting where they appear. Zero is the global scope, one is the first top-level block, two is inside that, you get the idea. We use this to track which block each local belongs to so that we know which locals to discard when a block ends.</p>
+</blockquote>
+<p>我們的Java直譯器使用了一個map鏈將每個塊的變數與其它塊分開。這一次，我們根據變量出現的巢狀級別對其進行編號。0是全域性作用域，1是第一個頂層塊，2是它內部的塊，你懂的。我們用它來跟蹤每個區域性變數屬於哪個塊，這樣當一個塊結束時，我們就知道該刪除哪些區域性變數。</p>
+<blockquote>
+<p>Each local in the array is one of these:</p>
+</blockquote>
+<p>陣列中的每個區域性變數都是這樣的：</p>
+<p><em><u>compiler.c，在結構體ParseRule後新增程式碼：</u></em></p>
+<pre><code class="language-c">} ParseRule;
+// 新增部分開始
+typedef struct {
+  Token name;
+  int depth;
+} Local;
+// 新增部分結束
+typedef struct {
+</code></pre>
+<blockquote>
+<p>We store the name of the variable. When we’re resolving an identifier, we compare the identifier’s lexeme with each local’s name to find a match. It’s pretty hard to resolve a variable if you don’t know its name. The <code>depth</code> field records the scope depth of the block where the local variable was declared. That’s all the state we need for now.</p>
+</blockquote>
+<p>我們儲存變數的名稱。當我們解析一個識別符號時，會將識別符號的詞素與每個區域性變數名稱進行比較，以找到一個匹配項。如果你不知道變數的名稱，就很難解析它。<code>depth</code>欄位記錄了宣告區域性變數的程式碼塊的作用域深度。這就是我們現在需要的所有狀態。</p>
+<blockquote>
+<p>This is a very different representation from what we had in jlox, but it still lets us answer all of the same questions our compiler needs to ask of the lexical environment. The next step is figuring out how the compiler <em>gets</em> at this state. If we were principled engineers, we’d give each function in the front end a parameter that accepts a pointer to a Compiler. We’d create a Compiler at the beginning and carefully thread it through each function call . . . but that would mean a lot of boring changes to the code we already wrote, so here’s a global variable instead:</p>
+</blockquote>
+<p>這與我們在jlox中使用的表示方式非常不同，但我們用它仍然可以回答編譯器需要向詞法環境提出的所有相同的問題。下一步是弄清楚編譯器如何獲取這個狀態。如果我們是有原則的工程師，我們應該給前端的每個函式新增一個引數，接受一個指向Compiler的指標。我們在一開始就建立一個Compiler，並小心地在將它貫穿於每個函式的呼叫中……但這意味著要對我們已經寫好的程式碼進行大量無聊的修改，所以這裡用一個全域性變數代替<sup class="footnote-reference" id="fr-5-1"><a href="#footnote-5">5</a></sup>：</p>
+<p><em><u>compiler.c，在變數parser後新增程式碼：</u></em></p>
+<pre><code class="language-c">Parser parser;
+// 新增部分開始
+Compiler* current = NULL;
+// 新增部分結束
+Chunk* compilingChunk;
+</code></pre>
+<blockquote>
+<p>Here’s a little function to initialize the compiler:</p>
+</blockquote>
+<p>下面是一個用於初始化編譯器的小函式：</p>
+<p><em><u>compiler.c，在emitConstant()方法後新增程式碼：</u></em></p>
+<pre><code class="language-c">static void initCompiler(Compiler* compiler) {
+  compiler-&gt;localCount = 0;
+  compiler-&gt;scopeDepth = 0;
+  current = compiler;
+}
+</code></pre>
+<blockquote>
+<p>When we first start up the VM, we call it to get everything into a clean state.</p>
+</blockquote>
+<p>當我們第一次啟動虛擬機器時，我們會呼叫它使所有東西進入一個乾淨的狀態。</p>
+<p><em><u>compiler.c，在compile()方法中新增程式碼：</u></em></p>
+<pre><code class="language-c">  initScanner(source);
+  // 新增部分開始
+  Compiler compiler;
+  initCompiler(&amp;compiler);
+  // 新增部分結束
+  compilingChunk = chunk;
+</code></pre>
+<blockquote>
+<p>Our compiler has the data it needs, but not the operations on that data. There’s no way to create and destroy scopes, or add and resolve variables. We’ll add those as we need them. First, let’s start building some language features.</p>
+</blockquote>
+<p>我們的編譯器有了它需要的資料，但還沒有對這些資料的操作。沒有辦法建立或銷燬作用域，新增和解析變數。我們會在需要的時候新增這些功能。首先，讓我們開始構建一些語言特性。</p>
+<blockquote>
+<h2 id="22--2-block-statements"><a class="header" href="#22--2-block-statements">22 . 2 Block Statements</a></h2>
+</blockquote>
+<h2 id="222-塊語句"><a class="header" href="#222-塊語句">22.2 塊語句</a></h2>
+<blockquote>
+<p>Before we can have any local variables, we need some local scopes. These come from two things: function bodies and blocks. Functions are a big chunk of work that we’ll tackle in <a href="http://www.craftinginterpreters.com/calls-and-functions.html">a later chapter</a>, so for now we’re only going to do blocks. As usual, we start with the syntax. The new grammar we’ll introduce is:</p>
+</blockquote>
+<p>在能夠使用區域性變數之前，我們需要一些區域性作用域。它們來自於兩方面：函式體和程式碼塊。函式是一大塊工作，我們在後面的章節中處理，因此現在我們只做塊<sup class="footnote-reference" id="fr-6-1"><a href="#footnote-6">6</a></sup>。和往常一樣，我們從語法開始。我們要介紹的新語法是：</p>
+<pre><code class="language-javascript">statement      → exprStmt
+               | printStmt
+               | block ;
+
+block          → "{" declaration* "}" ;
+</code></pre>
+<blockquote>
+<p>Blocks are a kind of statement, so the rule for them goes in the <code>statement</code> production. The corresponding code to compile one looks like this:</p>
+</blockquote>
+<p>塊是一種語句，所以它的規則是在<code>statement</code>生成式中。對應的編譯程式碼如下：</p>
+<p><em><u>compiler.c，在statement()方法中新增程式碼：</u></em></p>
+<pre><code class="language-c">  if (match(TOKEN_PRINT)) {
+    printStatement();
+  // 新增部分開始  
+  } else if (match(TOKEN_LEFT_BRACE)) {
+    beginScope();
+    block();
+    endScope();
+  // 新增部分結束  
+  } else {
+</code></pre>
+<blockquote>
+<p>After parsing the initial curly brace, we use this helper function to compile the rest of the block:</p>
+</blockquote>
+<p>解析完開頭的花括號之後，我們使用這個輔助函式<sup class="footnote-reference" id="fr-7-1"><a href="#footnote-7">7</a></sup>來編譯塊的其餘部分：</p>
+<p><em><u>compiler.c，在expression()方法後新增程式碼：</u></em></p>
+<pre><code class="language-c">static void block() {
+  while (!check(TOKEN_RIGHT_BRACE) &amp;&amp; !check(TOKEN_EOF)) {
+    declaration();
+  }
+
+  consume(TOKEN_RIGHT_BRACE, "Expect '}' after block.");
+}
+</code></pre>
+<blockquote>
+<p>It keeps parsing declarations and statements until it hits the closing brace. As we do with any loop in the parser, we also check for the end of the token stream. This way, if there’s a malformed program with a missing closing curly, the compiler doesn’t get stuck in a loop.</p>
+</blockquote>
+<p>它會一直解析宣告和語句，直到遇見右括號。就像我們在解析器中的所有迴圈一樣，我們也要檢查標識流是否結束。這樣一來，如果有一個格式不正確的程式缺少右括號，編譯器也不會卡在迴圈裡。</p>
+<blockquote>
+<p>Executing a block simply means executing the statements it contains, one after the other, so there isn’t much to compiling them. The semantically interesting thing blocks do is create scopes. Before we compile the body of a block, we call this function to enter a new local scope:</p>
+</blockquote>
+<p>執行程式碼塊只是意味著一個接一個地執行其中包含的語句，所以不需要編譯它們。從語義上講，塊所做的事就是建立作用域。在我們編譯塊的主體之前，我們會呼叫這個函式進入一個新的區域性作用域：</p>
+<p><em><u>compiler.c，在endCompiler()方法後新增程式碼：</u></em></p>
+<pre><code class="language-c">static void beginScope() {
+  current-&gt;scopeDepth++;
+}
+</code></pre>
+<blockquote>
+<p>In order to “create” a scope, all we do is increment the current depth. This is certainly much faster than jlox, which allocated an entire new HashMap for each one. Given <code>beginScope()</code>, you can probably guess what <code>endScope()</code> does.</p>
+</blockquote>
+<p>為了“建立”一個作用域，我們所做的就是增加當前的深度。這當然比jlox快得多，因為jlox為每個作用域分配了全新的HashMap。有了<code>beginScope()</code>，你大概能猜到<code>endScope()</code>會做什麼。</p>
+<p><em><u>compiler.c，在beginScope()方法後新增程式碼：</u></em></p>
+<pre><code class="language-c">static void endScope() {
+  current-&gt;scopeDepth--;
+}
+</code></pre>
+<blockquote>
+<p>That’s it for blocks and scopes—more or less—so we’re ready to stuff some variables into them.</p>
+</blockquote>
+<p>這就是塊和作用域的全部內容——或多或少吧——現在我們準備在其中新增一些變數。</p>
+<blockquote>
+<h2 id="22--3-declaring-local-variables"><a class="header" href="#22--3-declaring-local-variables">22 . 3 Declaring Local Variables</a></h2>
+</blockquote>
+<h2 id="223-宣告區域性變數"><a class="header" href="#223-宣告區域性變數">22.3 宣告區域性變數</a></h2>
+<blockquote>
+<p>Usually we start with parsing here, but our compiler already supports parsing and compiling variable declarations. We’ve got <code>var</code> statements, identifier expressions and assignment in there now. It’s just that the compiler assumes all variables are global. So we don’t need any new parsing support, we just need to hook up the new scoping semantics to the existing code.</p>
+</blockquote>
+<p>通常我們會從解析開始，但是我們的編譯器已經支援瞭解析和編譯變數宣告。我們現在已經有了<code>var</code>語句、識別符號表示式和賦值語句。只是編譯器假設所有的變數都是全域性變數。所以，我們不需要任何新的解析支援，我們只需要將新的作用域語義與已有的程式碼連線起來。</p>
+<p><img src="22.%E5%8D%80%E5%9F%9F%E6%80%A7%E8%AE%8A%E6%95%B8/declaration.png" alt="The code flow within varDeclaration()." /></p>
+<blockquote>
+<p>Variable declaration parsing begins in <code>varDeclaration()</code> and relies on a couple of other functions. First, <code>parseVariable()</code> consumes the identifier token for the variable name, adds its lexeme to the chunk’s constant table as a string, and then returns the constant table index where it was added. Then, after <code>varDeclaration()</code> compiles the initializer, it calls <code>defineVariable()</code> to emit the bytecode for storing the variable’s value in the global variable hash table.</p>
+</blockquote>
+<p>變數宣告的解析從<code>varDeclaration()</code>開始，並依賴於其它幾個函式。首先，<code>parseVariable()</code>會使用識別符號標識作為變數名稱，將其詞素作為字串新增到位元組碼塊的常量表中，然後返回它的常量表索引。接著，在<code>varDeclaration()</code>編譯完初始化表示式後，會呼叫<code>defineVariable()</code>生成位元組碼，將變數的值儲存到全域性變數雜湊表中。</p>
+<blockquote>
+<p>Both of those helpers need a few changes to support local variables. In <code>parseVariable()</code>, we add:</p>
+</blockquote>
+<p>這兩個輔助函式都需要一些調整以支援區域性變數。在<code>parseVariable()</code>中，我們新增：</p>
+<p><em><u>compiler.c，在parseVariable()方法中新增程式碼：</u></em></p>
+<pre><code class="language-c">  consume(TOKEN_IDENTIFIER, errorMessage);
+  // 新增部分開始
+  declareVariable();
+  if (current-&gt;scopeDepth &gt; 0) return 0;
+  // 新增部分結束
+  return identifierConstant(&amp;parser.previous);
+</code></pre>
+<blockquote>
+<p>First, we “declare” the variable. I’ll get to what that means in a second. After that, we exit the function if we’re in a local scope. At runtime, locals aren’t looked up by name. There’s no need to stuff the variable’s name into the constant table, so if the declaration is inside a local scope, we return a dummy table index instead.</p>
+</blockquote>
+<p>首先，我們“宣告”這個變數。我一會兒會說到這是什麼意思。之後，如果我們在區域性作用域中，則退出函式。在執行時，不會透過名稱查詢區域性變數。不需要將變數的名稱放入常量表中，所以如果宣告在區域性作用域內，則返回一個假的表索引。</p>
+<blockquote>
+<p>Over in <code>defineVariable()</code>, we need to emit the code to store a local variable if we’re in a local scope. It looks like this:</p>
+</blockquote>
+<p>在<code>defineVariable()</code>中，如果處於區域性作用域內，就需要生成一個位元組碼來儲存區域性變數。它看起來是這樣的：</p>
+<p><em><u>compiler.c，在defineVariable()方法中新增程式碼：</u></em></p>
+<pre><code class="language-c">static void defineVariable(uint8_t global) {
+  // 新增部分開始
+  if (current-&gt;scopeDepth &gt; 0) {
+    return;
+  }
+  // 新增部分結束
+  emitBytes(OP_DEFINE_GLOBAL, global);
+</code></pre>
+<blockquote>
+<p>Wait, what? Yup. That’s it. There is no code to create a local variable at runtime. Think about what state the VM is in. It has already executed the code for the variable’s initializer (or the implicit <code>nil</code> if the user omitted an initializer), and that value is sitting right on top of the stack as the only remaining temporary. We also know that new locals are allocated at the top of the stack . . . right where that value already is. Thus, there’s nothing to do. The temporary simply <em>becomes</em> the local variable. It doesn’t get much more efficient than that.</p>
+</blockquote>
+<p>等等，什麼？是的，就是這樣。沒有程式碼會在執行時建立區域性變數。想想虛擬機器現在處於什麼狀態。它已經執行了變數初始化表示式的程式碼（如果使用者省略了初始化，則是隱式的<code>nil</code>），並且該值作為唯一保留的臨時變數位於棧頂。我們還知道，新的區域性變數會被分配到棧頂……這個值已經在那裡了。因此，沒有什麼可做的。臨時變數直接<em>成為</em>區域性變數。沒有比這更有效的方法了。</p>
+<p><img src="22.%E5%8D%80%E5%9F%9F%E6%80%A7%E8%AE%8A%E6%95%B8/local-slots.png" alt="Walking through the bytecode execution showing that each initializer&#39;s result ends up in the local&#39;s slot." /></p>
+<blockquote>
+<p>OK, so what’s “declaring” about? Here’s what that does:</p>
+</blockquote>
+<p>好的，那“宣告”是怎麼回事呢？它的作用如下：</p>
+<p><em><u>compiler.c，在identifierConstant()方法後新增程式碼：</u></em></p>
+<pre><code class="language-c">static void declareVariable() {
+  if (current-&gt;scopeDepth == 0) return;
+
+  Token* name = &amp;parser.previous;
+  addLocal(*name);
+}
+</code></pre>
+<blockquote>
+<p>This is the point where the compiler records the existence of the variable. We only do this for locals, so if we’re in the top-level global scope, we just bail out. Because global variables are late bound, the compiler doesn’t keep track of which declarations for them it has seen.</p>
+</blockquote>
+<p>在這裡，編譯器記錄變數的存在。我們只對區域性變數這樣做，所以如果在頂層全域性作用域中，就直接退出。因為全域性變數是後期繫結的，所以編譯器不會跟蹤它所看到的關於全域性變數的宣告。</p>
+<blockquote>
+<p>But for local variables, the compiler does need to remember that the variable exists. That’s what declaring it does—it adds it to the compiler’s list of variables in the current scope. We implement that using another new function.</p>
+</blockquote>
+<p>但是對於區域性變數，編譯器確實需要記住變數的存在。這就是宣告的作用——將變數新增到編譯器在當前作用域內的變數列表中。我們使用另一個新函式來實現這一點。</p>
+<p><em><u>compiler.c，在identifierConstant()方法後新增程式碼：</u></em></p>
+<pre><code class="language-c">static void addLocal(Token name) {
+  Local* local = &amp;current-&gt;locals[current-&gt;localCount++];
+  local-&gt;name = name;
+  local-&gt;depth = current-&gt;scopeDepth;
+}
+</code></pre>
+<blockquote>
+<p>This initializes the next available Local in the compiler’s array of variables. It stores the variable’s name and the depth of the scope that owns the variable.</p>
+</blockquote>
+<p>這會初始化編譯器變數陣列中下一個可用的Local。它儲存了變數的名稱和持有變數的作用域的深度<sup class="footnote-reference" id="fr-8-1"><a href="#footnote-8">8</a></sup>。</p>
+<blockquote>
+<p>Our implementation is fine for a correct Lox program, but what about invalid code? Let’s aim to be robust. The first error to handle is not really the user’s fault, but more a limitation of the VM. The instructions to work with local variables refer to them by slot index. That index is stored in a single-byte operand, which means the VM only supports up to 256 local variables in scope at one time.</p>
+</blockquote>
+<p>我們的實現對於一個正確的Lox程式來說是沒有問題的，但是對於無效的程式碼呢？我們還是以穩健為目標。第一個要處理的錯誤其實不是使用者的錯，而是虛擬機器的限制。使用區域性變數的指令透過槽的索引來引用變數。該索引儲存在一個單位元組運算元中，這意味著虛擬機器一次最多隻能支援256個區域性變數。</p>
+<blockquote>
+<p>If we try to go over that, not only could we not refer to them at runtime, but the compiler would overwrite its own locals array, too. Let’s prevent that.</p>
+</blockquote>
+<p>如果我們試圖超過這個範圍，不僅不能在執行時引用變數，而且編譯器也會覆蓋自己的區域性變數陣列。我們要防止這種情況。</p>
+<p><em><u>compiler.c，在addLocal()方法中新增程式碼：</u></em></p>
+<pre><code class="language-c">static void addLocal(Token name) {
+  // 新增部分開始
+  if (current-&gt;localCount == UINT8_COUNT) {
+    error("Too many local variables in function.");
+    return;
+  }
+  // 新增部分結束
+  Local* local = &amp;current-&gt;locals[current-&gt;localCount++];
+</code></pre>
+<blockquote>
+<p>The next case is trickier. Consider:</p>
+</blockquote>
+<p>接下來的情況就有點棘手了。考慮一下：</p>
+<pre><code class="language-javascript">{
+  var a = "first";
+  var a = "second";
+}
+</code></pre>
+<blockquote>
+<p>At the top level, Lox allows redeclaring a variable with the same name as a previous declaration because that’s useful for the REPL. But inside a local scope, that’s a pretty weird thing to do. It’s likely to be a mistake, and many languages, including our own Lox, enshrine that assumption by making this an error.</p>
+</blockquote>
+<p>在頂層，Lox允許使用與之前宣告的變數相同的名稱重新宣告一個變數，因為這在REPL中很有用。但在區域性作用域中，這就有些奇怪了。這很可能是一個誤用，許多語言（包括我們的Lox）都把它作為一個錯誤<sup class="footnote-reference" id="fr-9-1"><a href="#footnote-9">9</a></sup>。</p>
+<blockquote>
+<p>Note that the above program is different from this one:</p>
+</blockquote>
+<p>請注意，上面的程式碼跟這個是不同的：</p>
+<pre><code class="language-c">{
+  var a = "outer";
+  {
+    var a = "inner";
+  }
+}
+</code></pre>
+<blockquote>
+<p>It’s OK to have two variables with the same name in <em>different</em> scopes, even when the scopes overlap such that both are visible at the same time. That’s shadowing, and Lox does allow that. It’s only an error to have two variables with the same name in the <em>same</em> local scope.</p>
+</blockquote>
+<p>在<em>不同的</em>作用域中有兩個同名變數是可以的，即使作用域重疊，以至於兩個變數是同時可見的。這就是遮蔽，而Lox確實允許這樣做。只有在<em>同一個</em>區域性作用域中有兩個同名的變數才是錯誤的。</p>
+<blockquote>
+<p>We detect that error like so:</p>
+</blockquote>
+<p>我們這樣檢測這個錯誤<sup class="footnote-reference" id="fr-10-1"><a href="#footnote-10">10</a></sup>：</p>
+<p><em><u>compiler.c，在declareVariable()方法中新增程式碼：</u></em></p>
+<pre><code class="language-c">  Token* name = &amp;parser.previous;
+  // 新增部分開始
+  for (int i = current-&gt;localCount - 1; i &gt;= 0; i--) {
+    Local* local = &amp;current-&gt;locals[i];
+    if (local-&gt;depth != -1 &amp;&amp; local-&gt;depth &lt; current-&gt;scopeDepth) {
+      break; 
+    }
+
+    if (identifiersEqual(name, &amp;local-&gt;name)) {
+      error("Already a variable with this name in this scope.");
+    }
+  }
+  // 新增部分結束
+  addLocal(*name);
+}
+</code></pre>
+<blockquote>
+<p>Local variables are appended to the array when they’re declared, which means the current scope is always at the end of the array. When we declare a new variable, we start at the end and work backward, looking for an existing variable with the same name. If we find one in the current scope, we report the error. Otherwise, if we reach the beginning of the array or a variable owned by another scope, then we know we’ve checked all of the existing variables in the scope.</p>
+</blockquote>
+<p>區域性變數在宣告時被追加到陣列中，這意味著當前作用域始終位於陣列的末端。當我們宣告一個新的變數時，我們從末尾開始，反向查詢具有相同名稱的已有變數。如果是當前作用域中找到，我們就報告錯誤。此外，如果我們已經到達了陣列開頭或另一個作用域中的變數，我們就知道已經檢查了當前作用域中的所有現有變數。</p>
+<blockquote>
+<p>To see if two identifiers are the same, we use this:</p>
+</blockquote>
+<p>為了檢視兩個識別符號是否相同，我們使用這個方法：</p>
+<p><em><u>compiler.c，在identifierConstant()方法後新增程式碼：</u></em></p>
+<pre><code class="language-c">static bool identifiersEqual(Token* a, Token* b) {
+  if (a-&gt;length != b-&gt;length) return false;
+  return memcmp(a-&gt;start, b-&gt;start, a-&gt;length) == 0;
+}
+</code></pre>
+<blockquote>
+<p>Since we know the lengths of both lexemes, we check that first. That will fail quickly for many non-equal strings. If the lengths are the same, we check the characters using <code>memcmp()</code>. To get to <code>memcmp()</code>, we need an include.</p>
+</blockquote>
+<p>既然我們知道兩個詞素的長度，那我們首先檢查它<sup class="footnote-reference" id="fr-11-1"><a href="#footnote-11">11</a></sup>。對於很多不相等的字串，在這一步就很快失敗了。如果長度相同，我們就使用<code>memcmp()</code>檢查字元。為了使用<code>memcmp()</code>，我們需要引入一下。</p>
+<p><em><u>compiler.c，新增程式碼：</u></em></p>
+<pre><code class="language-c">#include &lt;stdlib.h&gt;
+// 新增部分開始
+#include &lt;string.h&gt;
+// 新增部分結束
+#include "common.h"
+</code></pre>
+<p>有了這個，我們就能創造出變數。但是，它們會停留在宣告它們的作用域之外，像幽靈一樣。當一個程式碼塊結束時，我們需要讓其中的變數安息。</p>
+<p><em><u>compiler.c，在endScope()方法中新增程式碼：</u></em></p>
+<pre><code class="language-c">  current-&gt;scopeDepth--;
+  // 新增部分開始
+  while (current-&gt;localCount &gt; 0 &amp;&amp;
+         current-&gt;locals[current-&gt;localCount - 1].depth &gt;
+            current-&gt;scopeDepth) {
+    emitByte(OP_POP);
+    current-&gt;localCount--;
+  }
+  // 新增部分結束
+}
+</code></pre>
+<blockquote>
+<p>When we pop a scope, we walk backward through the local array looking for any variables declared at the scope depth we just left. We discard them by simply decrementing the length of the array.</p>
+</blockquote>
+<p>當我們彈出一個作用域時，後向遍歷區域性變數陣列，查詢在剛剛離開的作用域深度上宣告的所有變數。我們透過簡單地遞減陣列長度來丟棄它們。</p>
+<blockquote>
+<p>There is a runtime component to this too. Local variables occupy slots on the stack. When a local variable goes out of scope, that slot is no longer needed and should be freed. So, for each variable that we discard, we also emit an <code>OP_POP</code> instruction to pop it from the stack.</p>
+</blockquote>
+<p>這裡也有一個執行時的因素。區域性變數佔用了堆疊中的槽位。當區域性變數退出作用域時，這個槽就不再需要了，應該被釋放。因此，對於我們丟棄的每一個變數，我們也要生成一條<code>OP_POP</code>指令，將其從棧中彈出<sup class="footnote-reference" id="fr-12-1"><a href="#footnote-12">12</a></sup>。</p>
+<blockquote>
+<h2 id="22--4-using-locals"><a class="header" href="#22--4-using-locals">22 . 4 Using Locals</a></h2>
+</blockquote>
+<h2 id="224-使用區域性變數"><a class="header" href="#224-使用區域性變數">22.4 使用區域性變數</a></h2>
+<blockquote>
+<p>We can now compile and execute local variable declarations. At runtime, their values are sitting where they should be on the stack. Let’s start using them. We’ll do both variable access and assignment at the same time since they touch the same functions in the compiler.</p>
+</blockquote>
+<p>我們現在可以編譯和執行區域性變數的宣告瞭。在執行時，它們的值就在棧中應在的位置上。讓我們開始使用它們吧。我們會同時完成變數訪問和賦值，因為它們在編譯器中涉及相同的函式。</p>
+<blockquote>
+<p>We already have code for getting and setting global variables, and—like good little software engineers—we want to reuse as much of that existing code as we can. Something like this:</p>
+</blockquote>
+<p>我們已經有了獲取和設定全域性變數的程式碼，而且像優秀的小軟體工程師一樣，我們希望儘可能多地重用現有的程式碼。就像這樣：</p>
+<p><em><u>compiler.c，在namedVariable()方法中替換1行：</u></em></p>
+<pre><code class="language-c">static void namedVariable(Token name, bool canAssign) {
+  // 替換部分開始
+  uint8_t getOp, setOp;
+  int arg = resolveLocal(current, &amp;name);
+  if (arg != -1) {
+    getOp = OP_GET_LOCAL;
+    setOp = OP_SET_LOCAL;
+  } else {
+    arg = identifierConstant(&amp;name);
+    getOp = OP_GET_GLOBAL;
+    setOp = OP_SET_GLOBAL;
+  }
+  // 替換部分結束
+  if (canAssign &amp;&amp; match(TOKEN_EQUAL)) {
+</code></pre>
+<blockquote>
+<p>Instead of hardcoding the bytecode instructions emitted for variable access and assignment, we use a couple of C variables. First, we try to find a local variable with the given name. If we find one, we use the instructions for working with locals. Otherwise, we assume it’s a global variable and use the existing bytecode instructions for globals.</p>
+</blockquote>
+<p>我們不對變數訪問和賦值對應的位元組碼指令進行硬編碼，而是使用了一些C變數。首先，我們嘗試查詢具有給定名稱的區域性變數，如果我們找到了，就使用處理區域性變數的指令。否則，我們就假定它是一個全域性變數，並使用現有的處理全域性變數的位元組碼。</p>
+<blockquote>
+<p>A little further down, we use those variables to emit the right instructions. For assignment:</p>
+</blockquote>
+<p>再往下一點，我們使用這些變數來生成正確的指令。對於賦值：</p>
+<p><em><u>compiler.c，在namedVariable()方法中替換1行：</u></em></p>
+<pre><code class="language-c">  if (canAssign &amp;&amp; match(TOKEN_EQUAL)) {
+    expression();  
+    // 替換部分開始
+    emitBytes(setOp, (uint8_t)arg);
+    // 替換部分結束
+  } else {
+</code></pre>
+<blockquote>
+<p>And for access:</p>
+</blockquote>
+<p>對於訪問：</p>
+<p><em><u>compiler.c，在namedVariable()方法中替換1行：</u></em></p>
+<pre><code class="language-c">    emitBytes(setOp, (uint8_t)arg);
+  } else {
+    // 替換部分開始
+    emitBytes(getOp, (uint8_t)arg);
+    // 替換部分結束
+  }
+</code></pre>
+<blockquote>
+<p>The real heart of this chapter, the part where we resolve a local variable, is here:</p>
+</blockquote>
+<p>本章的核心，也就是解析區域性變數的部分，在這裡：</p>
+<p><em><u>compiler.c，在identifiersEqual()方法後新增程式碼：</u></em></p>
+<pre><code class="language-c">static int resolveLocal(Compiler* compiler, Token* name) {
+  for (int i = compiler-&gt;localCount - 1; i &gt;= 0; i--) {
+    Local* local = &amp;compiler-&gt;locals[i];
+    if (identifiersEqual(name, &amp;local-&gt;name)) {
+      return i;
+    }
+  }
+
+  return -1;
+}
+</code></pre>
+<blockquote>
+<p>For all that, it’s straightforward. We walk the list of locals that are currently in scope. If one has the same name as the identifier token, the identifier must refer to that variable. We’ve found it! We walk the array backward so that we find the <em>last</em> declared variable with the identifier. That ensures that inner local variables correctly shadow locals with the same name in surrounding scopes.</p>
+</blockquote>
+<p>儘管如此，它還是很直截了當的。我們會遍歷當前在作用域內的區域性變數列表。如果有一個名稱與識別符號相同，則識別符號一定指向該變數。我們已經找到了它！我們後向遍歷陣列，這樣就能找到最後一個帶有該識別符號的已宣告變數。這可以確保內部的區域性變數能正確地遮蔽外圍作用域中的同名變數。</p>
+<blockquote>
+<p>At runtime, we load and store locals using the stack slot index, so that’s what the compiler needs to calculate after it resolves the variable. Whenever a variable is declared, we append it to the locals array in Compiler. That means the first local variable is at index zero, the next one is at index one, and so on. In other words, the locals array in the compiler has the <em>exact</em> same layout as the VM’s stack will have at runtime. The variable’s index in the locals array is the same as its stack slot. How convenient!</p>
+</blockquote>
+<p>在執行時，我們使用棧中槽索引來載入和儲存區域性變數，因此編譯器在解析變數之後需要計算索引。每當一個變數被宣告，我們就將它追加到編譯器的區域性變數陣列中。這意味著第一個區域性變數在索引0的位置，下一個在索引1的位置，以此類推。換句話說，編譯器中的區域性變數陣列的佈局與虛擬機器堆疊在執行時的佈局完全相同。變數在區域性變數陣列中的索引與其在棧中的槽位相同。多麼方便啊！</p>
+<blockquote>
+<p>If we make it through the whole array without finding a variable with the given name, it must not be a local. In that case, we return <code>-1</code> to signal that it wasn’t found and should be assumed to be a global variable instead.</p>
+</blockquote>
+<p>如果我們在整個陣列中都沒有找到具有指定名稱的變數，那它肯定不是區域性變數。在這種情況下，我們返回<code>-1</code>，表示沒有找到，應該假定它是一個全域性變數。</p>
+<blockquote>
+<h3 id="22--4--1-interpreting-local-variables"><a class="header" href="#22--4--1-interpreting-local-variables">22 . 4 . 1 Interpreting local variables</a></h3>
+</blockquote>
+<h3 id="2241-解釋區域性變數"><a class="header" href="#2241-解釋區域性變數">22.4.1 解釋區域性變數</a></h3>
+<blockquote>
+<p>Our compiler is emitting two new instructions, so let’s get them working. First is loading a local variable:</p>
+</blockquote>
+<p>我們的編譯器發出了兩條新指令，我們來讓它們發揮作用。首先是載入一個區域性變數：</p>
+<p><em><u>chunk.h，在列舉OpCode中新增程式碼：</u></em></p>
+<pre><code class="language-c">  OP_POP,
+  // 新增部分開始
+  OP_GET_LOCAL,
+  // 新增部分結束
+  OP_GET_GLOBAL,
+</code></pre>
+<blockquote>
+<p>And its implementation:</p>
+</blockquote>
+<p>還有其實現<sup class="footnote-reference" id="fr-13-1"><a href="#footnote-13">13</a></sup>：</p>
+<p><em><u>vm.c，在run()方法中新增程式碼：</u></em></p>
+<pre><code class="language-c">      case OP_POP: pop(); break;
+      // 新增部分開始
+      case OP_GET_LOCAL: {
+        uint8_t slot = READ_BYTE();
+        push(vm.stack[slot]); 
+        break;
+      }
+      // 新增部分結束
+      case OP_GET_GLOBAL: {
+</code></pre>
+<blockquote>
+<p>It takes a single-byte operand for the stack slot where the local lives. It loads the value from that index and then pushes it on top of the stack where later instructions can find it.</p>
+</blockquote>
+<p>它接受一個單位元組運算元，用作區域性變數所在的棧槽。它從索引處載入值，然後將其壓入棧頂，在後面的指令可以找到它。</p>
+<blockquote>
+<p>Next is assignment:</p>
+</blockquote>
+<p>接下來是賦值：</p>
+<p><em><u>chunk.h，在列舉OpCode中新增程式碼：</u></em></p>
+<pre><code class="language-c">  OP_GET_LOCAL,  
+  // 新增部分開始
+  OP_SET_LOCAL,
+  // 新增部分結束
+  OP_GET_GLOBAL,
+</code></pre>
+<blockquote>
+<p>You can probably predict the implementation.</p>
+</blockquote>
+<p>你大概能預測到它的實現。</p>
+<p><em><u>vm.c，在run()方法中新增程式碼：</u></em></p>
+<pre><code class="language-c">      }
+      // 新增部分開始
+      case OP_SET_LOCAL: {
+        uint8_t slot = READ_BYTE();
+        vm.stack[slot] = peek(0);
+        break;
+      }
+      // 新增部分結束
+      case OP_GET_GLOBAL: {
+</code></pre>
+<blockquote>
+<p>It takes the assigned value from the top of the stack and stores it in the stack slot corresponding to the local variable. Note that it doesn’t pop the value from the stack. Remember, assignment is an expression, and every expression produces a value. The value of an assignment expression is the assigned value itself, so the VM just leaves the value on the stack.</p>
+</blockquote>
+<p>它從棧頂獲取所賦的值，然後儲存到與區域性變數對應的棧槽中。注意，它不會從棧中彈出值。請記住，賦值是一個表示式，而每個表示式都會產生一個值。賦值表示式的值就是所賦的值本身，所以虛擬機器要把值留在棧上。</p>
+<blockquote>
+<p>Our disassembler is incomplete without support for these two new instructions.</p>
+</blockquote>
+<p>如果不支援這兩條新指令，我們的反彙編程式就不完整了。</p>
+<p><em><u>debug.c，在disassembleInstruction()方法中新增程式碼：</u></em></p>
+<pre><code class="language-c">      return simpleInstruction("OP_POP", offset);
+    // 新增部分開始  
+    case OP_GET_LOCAL:
+      return byteInstruction("OP_GET_LOCAL", chunk, offset);
+    case OP_SET_LOCAL:
+      return byteInstruction("OP_SET_LOCAL", chunk, offset);
+    // 新增部分結束  
+    case OP_GET_GLOBAL:
+</code></pre>
+<blockquote>
+<p>The compiler compiles local variables to direct slot access. The local variable’s name never leaves the compiler to make it into the chunk at all. That’s great for performance, but not so great for introspection. When we disassemble these instructions, we can’t show the variable’s name like we could with globals. Instead, we just show the slot number.</p>
+</blockquote>
+<p>編譯器將區域性變數編譯為直接的槽訪問。區域性變數的名稱永遠不會離開編譯器，根本不可能進入位元組碼塊。這對效能很好，但對內省(自我觀察)來說就不那麼好了。當我們反彙編這些指令時，我們不能像全域性變數那樣使用變數名稱。相反，我們只顯示槽號<sup class="footnote-reference" id="fr-14-1"><a href="#footnote-14">14</a></sup>。</p>
+<p><em><u>debug.c，在simpleInstruction()方法後新增程式碼：</u></em></p>
+<pre><code class="language-c">static int byteInstruction(const char* name, Chunk* chunk,
+                           int offset) {
+  uint8_t slot = chunk-&gt;code[offset + 1];
+  printf("%-16s %4d\n", name, slot);
+  return offset + 2; 
+}
+</code></pre>
+<blockquote>
+<h3 id="22--4--2-another-scope-edge-case"><a class="header" href="#22--4--2-another-scope-edge-case">22 . 4 . 2 Another scope edge case</a></h3>
+</blockquote>
+<h3 id="2242-另一種作用域邊界情況"><a class="header" href="#2242-另一種作用域邊界情況">22.4.2 另一種作用域邊界情況</a></h3>
+<blockquote>
+<p>We already sunk some time into handling a couple of weird edge cases around scopes. We made sure shadowing works correctly. We report an error if two variables in the same local scope have the same name. For reasons that aren’t entirely clear to me, variable scoping seems to have a lot of these wrinkles. I’ve never seen a language where it feels completely elegant.</p>
+</blockquote>
+<p>我們已經花了一些時間來處理部分關於作用域的奇怪的邊界情況。我們確保變數遮蔽能正確工作。如果同一個區域性作用域中的兩個變數具有相同的名稱，我們會報告錯誤。由於我並不完全清楚的原因，變數作用域似乎有很多這樣的問題。我從來沒有見過一種語言讓人感覺絕對優雅<sup class="footnote-reference" id="fr-15-1"><a href="#footnote-15">15</a></sup>。</p>
+<blockquote>
+<p>We’ve got one more edge case to deal with before we end this chapter. Recall this strange beastie we first met in <a href="http://www.craftinginterpreters.com/resolving-and-binding.html#resolving-variable-declarations">jlox’s implementation of variable resolution</a>:</p>
+</blockquote>
+<p>在本章結束之前，我們還有一個邊界情況需要處理。回顧一下我們第一次在jlox中實現變數解析時，遇到的這個奇怪的東西：</p>
+<pre><code>{
+  var a = "outer";
+  {
+    var a = a;
+  }
+}
+</code></pre>
+<blockquote>
+<p>We slayed it then by splitting a variable’s declaration into two phases, and we’ll do that again here:</p>
+</blockquote>
+<p>我們當時透過將一個變數的宣告拆分為兩個階段來解決這個問題，在這裡我們也要這樣做：</p>
+<p><img src="22.%E5%8D%80%E5%9F%9F%E6%80%A7%E8%AE%8A%E6%95%B8/phases.png" alt="An example variable declaration marked &#39;declared uninitialized&#39; before the variable name and &#39;ready for use&#39; after the initializer." /></p>
+<blockquote>
+<p>As soon as the variable declaration begins—in other words, before its initializer—the name is declared in the current scope. The variable exists, but in a special “uninitialized” state. Then we compile the initializer. If at any point in that expression we resolve an identifier that points back to this variable, we’ll see that it is not initialized yet and report an error. After we finish compiling the initializer, we mark the variable as initialized and ready for use.</p>
+</blockquote>
+<p>一旦變數宣告開始——換句話說，在它的初始化式之前——名稱就會在當前作用域中宣告。變數存在，但處於特殊的“未初始化”狀態。然後我們編譯初始化式。如果在表示式中的任何一個時間點，我們解析了一個指向該變數的識別符號，我們會發現它還沒有初始化，並報告錯誤。在我們完成初始化表示式的編譯之後，把變數標記為已初始化並可供使用。</p>
+<blockquote>
+<p>To implement this, when we declare a local, we need to indicate the “uninitialized” state somehow. We could add a new field to Local, but let’s be a little more parsimonious with memory. Instead, we’ll set the variable’s scope depth to a special sentinel value, <code>-1</code>.</p>
+</blockquote>
+<p>為了實現這一點，當宣告一個區域性變數時，我們需要以某種方式表明“未初始化”狀態。我們可以在Local中新增一個新欄位，但我們還是在記憶體方面更節省一些。相對地，我們將變數的作用域深度設定為一個特殊的哨兵值<code>-1</code>。</p>
+<p><em><u>compiler.c，在addLocal()方法中替換1行：</u></em></p>
+<pre><code class="language-c">  local-&gt;name = name;
+  // 替換部分開始
+  local-&gt;depth = -1;
+  // 替換部分結束
+}
+</code></pre>
+<blockquote>
+<p>Later, once the variable’s initializer has been compiled, we mark it initialized.</p>
+</blockquote>
+<p>稍後，一旦變數的初始化式編譯完成，我們將其標記為已初始化。</p>
+<p><em><u>compiler.c，在defineVariable()方法中新增程式碼：</u></em></p>
+<pre><code class="language-c">  if (current-&gt;scopeDepth &gt; 0) {
+    // 新增部分開始
+    markInitialized();
+    // 新增部分結束
+    return;
+  }
+</code></pre>
+<blockquote>
+<p>That is implemented like so:</p>
+</blockquote>
+<p>實現如下：</p>
+<p><em><u>compiler.c，在parseVariable()方法後新增程式碼：</u></em></p>
+<pre><code class="language-c">static void markInitialized() {
+  current-&gt;locals[current-&gt;localCount - 1].depth =
+      current-&gt;scopeDepth;
+}
+</code></pre>
+<blockquote>
+<p>So this is <em>really</em> what “declaring” and “defining” a variable means in the compiler. “Declaring” is when the variable is added to the scope, and “defining” is when it becomes available for use.</p>
+</blockquote>
+<p>所這就是編譯器中“宣告”和“定義”變數的真正含義。“宣告”是指變數被新增到作用域中，而“定義”是變數可以被使用的時候。</p>
+<blockquote>
+<p>When we resolve a reference to a local variable, we check the scope depth to see if it’s fully defined.</p>
+</blockquote>
+<p>當解析指向區域性變數的引用時，我們會檢查作用域深度，看它是否被完全定義。</p>
+<p><em><u>compiler.c，在resolveLocal()方法中新增程式碼：</u></em></p>
+<pre><code class="language-c">    if (identifiersEqual(name, &amp;local-&gt;name)) {
+      // 新增部分開始
+      if (local-&gt;depth == -1) {
+        error("Can't read local variable in its own initializer.");
+      }
+      // 新增部分結束
+      return i;
+</code></pre>
+<blockquote>
+<p>If the variable has the sentinel depth, it must be a reference to a variable in its own initializer, and we report that as an error.</p>
+</blockquote>
+<p>如果變數的深度是哨兵值，那這一定是在變數自身的初始化式中對該變數的引用，我們會將其報告為一個錯誤。</p>
+<blockquote>
+<p>That’s it for this chapter! We added blocks, local variables, and real, honest-to-God lexical scoping. Given that we introduced an entirely different runtime representation for variables, we didn’t have to write a lot of code. The implementation ended up being pretty clean and efficient.</p>
+</blockquote>
+<p>這一章就講到這裡！我們添加了塊、區域性變數和真正的詞法作用域。鑑於我們為變數引入了完全不同的執行時表示形式，我們不必編寫很多程式碼。這個實現最終是相當乾淨和高效的。</p>
+<blockquote>
+<p>You’ll notice that almost all of the code we wrote is in the compiler. Over in the runtime, it’s just two little instructions. You’ll see this as a continuing trend in clox compared to jlox. One of the biggest hammers in the optimizer’s toolbox is pulling work forward into the compiler so that you don’t have to do it at runtime. In this chapter, that meant resolving exactly which stack slot every local variable occupies. That way, at runtime, no lookup or resolution needs to happen.</p>
+</blockquote>
+<p>你會注意到，我們寫的幾乎所有的程式碼都在編譯器中。在執行時，只有兩個小指令。你會看到，相比於jlox，這是clox中的一個持續的趨勢<sup class="footnote-reference" id="fr-16-1"><a href="#footnote-16">16</a></sup>。最佳化器工具箱中最大的錘子就是把工作提前到編譯器中，這樣你就不必在執行時做這些工作了。在本章中，這意味著要準確地解析每個區域性變數佔用的棧槽。這樣，在執行時就不需要進行查詢或解析。</p>
+<hr />
+<h2 id="習題"><a class="header" href="#習題">習題</a></h2>
+<ol>
+<li>
+<blockquote>
+<p>Our simple local array makes it easy to calculate the stack slot of each local variable. But it means that when the compiler resolves a reference to a variable, we have to do a linear scan through the array.</p>
+<p>Come up with something more efficient. Do you think the additional complexity is worth it?</p>
+</blockquote>
+<p>我們這個簡單的區域性變數陣列使得計算每個區域性變數的棧槽很容易。但這意味著，當編譯器解析一個變數的引用時，我們必須對陣列進行線性掃描。</p>
+<p>想出一些更有效的方法。你認為這種額外的複雜性是否值得？</p>
+</li>
+<li>
+<blockquote>
+<p>How do other languages handle code like this:</p>
+</blockquote>
+<p>其它語言中如何處理這樣的程式碼：</p>
+<pre><code class="language-javascript">var a = a;
+</code></pre>
+<blockquote>
+<p>What would you do if it was your language? Why?</p>
+</blockquote>
+<p>如果這是你的語言，你會怎麼做？為什麼？</p>
+</li>
+<li>
+<blockquote>
+<p>Many languages make a distinction between variables that can be reassigned and those that can’t. In Java, the <code>final</code> modifier prevents you from assigning to a variable. In JavaScript, a variable declared with <code>let</code> can be assigned, but one declared using <code>const</code> can’t. Swift treats <code>let</code> as single-assignment and uses <code>var</code> for assignable variables. Scala and Kotlin use <code>val</code> and <code>var</code>.</p>
+<p>Pick a keyword for a single-assignment variable form to add to Lox. Justify your choice, then implement it. An attempt to assign to a variable declared using your new keyword should cause a compile error.</p>
+</blockquote>
+<p>許多語言中，對可以重新賦值的變數與不能重新賦值的變數進行了區分。在Java中，<code>final</code>修飾符可以阻止你對變數進行賦值。在JavaScript中，用<code>let</code>宣告的變數可以被賦值，但用<code>const</code>宣告的變數不能被賦值。<code>Swift</code>將<code>let</code>視為單次賦值，並對可賦值變數使用<code>var</code>。<code>Scala</code>和<code>Kotlin</code>則使用<code>val</code>和<code>var</code>。</p>
+<p>選一個關鍵字作為單次賦值變數的形式新增到Lox中。解釋一下你的選擇，然後實現它。試圖賦值給一個用新關鍵字宣告的變數應該會引起編譯錯誤。</p>
+</li>
+<li>
+<blockquote>
+<p>Extend clox to allow more than 256 local variables to be in scope at a time.</p>
+</blockquote>
+<p>擴充套件Lox，允許作用域中同時有超過256個區域性變數。</p>
+</li>
+</ol>
+<hr>
+<ol class="footnote-definition"><li id="footnote-1">
+<p>函式引數也被大量使用。它們也像區域性變數一樣工作，因此我們將會對它們使用同樣的實現技術。 <a href="#fr-1-1">↩</a></p>
+</li>
+<li id="footnote-2">
+<p>這種排列方式顯然不是巧合。我將Lox設計成可以單遍編譯為基於堆疊的位元組碼。但我沒必要為了適應這些限制對語言進行過多的調整。它的大部分設計應該感覺很自然。<BR>這在很大程度上是因為語言的歷史與單次編譯緊密聯絡在一起，其次是基於堆疊的架構。Lox的塊作用域遵循的傳統可以追溯到BCPL。作為程式設計師，我們對一門語言中什麼是“正常”的直覺，即使在今天也會受到過去的硬體限制的影響。 <a href="#fr-2-1">↩</a></p>
+</li>
+<li id="footnote-3">
+<p>在本章中，區域性變數從虛擬機器堆疊陣列的底部開始，並在那裡建立索引。當我們新增函式時，這個方案就變得有點複雜了。每個函式都需要自己的堆疊區域來存放引數和區域性變數。但是，正如我們將看到的，這並沒有如你所想那樣增加太多的複雜性。 <a href="#fr-3-1">↩</a></p>
+</li>
+<li id="footnote-4">
+<p>我們正在編寫一個單遍編譯器，所以對於如何在陣列中對變數進行排序，我們並沒有太多的選擇。 <a href="#fr-4-1">↩</a></p>
+</li>
+<li id="footnote-5">
+<p>特別說明，如果我們想在多執行緒應用程式中使用編譯器（可能有多個編譯器並行執行），那麼使用全域性變數是一個壞主意。 <a href="#fr-5-1">↩</a></p>
+</li>
+<li id="footnote-6">
+<p>仔細想想，“塊”是個奇怪的名字。作為比喻來說，“塊”通常意味著一個不可分割的小單元，但出於某種原因，Algol 60委員會決定用它來指代一個複合結構——一系列語句。我想，還有更糟的情況，Algol 58將<code>begin</code>和<code>end</code>稱為“語句括號”。 <a href="#fr-6-1">↩</a></p>
+</li>
+<li id="footnote-7">
+<p>在後面編譯函式體時，這個方法會派上用場。 <a href="#fr-7-1">↩</a></p>
+</li>
+<li id="footnote-8">
+<p>擔心作為變數名稱的字串的生命週期嗎？Local直接儲存了識別符號對應Token結構體的副本。Token儲存了一個指向其詞素中第一個字元的指標，以及詞素的長度。該指標指向正在編譯的指令碼或REPL輸入語句的源字串。<BR>只要這個字串在整個編譯過程中存在——你知道，它一定存在，我們正在編譯它——那麼所有指向它的標識都是正常的。 <a href="#fr-8-1">↩</a></p>
+</li>
+<li id="footnote-9">
+<p>有趣的是，Rust語言確實允許這樣做，而且慣用程式碼也依賴於此。 <a href="#fr-9-1">↩</a></p>
+</li>
+<li id="footnote-10">
+<p>暫時先不用關心那個奇怪的<code>depth != -1</code>部分。我們稍後會講到。 <a href="#fr-10-1">↩</a></p>
+</li>
+<li id="footnote-11">
+<p>如果我們能檢查它們的雜湊值，將是一個不錯的小最佳化，但標識不是完整的LoxString，所以我們還沒有計算出它們的雜湊值。 <a href="#fr-11-1">↩</a></p>
+</li>
+<li id="footnote-12">
+<p>當多個區域性變數同時退出作用域時，你會得到一系列的<code>OP_POP</code>指令，這些指令會被逐個解釋。你可以在你的Lox實現中新增一個簡單的最佳化，那就是專門的<code>OP_POPN</code>指令，該指令接受一個運算元，作為彈出的槽位的數量，並一次性彈出所有槽位。 <a href="#fr-12-1">↩</a></p>
+</li>
+<li id="footnote-13">
+<p>把區域性變數的值壓到棧中似乎是多餘的，因為它已經在棧中較低的某個位置了。問題是，其它位元組碼指令只能查詢<em>棧頂</em>的資料。這也是我們的位元組碼指令集基於堆疊的主要表現。<a href="http://www.craftinginterpreters.com/a-virtual-machine.html#design-note">基於暫存器</a>的位元組碼指令集避免了這種堆疊技巧，其代價是有著更多運算元的大型指令。 <a href="#fr-13-1">↩</a></p>
+</li>
+<li id="footnote-14">
+<p>如果我們想為虛擬機器實現一個偵錯程式，在編譯器中擦除區域性變數名稱是一個真正的問題。當使用者逐步執行程式碼時，他們希望看到區域性變數的值按名稱排列。為了支援這一點，我們需要輸出一些額外的資訊，以跟蹤每個棧槽中的區域性變數的名稱。 <a href="#fr-14-1">↩</a></p>
+</li>
+<li id="footnote-15">
+<p>沒有，即便Scheme也不是。 <a href="#fr-15-1">↩</a></p>
+</li>
+<li id="footnote-16">
+<p>你可以把靜態型別看作是這種趨勢的一個極端例子。靜態型別語言將所有的型別分析和型別錯誤處理都在編譯過程中進行了整理。這樣，執行時就不必浪費時間來檢查值是否具有適合其操作的型別。事實上，在一些靜態型別語言（如C）中，你甚至不<em>知道</em>執行時的型別。編譯器完全擦除值型別的任何表示，只留下空白的位元位。 <a href="#fr-16-1">↩</a></p>
+</li>
+</ol>
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../../content/21.全局變量.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../../content/23.來回跳轉.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../../content/21.全局變量.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../../content/23.來回跳轉.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+
+    </div>
+    </body>
+</html>

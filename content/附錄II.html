@@ -1,0 +1,740 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>附錄II</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="../highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="../tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "../";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "../searchindex.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title"></h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="附錄ii-appendix-ii"><a class="header" href="#附錄ii-appendix-ii">附錄II Appendix II</a></h1>
+<blockquote>
+<p>For your edification, here is the code produced by <a href="http://www.craftinginterpreters.com/representing-code.html#metaprogramming-the-trees">the little script we built</a> to automate generating the syntax tree classes for jlox.</p>
+</blockquote>
+<p>為了方便你們學習，下面是我們為自動生成jlox語法樹類而<a href="http://www.craftinginterpreters.com/representing-code.html#metaprogramming-the-trees">構建的小指令碼</a>所產生的程式碼。</p>
+<blockquote>
+<h2 id="a2--1-expressions"><a class="header" href="#a2--1-expressions">A2 . 1 Expressions</a></h2>
+</blockquote>
+<h2 id="a21-表示式"><a class="header" href="#a21-表示式">A2.1 表示式</a></h2>
+<blockquote>
+<p>Expressions are the first syntax tree nodes we see, introduced in “<a href="http://www.craftinginterpreters.com/representing-code.html">Representing Code</a>”. The main Expr class defines the visitor interface used to dispatch against the specific expression types, and contains the other expression subclasses as nested classes.</p>
+</blockquote>
+<p>表示式是我們看到的第一個語法樹節點，在“表示程式碼”中介紹過。主要的Expr類定義了用於針對特定表示式型別進行排程的訪問者介面，並將其它表示式子類作為巢狀類包含其中。</p>
+<p><em><u>lox/Expr.java，建立新檔案：</u></em></p>
+<pre><code class="language-c">package com.craftinginterpreters.lox;
+
+import java.util.List;
+
+abstract class Expr {
+  interface Visitor&lt;R&gt; {
+    R visitAssignExpr(Assign expr);
+    R visitBinaryExpr(Binary expr);
+    R visitCallExpr(Call expr);
+    R visitGetExpr(Get expr);
+    R visitGroupingExpr(Grouping expr);
+    R visitLiteralExpr(Literal expr);
+    R visitLogicalExpr(Logical expr);
+    R visitSetExpr(Set expr);
+    R visitSuperExpr(Super expr);
+    R visitThisExpr(This expr);
+    R visitUnaryExpr(Unary expr);
+    R visitVariableExpr(Variable expr);
+  }
+
+  // Nested Expr classes here...
+
+  abstract &lt;R&gt; R accept(Visitor&lt;R&gt; visitor);
+}
+</code></pre>
+<h3 id="a2--1--1-assign-expression"><a class="header" href="#a2--1--1-assign-expression">A2 . 1 . 1 Assign expression</a></h3>
+<blockquote>
+<p>Variable assignment is introduced in “<a href="http://www.craftinginterpreters.com/statements-and-state.html#assignment">Statements and State</a>”.</p>
+</blockquote>
+<p>變數賦值在“表示式與狀態”中介紹過。</p>
+<p><em><u>lox/Expr.java，巢狀在Expr類中：</u></em></p>
+<pre><code class="language-c">  static class Assign extends Expr {
+    Assign(Token name, Expr value) {
+      this.name = name;
+      this.value = value;
+    }
+
+    @Override
+    &lt;R&gt; R accept(Visitor&lt;R&gt; visitor) {
+      return visitor.visitAssignExpr(this);
+    }
+
+    final Token name;
+    final Expr value;
+  }
+</code></pre>
+<blockquote>
+<h3 id="a2--1--2-binary-expression"><a class="header" href="#a2--1--2-binary-expression">A2 . 1 . 2 Binary expression</a></h3>
+</blockquote>
+<h3 id="a212-binary表示式"><a class="header" href="#a212-binary表示式">A2.1.2 Binary表示式</a></h3>
+<blockquote>
+<p>Binary operators are introduced in “<a href="http://www.craftinginterpreters.com/representing-code.html">Representing Code</a>”.</p>
+</blockquote>
+<p>二元運算子在“表示程式碼”中介紹過。</p>
+<p><em><u>lox/Expr.java，巢狀在類Expr中：</u></em></p>
+<pre><code class="language-c">  static class Binary extends Expr {
+    Binary(Expr left, Token operator, Expr right) {
+      this.left = left;
+      this.operator = operator;
+      this.right = right;
+    }
+
+    @Override
+    &lt;R&gt; R accept(Visitor&lt;R&gt; visitor) {
+      return visitor.visitBinaryExpr(this);
+    }
+
+    final Expr left;
+    final Token operator;
+    final Expr right;
+  }
+</code></pre>
+<h3 id="a2--1--3-call-expression"><a class="header" href="#a2--1--3-call-expression">A2 . 1 . 3 Call expression</a></h3>
+<blockquote>
+<p>Function call expressions are introduced in “<a href="http://www.craftinginterpreters.com/functions.html#function-calls">Functions</a>”.</p>
+</blockquote>
+<p>函式呼叫語句在“函式”中介紹過。</p>
+<p><em><u>lox/Expr.java，巢狀在Expr類中：</u></em></p>
+<pre><code class="language-c">  static class Call extends Expr {
+    Call(Expr callee, Token paren, List&lt;Expr&gt; arguments) {
+      this.callee = callee;
+      this.paren = paren;
+      this.arguments = arguments;
+    }
+
+    @Override
+    &lt;R&gt; R accept(Visitor&lt;R&gt; visitor) {
+      return visitor.visitCallExpr(this);
+    }
+
+    final Expr callee;
+    final Token paren;
+    final List&lt;Expr&gt; arguments;
+  }
+</code></pre>
+<h3 id="a2--1--4-get-expression"><a class="header" href="#a2--1--4-get-expression">A2 . 1 . 4 Get expression</a></h3>
+<blockquote>
+<p>Property access, or “get” expressions are introduced in “<a href="http://www.craftinginterpreters.com/classes.html#properties-on-instances">Classes</a>”.</p>
+</blockquote>
+<p>屬性訪問，或者說“get”表示式，在“類”中介紹過。</p>
+<p><em><u>lox/Expr.java，巢狀在Expr類中：</u></em></p>
+<pre><code class="language-c">  static class Get extends Expr {
+    Get(Expr object, Token name) {
+      this.object = object;
+      this.name = name;
+    }
+
+    @Override
+    &lt;R&gt; R accept(Visitor&lt;R&gt; visitor) {
+      return visitor.visitGetExpr(this);
+    }
+
+    final Expr object;
+    final Token name;
+  }
+</code></pre>
+<h3 id="a2--1--5-grouping-expression"><a class="header" href="#a2--1--5-grouping-expression">A2 . 1 . 5 Grouping expression</a></h3>
+<blockquote>
+<p>Using parentheses to group expressions is introduced in “<a href="http://www.craftinginterpreters.com/representing-code.html">Representing Code</a>”.</p>
+</blockquote>
+<p>使用括號進行分組的表示式在“表示程式碼”中介紹過。</p>
+<p><em><u>lox/Expr.java，巢狀在Expr類中：</u></em></p>
+<pre><code class="language-c">  static class Grouping extends Expr {
+    Grouping(Expr expression) {
+      this.expression = expression;
+    }
+
+    @Override
+    &lt;R&gt; R accept(Visitor&lt;R&gt; visitor) {
+      return visitor.visitGroupingExpr(this);
+    }
+
+    final Expr expression;
+  }
+</code></pre>
+<h3 id="a2--1--6-literal-expression"><a class="header" href="#a2--1--6-literal-expression">A2 . 1 . 6 Literal expression</a></h3>
+<blockquote>
+<p>Literal value expressions are introduced in “<a href="http://www.craftinginterpreters.com/representing-code.html">Representing Code</a>”.</p>
+</blockquote>
+<p>字面量值表示式在“表示程式碼”中介紹過。</p>
+<p><em><u>lox/Expr.java，巢狀在Expr類中：</u></em></p>
+<pre><code class="language-c">  static class Literal extends Expr {
+    Literal(Object value) {
+      this.value = value;
+    }
+
+    @Override
+    &lt;R&gt; R accept(Visitor&lt;R&gt; visitor) {
+      return visitor.visitLiteralExpr(this);
+    }
+
+    final Object value;
+  }
+</code></pre>
+<h3 id="a2--1--7-logical-expression"><a class="header" href="#a2--1--7-logical-expression">A2 . 1 . 7 Logical expression</a></h3>
+<blockquote>
+<p>The logical <code>and</code> and <code>or</code> operators are introduced in “<a href="http://www.craftinginterpreters.com/control-flow.html#logical-operators">Control Flow</a>”.</p>
+</blockquote>
+<p>邏輯運算子<code>and</code>和<code>or</code>在“控制流”中介紹過。</p>
+<p><em><u>lox/Expr.java，巢狀在Expr類中：</u></em></p>
+<pre><code class="language-c">  static class Logical extends Expr {
+    Logical(Expr left, Token operator, Expr right) {
+      this.left = left;
+      this.operator = operator;
+      this.right = right;
+    }
+
+    @Override
+    &lt;R&gt; R accept(Visitor&lt;R&gt; visitor) {
+      return visitor.visitLogicalExpr(this);
+    }
+
+    final Expr left;
+    final Token operator;
+    final Expr right;
+  }
+</code></pre>
+<h3 id="a2--1--8-set-expression"><a class="header" href="#a2--1--8-set-expression">A2 . 1 . 8 Set expression</a></h3>
+<blockquote>
+<p>Property assignment, or “set” expressions are introduced in “<a href="http://www.craftinginterpreters.com/classes.html#properties-on-instances">Classes</a>”.</p>
+</blockquote>
+<p>屬性賦值，或者叫“set”表示式，在“類”中介紹過。</p>
+<p><em><u>lox/Expr.java，巢狀在Expr類中：</u></em></p>
+<pre><code class="language-c">  static class Set extends Expr {
+    Set(Expr object, Token name, Expr value) {
+      this.object = object;
+      this.name = name;
+      this.value = value;
+    }
+
+    @Override
+    &lt;R&gt; R accept(Visitor&lt;R&gt; visitor) {
+      return visitor.visitSetExpr(this);
+    }
+
+    final Expr object;
+    final Token name;
+    final Expr value;
+  }
+</code></pre>
+<h3 id="a2--1--9-super-expression"><a class="header" href="#a2--1--9-super-expression">A2 . 1 . 9 Super expression</a></h3>
+<blockquote>
+<p>The <code>super</code> expression is introduced in “<a href="http://www.craftinginterpreters.com/inheritance.html#calling-superclass-methods">Inheritance</a>”.</p>
+</blockquote>
+<p><code>super</code>表示式在“繼承”中介紹過。</p>
+<p><em><u>lox/Expr.java，巢狀在Expr類中：</u></em></p>
+<pre><code class="language-c">  static class Super extends Expr {
+    Super(Token keyword, Token method) {
+      this.keyword = keyword;
+      this.method = method;
+    }
+
+    @Override
+    &lt;R&gt; R accept(Visitor&lt;R&gt; visitor) {
+      return visitor.visitSuperExpr(this);
+    }
+
+    final Token keyword;
+    final Token method;
+  }
+</code></pre>
+<h3 id="a2--1--10-this-expression"><a class="header" href="#a2--1--10-this-expression">A2 . 1 . 10 This expression</a></h3>
+<blockquote>
+<p>The <code>this</code> expression is introduced in “<a href="http://www.craftinginterpreters.com/classes.html#this">Classes</a>”.</p>
+</blockquote>
+<p><code>this</code>表示式在“類”中介紹過。</p>
+<p><em><u>lox/Expr.java，巢狀在Expr類中：</u></em></p>
+<pre><code class="language-c">  static class This extends Expr {
+    This(Token keyword) {
+      this.keyword = keyword;
+    }
+
+    @Override
+    &lt;R&gt; R accept(Visitor&lt;R&gt; visitor) {
+      return visitor.visitThisExpr(this);
+    }
+
+    final Token keyword;
+  }
+</code></pre>
+<h3 id="a2--1--11-unary-expression"><a class="header" href="#a2--1--11-unary-expression">A2 . 1 . 11 Unary expression</a></h3>
+<blockquote>
+<p>Unary operators are introduced in “<a href="http://www.craftinginterpreters.com/representing-code.html">Representing Code</a>”.</p>
+</blockquote>
+<p>一元運算子在“表示程式碼”中介紹過。</p>
+<p><em><u>lox/Expr.java，巢狀在Expr類中：</u></em></p>
+<pre><code class="language-c">  static class Unary extends Expr {
+    Unary(Token operator, Expr right) {
+      this.operator = operator;
+      this.right = right;
+    }
+
+    @Override
+    &lt;R&gt; R accept(Visitor&lt;R&gt; visitor) {
+      return visitor.visitUnaryExpr(this);
+    }
+
+    final Token operator;
+    final Expr right;
+  }
+</code></pre>
+<h3 id="a2--1--12-variable-expression"><a class="header" href="#a2--1--12-variable-expression">A2 . 1 . 12 Variable expression</a></h3>
+<blockquote>
+<p>Variable access expressions are introduced in “<a href="http://www.craftinginterpreters.com/statements-and-state.html#variable-syntax">Statements and State</a>”.</p>
+</blockquote>
+<p>變數訪問表示式在“語句和狀態”中介紹過。</p>
+<p><em><u>lox/Expr.java，巢狀在Expr類中：</u></em></p>
+<pre><code class="language-c">  static class Variable extends Expr {
+    Variable(Token name) {
+      this.name = name;
+    }
+
+    @Override
+    &lt;R&gt; R accept(Visitor&lt;R&gt; visitor) {
+      return visitor.visitVariableExpr(this);
+    }
+
+    final Token name;
+  }
+</code></pre>
+<blockquote>
+<h2 id="a2--2-statements"><a class="header" href="#a2--2-statements">A2 . 2 Statements</a></h2>
+</blockquote>
+<h2 id="a22-語句"><a class="header" href="#a22-語句">A2.2 語句</a></h2>
+<blockquote>
+<p>Statements form a second hierarchy of syntax tree nodes independent of expressions. We add the first couple of them in “<a href="http://www.craftinginterpreters.com/statements-and-state.html">Statements and State</a>”.</p>
+</blockquote>
+<p>語句形成了獨立於表示式的第二個語法樹節點層次。我們在“宣告和狀態”中添加了前幾個。</p>
+<p><em><u>lox/Stmt.java，建立新檔案：</u></em></p>
+<pre><code class="language-c">package com.craftinginterpreters.lox;
+
+import java.util.List;
+
+abstract class Stmt {
+  interface Visitor&lt;R&gt; {
+    R visitBlockStmt(Block stmt);
+    R visitClassStmt(Class stmt);
+    R visitExpressionStmt(Expression stmt);
+    R visitFunctionStmt(Function stmt);
+    R visitIfStmt(If stmt);
+    R visitPrintStmt(Print stmt);
+    R visitReturnStmt(Return stmt);
+    R visitVarStmt(Var stmt);
+    R visitWhileStmt(While stmt);
+  }
+
+  // Nested Stmt classes here...
+
+  abstract &lt;R&gt; R accept(Visitor&lt;R&gt; visitor);
+}
+</code></pre>
+<h3 id="a2--2--1-block-statement"><a class="header" href="#a2--2--1-block-statement">A2 . 2 . 1 Block statement</a></h3>
+<blockquote>
+<p>The curly-braced block statement that defines a local scope is introduced in “<a href="http://www.craftinginterpreters.com/statements-and-state.html#block-syntax-and-semantics">Statements and State</a>”.</p>
+</blockquote>
+<p>在“語句和狀態”中介紹過的花括號塊語句，可以定義一個區域性作用域。</p>
+<p><em><u>lox/Stmt.java，巢狀在Stmt類中：</u></em></p>
+<pre><code class="language-c">  static class Block extends Stmt {
+    Block(List&lt;Stmt&gt; statements) {
+      this.statements = statements;
+    }
+
+    @Override
+    &lt;R&gt; R accept(Visitor&lt;R&gt; visitor) {
+      return visitor.visitBlockStmt(this);
+    }
+
+    final List&lt;Stmt&gt; statements;
+  }
+</code></pre>
+<h3 id="a2--2--2-class-statement"><a class="header" href="#a2--2--2-class-statement">A2 . 2 . 2 Class statement</a></h3>
+<blockquote>
+<p>Class declarations are introduced in, unsurprisingly, “<a href="http://www.craftinginterpreters.com/classes.html#class-declarations">Classes</a>”.</p>
+</blockquote>
+<p>類宣告是在“類”中介紹的，毫不意外。</p>
+<p><em><u>lox/Stmt.java，巢狀在Stmt類中：</u></em></p>
+<pre><code class="language-c">  static class Class extends Stmt {
+    Class(Token name,
+          Expr.Variable superclass,
+          List&lt;Stmt.Function&gt; methods) {
+      this.name = name;
+      this.superclass = superclass;
+      this.methods = methods;
+    }
+
+    @Override
+    &lt;R&gt; R accept(Visitor&lt;R&gt; visitor) {
+      return visitor.visitClassStmt(this);
+    }
+
+    final Token name;
+    final Expr.Variable superclass;
+    final List&lt;Stmt.Function&gt; methods;
+  }
+</code></pre>
+<h3 id="a2--2--3-expression-statement"><a class="header" href="#a2--2--3-expression-statement">A2 . 2 . 3 Expression statement</a></h3>
+<blockquote>
+<p>The expression statement is introduced in “<a href="http://www.craftinginterpreters.com/statements-and-state.html#statements">Statements and State</a>”.</p>
+</blockquote>
+<p>表示式語句在“語句和狀態”中介紹過。</p>
+<p><em><u>lox/Stmt.java，巢狀在Stmt類中：</u></em></p>
+<pre><code class="language-c">  static class Expression extends Stmt {
+    Expression(Expr expression) {
+      this.expression = expression;
+    }
+
+    @Override
+    &lt;R&gt; R accept(Visitor&lt;R&gt; visitor) {
+      return visitor.visitExpressionStmt(this);
+    }
+
+    final Expr expression;
+  }
+</code></pre>
+<h3 id="a2--2--4-function-statement"><a class="header" href="#a2--2--4-function-statement">A2 . 2 . 4 Function statement</a></h3>
+<blockquote>
+<p>Function declarations are introduced in, you guessed it, “<a href="http://www.craftinginterpreters.com/functions.html#function-declarations">Functions</a>”.</p>
+</blockquote>
+<p>函式宣告是在“函式”中介紹的。</p>
+<p><em><u>lox/Stmt.java，巢狀在Stmt類中：</u></em></p>
+<pre><code class="language-c">  static class Function extends Stmt {
+    Function(Token name, List&lt;Token&gt; params, List&lt;Stmt&gt; body) {
+      this.name = name;
+      this.params = params;
+      this.body = body;
+    }
+
+    @Override
+    &lt;R&gt; R accept(Visitor&lt;R&gt; visitor) {
+      return visitor.visitFunctionStmt(this);
+    }
+
+    final Token name;
+    final List&lt;Token&gt; params;
+    final List&lt;Stmt&gt; body;
+  }
+</code></pre>
+<h3 id="a2--2--5-if-statement"><a class="header" href="#a2--2--5-if-statement">A2 . 2 . 5 If statement</a></h3>
+<blockquote>
+<p>The <code>if</code> statement is introduced in “<a href="http://www.craftinginterpreters.com/control-flow.html#conditional-execution">Control Flow</a>”.</p>
+</blockquote>
+<p><code>if</code>語句在“控制流”中介紹過。</p>
+<p><em><u>lox/Stmt.java，巢狀在Stmt類中：</u></em></p>
+<pre><code class="language-c">  static class If extends Stmt {
+    If(Expr condition, Stmt thenBranch, Stmt elseBranch) {
+      this.condition = condition;
+      this.thenBranch = thenBranch;
+      this.elseBranch = elseBranch;
+    }
+
+    @Override
+    &lt;R&gt; R accept(Visitor&lt;R&gt; visitor) {
+      return visitor.visitIfStmt(this);
+    }
+
+    final Expr condition;
+    final Stmt thenBranch;
+    final Stmt elseBranch;
+  }
+</code></pre>
+<h3 id="a2--2--6-print-statement"><a class="header" href="#a2--2--6-print-statement">A2 . 2 . 6 Print statement</a></h3>
+<blockquote>
+<p>The <code>print</code> statement is introduced in “<a href="http://www.craftinginterpreters.com/statements-and-state.html#statements">Statements and State</a>”.</p>
+</blockquote>
+<p><code>print</code>語句在“語句和狀態”中介紹過。</p>
+<p><em><u>lox/Stmt.java，巢狀在Stmt類中：</u></em></p>
+<pre><code class="language-c">  static class Print extends Stmt {
+    Print(Expr expression) {
+      this.expression = expression;
+    }
+
+    @Override
+    &lt;R&gt; R accept(Visitor&lt;R&gt; visitor) {
+      return visitor.visitPrintStmt(this);
+    }
+
+    final Expr expression;
+  }
+</code></pre>
+<h3 id="a2--2--7-return-statement"><a class="header" href="#a2--2--7-return-statement">A2 . 2 . 7 Return statement</a></h3>
+<blockquote>
+<p>You need a function to return from, so <code>return</code> statements are introduced in “<a href="http://www.craftinginterpreters.com/functions.html#return-statements">Functions</a>”.</p>
+</blockquote>
+<p>你需要一個函式才能返回，所以<code>return</code>語句是在“函式”中介紹的。</p>
+<p><em><u>lox/Stmt.java，巢狀在Stmt類中：</u></em></p>
+<pre><code class="language-c">  static class Return extends Stmt {
+    Return(Token keyword, Expr value) {
+      this.keyword = keyword;
+      this.value = value;
+    }
+
+    @Override
+    &lt;R&gt; R accept(Visitor&lt;R&gt; visitor) {
+      return visitor.visitReturnStmt(this);
+    }
+
+    final Token keyword;
+    final Expr value;
+  }
+</code></pre>
+<h3 id="a2--2--8-variable-statement"><a class="header" href="#a2--2--8-variable-statement">A2 . 2 . 8 Variable statement</a></h3>
+<blockquote>
+<p>Variable declarations are introduced in “<a href="http://www.craftinginterpreters.com/statements-and-state.html#variable-syntax">Statements and State</a>”.</p>
+</blockquote>
+<p>變數宣告在“語句和狀態”中介紹過。</p>
+<p><em><u>lox/Stmt.java，巢狀在Stmt類中：</u></em></p>
+<pre><code class="language-c">  static class Var extends Stmt {
+    Var(Token name, Expr initializer) {
+      this.name = name;
+      this.initializer = initializer;
+    }
+
+    @Override
+    &lt;R&gt; R accept(Visitor&lt;R&gt; visitor) {
+      return visitor.visitVarStmt(this);
+    }
+
+    final Token name;
+    final Expr initializer;
+  }
+</code></pre>
+<h3 id="a2--2--9-while-statement"><a class="header" href="#a2--2--9-while-statement">A2 . 2 . 9 While statement</a></h3>
+<blockquote>
+<p>The <code>while</code> statement is introduced in “<a href="http://www.craftinginterpreters.com/control-flow.html#while-loops">Control Flow</a>”.</p>
+</blockquote>
+<p><code>while</code>語句在“控制流”中介紹過。</p>
+<p><em><u>lox/Stmt.java，巢狀在Stmt類中：</u></em></p>
+<pre><code class="language-c">  static class While extends Stmt {
+    While(Expr condition, Stmt body) {
+      this.condition = condition;
+      this.body = body;
+    }
+
+    @Override
+    &lt;R&gt; R accept(Visitor&lt;R&gt; visitor) {
+      return visitor.visitWhileStmt(this);
+    }
+
+    final Expr condition;
+    final Stmt body;
+  }
+</code></pre>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../../content/附錄I.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../../content/附錄I.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+
+    </div>
+    </body>
+</html>
