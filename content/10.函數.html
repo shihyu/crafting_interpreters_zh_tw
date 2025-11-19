@@ -1,0 +1,1296 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>10.函數</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="../highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="../tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "../";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "../searchindex.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title"></h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="10函式functions"><a class="header" href="#10函式functions">10.函式Functions</a></h1>
+<blockquote>
+<p>And that is also the way the human mind works—by the compounding of old ideas into new structures that become new ideas that can themselves be used in compounds, and round and round endlessly, growing ever more remote from the basic earthbound imagery that is each language’s soil.</p>
+<p>​																														—— Douglas R. Hofstadter, <em>I Am a Strange Loop</em></p>
+</blockquote>
+<p>這也是人類思維的運作方式——將舊的想法複合成為新結構，成為新的想法，而這些想法本身又可以被用於複合，迴圈往復，無休無止，越來越遠離每一種語言賴以生存的基本的土壤。</p>
+<blockquote>
+<p>This chapter marks the culmination of a lot of hard work. The previous chapters add useful functionality in their own right, but each also supplies a piece of a puzzle. We’ll take those pieces—expressions, statements, variables, control flow, and lexical scope—add a couple more, and assemble them all into support for real user-defined functions and function calls.</p>
+</blockquote>
+<p>這一章標誌著很多艱苦工作的一個高潮。在前面的章節中，各自添加了一些有用的功能，但是每一章也都提供了一個拼圖的碎片。我們整理這些碎片——表示式、語句、變數、控制流和詞法作用域，再加上其它功能，並把他們組合起來，以支援真正的使用者定義函式和函式呼叫。</p>
+<blockquote>
+<h2 id="10--1-function-calls"><a class="header" href="#10--1-function-calls">10 . 1 Function Calls</a></h2>
+</blockquote>
+<h2 id="101-函式呼叫"><a class="header" href="#101-函式呼叫">10.1 函式呼叫</a></h2>
+<blockquote>
+<p>You’re certainly familiar with C-style function call syntax, but the grammar is more subtle than you may realize. Calls are typically to named functions like:</p>
+</blockquote>
+<p>你肯定熟悉C語言風格的函式呼叫語法，但其語法可能比你意識到的更微妙。呼叫通常是指向命名的函式，例如：</p>
+<pre><code class="language-java">average(1, 2);
+</code></pre>
+<blockquote>
+<p>But the name of the function being called isn’t actually part of the call syntax. The thing being called—the <strong>callee</strong>—can be any expression that evaluates to a function. (Well, it does have to be a pretty <em>high precedence</em> expression, but parentheses take care of that.) For example:</p>
+</blockquote>
+<p>但是被呼叫函式的名稱實際上並不是呼叫語法的一部分。被呼叫者（ <strong>callee</strong>）可以是計算結果為一個函式的任何表示式。(好吧，它必須是一個非常高優先順序的表示式，但是圓括號可以解決這個問題。)例如：</p>
+<pre><code class="language-java">getCallback()();
+</code></pre>
+<blockquote>
+<p>There are two call expressions here. The first pair of parentheses has <code>getCallback</code> as its callee. But the second call has the entire <code>getCallback()</code> expression as its callee. It is the parentheses following an expression that indicate a function call. You can think of a call as sort of like a postfix operator that starts with <code>(</code>.</p>
+</blockquote>
+<p>這裡有兩個函式呼叫。第一對括號將<code>getCallback</code>作為其被呼叫者。但是第二對括號將整個<code>getCallback()</code> 表示式作為其被呼叫者。表示式後面的小括號表示函式呼叫，你可以把呼叫看作是一種以<code>(</code>開頭的字尾運算子。</p>
+<blockquote>
+<p>This “operator” has higher precedence than any other operator, even the unary ones. So we slot it into the grammar by having the <code>unary</code> rule bubble up to a new <code>call</code> rule.</p>
+</blockquote>
+<p>這個“運算子”比其它運算子（包括一元運算子）有更高的優先順序。所以我們透過讓<code>unary</code>規則跳轉到新的<code>call</code>規則，將其新增到語法中<sup class="footnote-reference" id="fr-1-1"><a href="#footnote-1">1</a></sup>。</p>
+<pre><code class="language-javascript">unary          → ( "!" | "-" ) unary | call ;
+call           → primary ( "(" arguments? ")" )* ;
+</code></pre>
+<blockquote>
+<p>This rule matches a primary expression followed by zero or more function calls. If there are no parentheses, this parses a bare primary expression. Otherwise, each call is recognized by a pair of parentheses with an optional list of arguments inside. The argument list grammar is:</p>
+</blockquote>
+<p>該規則匹配一個基本表示式，後面跟著0個或多個函式呼叫。如果沒有括號，則解析一個簡單的基本表示式。否則，每一對圓括號都表示一個函式呼叫，圓括號內有一個可選的引數列表。引數列表語法是：</p>
+<pre><code class="language-javascript">arguments      → expression ( "," expression )* ;
+</code></pre>
+<blockquote>
+<p>This rule requires at least one argument expression, followed by zero or more other expressions, each preceded by a comma. To handle zero-argument calls, the <code>call</code> rule itself considers the entire <code>arguments</code> production to be optional.</p>
+</blockquote>
+<p>這個規則要求至少有一個參數列達式，後面可以跟0個或多個其它表示式，每兩個表示式之間用<code>,</code>分隔。為了處理無參呼叫，<code>call</code>規則本身認為整個<code>arguments</code>生成式是可選的。</p>
+<blockquote>
+<p>I admit, this seems more grammatically awkward than you’d expect for the incredibly common “zero or more comma-separated things” pattern. There are some sophisticated metasyntaxes that handle this better, but in our BNF and in many language specs I’ve seen, it is this cumbersome.</p>
+</blockquote>
+<p>我承認，對於極其常見的 "零或多個逗號分隔的事物 "模式來說，這在語法上似乎比你想象的更難處理。有一些複雜的元語法可以更好地處理這個問題，但在我們的BNF和我見過的許多語言規範中，它就是如此的麻煩。</p>
+<blockquote>
+<p>Over in our syntax tree generator, we add a new node.</p>
+</blockquote>
+<p>在我們的語法樹生成器中，我們新增一個新節點。</p>
+<p><em><u>tool/GenerateAst.java，在 main()方法中新增程式碼：</u></em></p>
+<pre><code>      "Binary   : Expr left, Token operator, Expr right",
+      // 新增部分開始
+      "Call     : Expr callee, Token paren, List&lt;Expr&gt; arguments",
+      // 新增部分結束
+      "Grouping : Expr expression",
+</code></pre>
+<blockquote>
+<p>It stores the callee expression and a list of expressions for the arguments. It also stores the token for the closing parenthesis. We’ll use that token’s location when we report a runtime error caused by a function call.</p>
+</blockquote>
+<p>它儲存了被呼叫者表示式和參數列達式列表，同時也儲存了右括號標記。當我們報告由函式呼叫引起的執行時錯誤時，會使用該標記的位置。</p>
+<blockquote>
+<p>Crack open the parser. Where <code>unary()</code> used to jump straight to <code>primary()</code>, change it to call, well, <code>call()</code>.</p>
+</blockquote>
+<p>開啟解析器，原來<code>unary()</code>直接跳轉到<code>primary()</code>方法，將其修改為呼叫<code>call()</code>。</p>
+<p><em><u>lox/Parser.java，在 unary()方法中替換一行：</u></em></p>
+<pre><code class="language-java">      return new Expr.Unary(operator, right);
+    }
+    // 替換部分開始
+    return call();
+    // 替換部分結束
+  }
+</code></pre>
+<blockquote>
+<p>Its definition is:</p>
+</blockquote>
+<p>該方法定義為：</p>
+<p><em><u>lox/Parser.java，在 unary()方法後新增<sup class="footnote-reference" id="fr-2-1"><a href="#footnote-2">2</a></sup>：</u></em></p>
+<pre><code class="language-java">  private Expr call() {
+    Expr expr = primary();
+
+    while (true) { 
+      if (match(LEFT_PAREN)) {
+        expr = finishCall(expr);
+      } else {
+        break;
+      }
+    }
+
+    return expr;
+  }
+</code></pre>
+<blockquote>
+<p>The code here doesn’t quite line up with the grammar rules. I moved a few things around to make the code cleaner—one of the luxuries we have with a handwritten parser. But it’s roughly similar to how we parse infix operators. First, we parse a primary expression, the “left operand” to the call. Then, each time we see a <code>(</code>, we call <code>finishCall()</code> to parse the call expression using the previously parsed expression as the callee. The returned expression becomes the new <code>expr</code> and we loop to see if the result is itself called.</p>
+</blockquote>
+<p>這裡的程式碼與語法規則並非完全一致。為了保持程式碼簡潔，我調整了一些東西——這是我們手寫解析器的優點之一。但它與我們解析中綴運算子的方式類似。首先，我們解析一個基本表示式，即呼叫的左運算元。然後，每次看到<code>(</code>，我們就呼叫<code>finishCall()</code>解析呼叫表示式，並使用之前解析出的表示式作為被呼叫者。返回的表示式成為新的<code>expr</code>，我們迴圈檢查其結果是否被呼叫。</p>
+<blockquote>
+<p>The code to parse the argument list is in this helper:</p>
+</blockquote>
+<p>解析引數列表的程式碼在下面的工具方法中：</p>
+<p><em><u>lox/Parser.java，在 unary()方法後新增：</u></em></p>
+<pre><code class="language-java">  private Expr finishCall(Expr callee) {
+    List&lt;Expr&gt; arguments = new ArrayList&lt;&gt;();
+    if (!check(RIGHT_PAREN)) {
+      do {
+        arguments.add(expression());
+      } while (match(COMMA));
+    }
+
+    Token paren = consume(RIGHT_PAREN,
+                          "Expect ')' after arguments.");
+
+    return new Expr.Call(callee, paren, arguments);
+  }
+</code></pre>
+<blockquote>
+<p>This is more or less the <code>arguments</code> grammar rule translated to code, except that we also handle the zero-argument case. We check for that case first by seeing if the next token is <code>)</code>. If it is, we don’t try to parse any arguments.</p>
+</blockquote>
+<p>這或多或少是<code>arguments</code> 語法規則翻譯成程式碼的結果，除了我們這裡還處理了無參情況。我們首先判斷下一個標記是否<code>)</code>來檢查這種情況。如果是，我們就不會嘗試解析任何引數。</p>
+<blockquote>
+<p>Otherwise, we parse an expression, then look for a comma indicating that there is another argument after that. We keep doing that as long as we find commas after each expression. When we don’t find a comma, then the argument list must be done and we consume the expected closing parenthesis. Finally, we wrap the callee and those arguments up into a call AST node.</p>
+</blockquote>
+<p>如果不是，我們就解析一個表示式，然後尋找逗號（表明後面還有一個引數）。只要我們在表示式後面發現逗號，就會繼續解析表示式。當我們找不到逗號時，說明引數列表已經結束，我們繼續消費預期的右括號。最終，我們將被呼叫者和這些引數封裝成一個函式呼叫的AST節點。</p>
+<blockquote>
+<h3 id="10--1--1-maximum-argument-counts"><a class="header" href="#10--1--1-maximum-argument-counts">10 . 1 . 1 Maximum argument counts</a></h3>
+</blockquote>
+<h3 id="1011--最大引數數量"><a class="header" href="#1011--最大引數數量">10.1.1  最大引數數量</a></h3>
+<blockquote>
+<p>Right now, the loop where we parse arguments has no bound. If you want to call a function and pass a million arguments to it, the parser would have no problem with it. Do we want to limit that?</p>
+</blockquote>
+<p>現在，我們解析引數的迴圈是沒有邊界的。如果你想呼叫一個函式並向其傳遞一百萬個引數，解析器不會有任何問題。我們要對此進行限制嗎？</p>
+<blockquote>
+<p>Other languages have various approaches. The C standard says a conforming implementation has to support <em>at least</em> 127 arguments to a function, but doesn’t say there’s any upper limit. The Java specification says a method can accept <em>no more than</em> 255 arguments.</p>
+</blockquote>
+<p>其它語言採用了不同的策略。C語言標準要求在符合標準的實現中，一個函式至少要支援127個引數，但是沒有指定任何上限。Java規範規定一個方法可以接受不超過255個引數<sup class="footnote-reference" id="fr-3-1"><a href="#footnote-3">3</a></sup>。</p>
+<blockquote>
+<p>Our Java interpreter for Lox doesn’t really need a limit, but having a maximum number of arguments will simplify our bytecode interpreter in <a href="http://craftinginterpreters.com/a-bytecode-virtual-machine.html">Part III</a>. We want our two interpreters to be compatible with each other, even in weird corner cases like this, so we’ll add the same limit to jlox.</p>
+</blockquote>
+<p>Lox的Java直譯器實際上並不需要限制，但是設定一個最大的引數數量限制可以簡化第三部分中的位元組碼直譯器。即使是在這樣奇怪的地方里，我們也希望兩個直譯器能夠相互相容，所以我們為jlox新增同樣的限制。</p>
+<p><em><u>lox/Parser.java，在 finishCall()方法中新增：</u></em></p>
+<pre><code class="language-java">      do {
+        // 新增部分開始
+        if (arguments.size() &gt;= 255) {
+          error(peek(), "Can't have more than 255 arguments.");
+        }
+        // 新增部分結束
+        arguments.add(expression());
+</code></pre>
+<blockquote>
+<p>Note that the code here <em>reports</em> an error if it encounters too many arguments, but it doesn’t <em>throw</em> the error. Throwing is how we kick into panic mode which is what we want if the parser is in a confused state and doesn’t know where it is in the grammar anymore. But here, the parser is still in a perfectly valid state—it just found too many arguments. So it reports the error and keeps on keepin’ on.</p>
+</blockquote>
+<p>請注意，如果發現引數過多，這裡的程式碼會<em>報告</em>一個錯誤，但是不會<em>丟擲</em>該錯誤。丟擲錯誤是進入恐慌模式的方法，如果解析器處於混亂狀態，不知道自己在語法中處於什麼位置，那這就是我們想要的。但是在這裡，解析器仍然處於完全有效的狀態，只是發現了太多的引數。所以它會報告這個錯誤，並繼續執行解析。</p>
+<blockquote>
+<h3 id="10--1--2-interpreting-function-calls"><a class="header" href="#10--1--2-interpreting-function-calls">10 . 1 . 2 Interpreting function calls</a></h3>
+</blockquote>
+<h3 id="1012-解釋函式呼叫"><a class="header" href="#1012-解釋函式呼叫">10.1.2 解釋函式呼叫</a></h3>
+<blockquote>
+<p>We don’t have any functions we can call, so it seems weird to start implementing calls first, but we’ll worry about that when we get there. First, our interpreter needs a new import.</p>
+</blockquote>
+<p>我們還沒有任何可以呼叫的函式，所以先實現函式呼叫似乎有點奇怪，但是這個問題我們後面再考慮。首先，我們的直譯器需要引入一個新依賴。</p>
+<p><u>lox/Interpreter.java</u></p>
+<pre><code class="language-java">// 新增部分開始
+import java.util.ArrayList;
+// 新增部分結束
+import java.util.List;
+</code></pre>
+<blockquote>
+<p>As always, interpretation starts with a new visit method for our new call expression node.</p>
+</blockquote>
+<p>跟之前一樣，解釋工作從新的呼叫表示式節點對應的新的visit方法開始<sup class="footnote-reference" id="fr-4-1"><a href="#footnote-4">4</a></sup>。</p>
+<p><em><u>lox/Interpreter.java，在 visitBinaryExpr()方法後新增：</u></em></p>
+<pre><code class="language-java">  @Override
+  public Object visitCallExpr(Expr.Call expr) {
+    Object callee = evaluate(expr.callee);
+
+    List&lt;Object&gt; arguments = new ArrayList&lt;&gt;();
+    for (Expr argument : expr.arguments) { 
+      arguments.add(evaluate(argument));
+    }
+
+    LoxCallable function = (LoxCallable)callee;
+    return function.call(this, arguments);
+  }
+</code></pre>
+<blockquote>
+<p>First, we evaluate the expression for the callee. Typically, this expression is just an identifier that looks up the function by its name, but it could be anything. Then we evaluate each of the argument expressions in order and store the resulting values in a list.</p>
+</blockquote>
+<p>首先，對被呼叫者的表示式求值。通常情況下，這個表示式只是一個識別符號，可以透過它的名字來查詢函式。但它可以是任何東西。然後，我們依次對每個參數列達式求值，並將結果值儲存在一個列表中。</p>
+<blockquote>
+<p>Once we’ve got the callee and the arguments ready, all that remains is to perform the call. We do that by casting the callee to a LoxCallable and then invoking a <code>call()</code> method on it. The Java representation of any Lox object that can be called like a function will implement this interface. That includes user-defined functions, naturally, but also class objects since classes are “called” to construct new instances. We’ll also use it for one more purpose shortly.</p>
+</blockquote>
+<p>一旦我們準備好被呼叫者和引數，剩下的就是執行函式呼叫。我們將被呼叫者轉換為LoxCallable，然後對其呼叫<code>call()</code>方法來實現。任何可以像函式一樣被呼叫的Lox物件的Java表示都要實現這個介面。這自然包括使用者定義的函式，但也包括類物件，因為類會被 "呼叫 "來建立新的例項。稍後我們還將把它用於另一個目的。</p>
+<blockquote>
+<p>There isn’t too much to this new interface.</p>
+</blockquote>
+<p>這個新介面中沒有太多內容。</p>
+<p><em><u>lox/LoxCallable.java，建立新檔案：</u></em></p>
+<pre><code class="language-java">package com.craftinginterpreters.lox;
+
+import java.util.List;
+
+interface LoxCallable {
+  Object call(Interpreter interpreter, List&lt;Object&gt; arguments);
+}
+</code></pre>
+<blockquote>
+<p>We pass in the interpreter in case the class implementing <code>call()</code> needs it. We also give it the list of evaluated argument values. The implementer’s job is then to return the value that the call expression produces.</p>
+</blockquote>
+<p>我們會傳入直譯器，以防實現<code>call()</code>方法的類會需要它。我們也會提供已求值的引數值列表。介面實現者的任務就是返回呼叫表示式產生的值。</p>
+<blockquote>
+<h3 id="10--1--3-call-type-errors"><a class="header" href="#10--1--3-call-type-errors">10 . 1 . 3 Call type errors</a></h3>
+</blockquote>
+<h3 id="1013-呼叫型別錯誤"><a class="header" href="#1013-呼叫型別錯誤">10.1.3 呼叫型別錯誤</a></h3>
+<blockquote>
+<p>Before we get to implementing LoxCallable, we need to make the visit method a little more robust. It currently ignores a couple of failure modes that we can’t pretend won’t occur. First, what happens if the callee isn’t actually something you can call? What if you try to do this:</p>
+</blockquote>
+<p>在實現<code>LoxCallable</code>之前，必須先強化一下我們的visit方法。這個方法忽略了兩個可能出現的錯誤場景。第一個，如果被呼叫者無法被呼叫，會發生什麼？比如：</p>
+<pre><code class="language-java">"totally not a function"();
+</code></pre>
+<blockquote>
+<p>Strings aren’t callable in Lox. The runtime representation of a Lox string is a Java string, so when we cast that to LoxCallable, the JVM will throw a ClassCastException. We don’t want our interpreter to vomit out some nasty Java stack trace and die. Instead, we need to check the type ourselves first.</p>
+</blockquote>
+<p>在Lox中，字串不是可呼叫的資料型別。Lox字串在執行時中的本質其實是java字串，所以當我們把它當作<code>LoxCallable</code> 處理的時候，JVM就會丟擲<code>ClassCastException</code>。我們並不想讓我們的直譯器吐出一坨java堆疊資訊然後掛掉。所以，我們自己必須先做一次型別檢查。</p>
+<p><em><u>lox/Interpreter.java，在visitCallExpr介面中新增：</u></em></p>
+<pre><code class="language-java">    // 新增部分開始
+    if (!(callee instanceof LoxCallable)) {
+      throw new RuntimeError(expr.paren,
+          "Can only call functions and classes.");
+    }
+    // 新增部分結束
+    LoxCallable function = (LoxCallable)callee;
+</code></pre>
+<p>We still throw an exception, but now we’re throwing our own exception type, one that the interpreter knows to catch and report gracefully.</p>
+<p>我們的實現同樣也是丟擲錯誤，但它們能夠被直譯器捕獲並優雅地展示出來。</p>
+<blockquote>
+<h3 id="10--1--4-checking-arity"><a class="header" href="#10--1--4-checking-arity">10 . 1 . 4 Checking arity</a></h3>
+</blockquote>
+<h3 id="1014-檢查元數"><a class="header" href="#1014-檢查元數">10.1.4 檢查元數</a></h3>
+<blockquote>
+<p>The other problem relates to the function’s <strong>arity</strong>. Arity is the fancy term for the number of arguments a function or operation expects. Unary operators have arity one, binary operators two, etc. With functions, the arity is determined by the number of parameters it declares.</p>
+</blockquote>
+<p>另一個問題與函式的<strong>元數</strong>有關。元數是一個花哨的術語，指一個函式或操作所期望的引數數量。一元運算子的元數是1，二元運算子是2，等等。對於函式來說，元數由函式宣告的引數數量決定。</p>
+<pre><code class="language-java">fun add(a, b, c) {
+  print a + b + c;
+}
+</code></pre>
+<blockquote>
+<p>This function defines three parameters, <code>a</code>, <code>b</code>, and <code>c</code>, so its arity is three and it expects three arguments. So what if you try to call it like this:</p>
+</blockquote>
+<p>這個函式定義了三個形參，<code>a</code> 、<code>b</code> 和<code>c</code>，所以它的元數是3，而且它期望有3個引數。那麼如果你用下面的方式呼叫該函式會怎樣：</p>
+<pre><code class="language-java">add(1, 2, 3, 4); // Too many.
+add(1, 2);       // Too few.
+</code></pre>
+<blockquote>
+<p>Different languages take different approaches to this problem. Of course, most statically typed languages check this at compile time and refuse to compile the code if the argument count doesn’t match the function’s arity. JavaScript discards any extra arguments you pass. If you don’t pass enough, it fills in the missing parameters with the magic sort-of-like-null-but-not-really value <code>undefined</code>. Python is stricter. It raises a runtime error if the argument list is too short or too long.</p>
+</blockquote>
+<p>不同的語言對這個問題採用了不同的方法。當然，大多數靜態型別的語言在編譯時都會檢查這個問題，如果實參與函式元數不匹配，則拒絕編譯程式碼。JavaScript會丟棄你傳遞的所有多餘引數。如果你沒有傳入的引數數量不足，它就會用神奇的與<code>null</code>類似但並不相同的值<code>undefined</code>來填補缺少的引數。Python更嚴格。如果引數列表太短或太長，它會引發一個執行時錯誤。</p>
+<blockquote>
+<p>I think the latter is a better approach. Passing the wrong number of arguments is almost always a bug, and it’s a mistake I do make in practice. Given that, the sooner the implementation draws my attention to it, the better. So for Lox, we’ll take Python’s approach. Before invoking the callable, we check to see if the argument list’s length matches the callable’s arity.</p>
+</blockquote>
+<p>我認為後者是一種更好的方法。傳遞錯誤的引數數量幾乎總是一個錯誤，這也是我在實踐中確實犯的一個錯誤。有鑑於此，語言實現能越早引起使用者的注意就越好。所以對於Lox，我們將採取Python的方法。在執行可呼叫方法之前，我們檢查引數列表的長度是否與可呼叫方法的元數相符。</p>
+<p><em><u>lox/Interpreter.java，在 visitCallExpr()方法中新增程式碼：</u></em></p>
+<pre><code class="language-java">    LoxCallable function = (LoxCallable)callee;
+    // 新增部分開始
+    if (arguments.size() != function.arity()) {
+      throw new RuntimeError(expr.paren, "Expected " +
+          function.arity() + " arguments but got " +
+          arguments.size() + ".");
+    }
+    // 新增部分結束
+    return function.call(this, arguments);
+</code></pre>
+<blockquote>
+<p>That requires a new method on the LoxCallable interface to ask it its arity.</p>
+</blockquote>
+<p>這就需要在<code>LoxCallable</code>介面中增加一個新方法來查詢函式的元數。</p>
+<p><em><u>lox/LoxCallable.java，在LoxCallable介面中新增：</u></em></p>
+<pre><code class="language-java">interface LoxCallable {
+  // 新增部分開始
+  int arity();
+  // 新增部分結束
+  Object call(Interpreter interpreter, List&lt;Object&gt; arguments);
+</code></pre>
+<blockquote>
+<p>We <em>could</em> push the arity checking into the concrete implementation of <code>call()</code>. But, since we’ll have multiple classes implementing LoxCallable, that would end up with redundant validation spread across a few classes. Hoisting it up into the visit method lets us do it in one place.</p>
+</blockquote>
+<p>我們可以在<code>call()</code>方法的具體實現中做元數檢查。但是，由於我們會有多個實現LoxCallable的類，這將導致冗餘的驗證分散在多個類中。把它提升到訪問方法中，這樣我們可以在一個地方完成該功能。</p>
+<blockquote>
+<h2 id="10--2-native-functions"><a class="header" href="#10--2-native-functions">10 . 2 Native Functions</a></h2>
+</blockquote>
+<h2 id="102-原生函式本地函式"><a class="header" href="#102-原生函式本地函式">10.2 原生函式（本地函式）</a></h2>
+<blockquote>
+<p>We can theoretically call functions, but we have no functions to call yet. Before we get to user-defined functions, now is a good time to introduce a vital but often overlooked facet of language implementations—<strong>native functions</strong>. These are functions that the interpreter exposes to user code but that are implemented in the host language (in our case Java), not the language being implemented (Lox).</p>
+</blockquote>
+<p>理論上我們可以呼叫函式了，但是我們還沒有可供呼叫的函式。在我們實現使用者自定義函式之前，現在正好可以介紹語言實現中一個重要但經常被忽視的方面——<strong>原生函式（本地函式）</strong>。這些函式是直譯器向用戶程式碼公開的，但它們是用宿主語言(在我們的例子中是Java)實現的，而不是正在實現的語言(Lox)。</p>
+<blockquote>
+<p>Sometimes these are called <strong>primitives</strong>, <strong>external functions</strong>, or <strong>foreign functions</strong>. Since these functions can be called while the user’s program is running, they form part of the implementation’s runtime. A lot of programming language books gloss over these because they aren’t conceptually interesting. They’re mostly grunt work.</p>
+</blockquote>
+<p>有時這些函式也被稱為<strong>原語</strong>、<strong>外部函式</strong>或<strong>外來函式</strong><sup class="footnote-reference" id="fr-5-1"><a href="#footnote-5">5</a></sup>。由於這些函式可以在使用者程式執行的時候被呼叫，因此它們構成了語言執行時的一部分。許多程式語言書籍都掩蓋了這些內容，因為它們在概念上並不有趣。它們主要是一些比較繁重的工作。</p>
+<blockquote>
+<p>But when it comes to making your language actually good at doing useful stuff, the native functions your implementation provides are key. They provide access to the fundamental services that all programs are defined in terms of. If you don’t provide native functions to access the file system, a user’s going to have a hell of a time writing a program that reads and displays a file.</p>
+</blockquote>
+<p>但是說到讓你的語言真正擅長做有用的事情，語言提供的本地函式是關鍵<sup class="footnote-reference" id="fr-6-1"><a href="#footnote-6">6</a></sup>。本地函式提供了對基礎服務的訪問，所有的程式都是根據這些服務來定義的。如果你不提供訪問檔案系統的本地函式，那麼使用者在寫一個讀取和顯示檔案的程式時就會有很大的困難。</p>
+<blockquote>
+<p>Many languages also allow users to provide their own native functions. The mechanism for doing so is called a <strong>foreign function interface</strong> (<strong>FFI</strong>), <strong>native extension</strong>, <strong>native interface</strong>, or something along those lines. These are nice because they free the language implementer from providing access to every single capability the underlying platform supports. We won’t define an FFI for jlox, but we will add one native function to give you an idea of what it looks like.</p>
+</blockquote>
+<p>許多語言還允許使用者提供自己的本地函式。這樣的機制稱為<strong>外來函式介面(FFI)</strong>、<strong>本機擴充套件</strong>、<strong>本機介面</strong>或類似的東西。這些機制很好，因為它們使語言實現者無需提供對底層平臺所支援的每一項功能的訪問。我們不會為 jlox 定義一個 FFI，但我們會新增一個本地函式，讓你知道它是什麼樣子。</p>
+<blockquote>
+<h3 id="10--2--1-telling-time"><a class="header" href="#10--2--1-telling-time">10 . 2 . 1 Telling time</a></h3>
+</blockquote>
+<h3 id="1021-報時"><a class="header" href="#1021-報時">10.2.1 報時</a></h3>
+<blockquote>
+<p>When we get to <a href="http://craftinginterpreters.com/a-bytecode-virtual-machine.html">Part III</a> and start working on a much more efficient implementation of Lox, we’re going to care deeply about performance. Performance work requires measurement, and that in turn means <strong>benchmarks</strong>. These are programs that measure the time it takes to exercise some corner of the interpreter.</p>
+</blockquote>
+<p>當我們進入第三部分，開始著手開發更有效的Lox實現時，我們就會非常關心效能。效能需要測量，這也就意味著需要<strong>基準測試</strong>。這些程式碼就是用於測量直譯器執行某些程式碼時所花費的時間。</p>
+<blockquote>
+<p>We could measure the time it takes to start up the interpreter, run the benchmark, and exit, but that adds a lot of overhead—JVM startup time, OS shenanigans, etc. That stuff does matter, of course, but if you’re just trying to validate an optimization to some piece of the interpreter, you don’t want that overhead obscuring your results.</p>
+</blockquote>
+<p>我們可以測量啟動直譯器、執行基準測試程式碼並退出所消耗的時間，但是這其中包括很多時間開銷——JVM啟動時間，作業系統欺詐等等。當然，這些東西確實很重要，但如果您只是試圖驗證對直譯器某個部分的最佳化，你肯定不希望這些多餘的時間開銷掩蓋你的結果。</p>
+<blockquote>
+<p>A nicer solution is to have the benchmark script itself measure the time elapsed between two points in the code. To do that, a Lox program needs to be able to tell time. There’s no way to do that now—you can’t implement a useful clock “from scratch” without access to the underlying clock on the computer.</p>
+</blockquote>
+<p>一個更好的解決方案是讓基準指令碼本身度量程式碼中兩個點之間的時間間隔。要做到這一點，Lox程式需要能夠報時。現在沒有辦法做到這一點——如果不訪問計算機上的底層時鐘，就無法從頭實現一個可用的時鐘。</p>
+<blockquote>
+<p>So we’ll add <code>clock()</code>, a native function that returns the number of seconds that have passed since some fixed point in time. The difference between two successive invocations tells you how much time elapsed between the two calls. This function is defined in the global scope, so let’s ensure the interpreter has access to that.</p>
+</blockquote>
+<p>所以我們要新增<code>clock()</code>，這是一個本地函式，用於返回自某個固定時間點以來所經過的秒數。兩次連續呼叫之間的差值可用告訴你兩次呼叫之間經過了多少時間。這個函式被定義在全域性作用域內，以確保直譯器能夠訪問這個函式。</p>
+<p><em><u>lox/Interpreter.java，在 Interpreter類中，替換一行：</u></em></p>
+<pre><code class="language-java">class Interpreter implements Expr.Visitor&lt;Object&gt;,
+                             Stmt.Visitor&lt;Void&gt; {
+  // 替換部分開始                           
+  final Environment globals = new Environment();
+  private Environment environment = globals;
+  // 替換部分結束
+  void interpret(List&lt;Stmt&gt; statements) {
+</code></pre>
+<blockquote>
+<p>The <code>environment</code> field in the interpreter changes as we enter and exit local scopes. It tracks the <em>current</em> environment. This new <code>globals</code> field holds a fixed reference to the outermost global environment.</p>
+</blockquote>
+<p>直譯器中的<code>environment</code>欄位會隨著進入和退出區域性作用域而改變，它會跟隨當前環境。新加的<code>globals</code>欄位則固定指向最外層的全域性作用域。</p>
+<blockquote>
+<p>When we instantiate an Interpreter, we stuff the native function in that global scope.</p>
+</blockquote>
+<p>當我們例項化一個直譯器時，我們將全域性作用域中新增本地函式。</p>
+<p><em><u>lox/Interpreter.java，在 Interpreter類中新增：</u></em></p>
+<pre><code class="language-java">  private Environment environment = globals;
+  // 新增部分開始
+  Interpreter() {
+    globals.define("clock", new LoxCallable() {
+      @Override
+      public int arity() { return 0; }
+
+      @Override
+      public Object call(Interpreter interpreter,
+                         List&lt;Object&gt; arguments) {
+        return (double)System.currentTimeMillis() / 1000.0;
+      }
+
+      @Override
+      public String toString() { return "&lt;native fn&gt;"; }
+    });
+  }
+  // 新增部分結束
+  void interpret(List&lt;Stmt&gt; statements) {
+</code></pre>
+<blockquote>
+<p>This defines a variable named “clock”. Its value is a Java anonymous class that implements LoxCallable. The <code>clock()</code> function takes no arguments, so its arity is zero. The implementation of <code>call()</code> calls the corresponding Java function and converts the result to a double value in seconds.</p>
+</blockquote>
+<p>這裡有一個名為<code>clock</code>的變數，它的值是一個實現LoxCallable介面的Java匿名類。這裡的<code>clock()</code>函式不接受引數，所以其元數為0。<code>call()</code>方法的實現是直接呼叫Java函式並將結果轉換為以秒為單位的double值。</p>
+<blockquote>
+<p>If we wanted to add other native functions—reading input from the user, working with files, etc.—we could add them each as their own anonymous class that implements LoxCallable. But for the book, this one is really all we need.</p>
+</blockquote>
+<p>如果我們想要新增其它本地函式——讀取使用者輸入，處理檔案等等——我們可以依次為它們提供實現LoxCallable介面的匿名類。但是在本書中，這個函式足以滿足需要。</p>
+<blockquote>
+<p>Let’s get ourselves out of the function-defining business and let our users take over . . .</p>
+</blockquote>
+<p>讓我們從函式定義的事務中解脫出來，由使用者來接管吧。</p>
+<blockquote>
+<h2 id="10--3-function-declarations"><a class="header" href="#10--3-function-declarations">10 . 3 Function Declarations</a></h2>
+</blockquote>
+<h2 id="103-函式宣告"><a class="header" href="#103-函式宣告">10.3 函式宣告</a></h2>
+<blockquote>
+<p>We finally get to add a new production to the <code>declaration</code> rule we introduced back when we added variables. Function declarations, like variables, bind a new name. That means they are allowed only in places where a declaration is permitted.</p>
+</blockquote>
+<p>我們終於可以在新增變數時就引入的<code>declaration</code>規則中新增產生式了。就像變數一樣，函式宣告也會繫結一個新的名稱。這意味中它們只能出現在允許宣告的地方。</p>
+<pre><code>declaration    → funDecl
+               | varDecl
+               | statement ;
+</code></pre>
+<blockquote>
+<p>The updated <code>declaration</code> rule references this new rule:</p>
+</blockquote>
+<p>更新後的<code>declaration</code>引用了下面的新規則：</p>
+<pre><code>funDecl        → "fun" function ;
+function       → IDENTIFIER "(" parameters? ")" block ;
+</code></pre>
+<blockquote>
+<p>The main <code>funDecl</code> rule uses a separate helper rule <code>function</code>. A function <em>declaration statement</em> is the <code>fun</code> keyword followed by the actual function-y stuff. When we get to classes, we’ll reuse that <code>function</code> rule for declaring methods. Those look similar to function declarations, but aren’t preceded by <code>fun</code>.</p>
+</blockquote>
+<p>主要的<code>funDecl</code>規則使用了一個單獨的輔助規則<code>function</code>。函式<em>宣告語句</em>是<code>fun</code>關鍵字後跟實際的函式體內容。等到我們實現類的時候，將會複用<code>function</code>規則來宣告方法。這些方法與函式宣告類似，但是前面沒有<code>fun</code>。</p>
+<blockquote>
+<p>The function itself is a name followed by the parenthesized parameter list and the body. The body is always a braced block, using the same grammar rule that block statements use. The parameter list uses this rule:</p>
+</blockquote>
+<p>函式本身是一個名稱，後跟帶括號的引數列表和函式體。函式體是一個帶花括號的塊，可以使用與塊語句相同的語法。引數列表則使用以下規則：</p>
+<pre><code>parameters     → IDENTIFIER ( "," IDENTIFIER )* ;
+</code></pre>
+<blockquote>
+<p>It’s like the earlier <code>arguments</code> rule, except that each parameter is an identifier, not an expression. That’s a lot of new syntax for the parser to chew through, but the resulting AST node isn’t too bad.</p>
+</blockquote>
+<p>這就類似於前面的<code>arguments</code> 規則，區別在於引數是一個識別符號，而不是一個表示式。這對於解析器來說是很多要處理的新語法，但是生成的AST節點沒這麼複雜。</p>
+<p><em><u>tool/GenerateAst.java，在 main()方法中新增：</u></em></p>
+<pre><code class="language-java">      "Expression : Expr expression",
+      // 新增部分開始
+      "Function   : Token name, List&lt;Token&gt; params," +
+                  " List&lt;Stmt&gt; body",
+      // 新增部分結束           
+      "If         : Expr condition, Stmt thenBranch," +
+</code></pre>
+<blockquote>
+<p>A function node has a name, a list of parameters (their names), and then the body. We store the body as the list of statements contained inside the curly braces.</p>
+</blockquote>
+<p>函式節點有一個名稱、一個引數列表(引數的名稱)，然後是函式主體。我們將函式主體儲存為包含在花括號中的語句列表。</p>
+<blockquote>
+<p>Over in the parser, we weave in the new declaration.</p>
+</blockquote>
+<p>在解析器中，我們把新的宣告新增進去。</p>
+<p><em><u>lox/Parser.java，在 declaration()方法中新增：</u></em></p>
+<pre><code class="language-java">    try {
+      // 新增部分開始
+      if (match(FUN)) return function("function");
+      // 新增部分結束
+      if (match(VAR)) return varDeclaration();
+</code></pre>
+<blockquote>
+<p>Like other statements, a function is recognized by the leading keyword. When we encounter <code>fun</code>, we call <code>function</code>. That corresponds to the <code>function</code> grammar rule since we already matched and consumed the <code>fun</code> keyword. We’ll build the method up a piece at a time, starting with this:</p>
+</blockquote>
+<p>像其它語句一樣，函式是透過前面的關鍵字來識別的。當我們遇到<code>fun</code>時，我們就呼叫<code>function</code>。這步操作對應於<code>function</code>語法規則，因為我們已經匹配並消費了<code>fun</code>關鍵字。我們會一步步構建這個方法，首先從下面的程式碼開始：</p>
+<p><em><u>lox/Parser.java，在 expressionStatement()方法後新增：</u></em></p>
+<pre><code class="language-java">  private Stmt.Function function(String kind) {
+    Token name = consume(IDENTIFIER, "Expect " + kind + " name.");
+  }
+</code></pre>
+<blockquote>
+<p>Right now, it only consumes the identifier token for the function’s name. You might be wondering about that funny little <code>kind</code> parameter. Just like we reuse the grammar rule, we’ll reuse the <code>function()</code> method later to parse methods inside classes. When we do that, we’ll pass in “method” for <code>kind</code> so that the error messages are specific to the kind of declaration being parsed.</p>
+</blockquote>
+<p>現在，它只是消費了識別符號標記作為函式名稱。你可能會對這裡的<code>kind</code>引數感到疑惑。就像我們複用語法規則一樣，稍後我們也會複用<code>function()</code>方法來解析類中的方法。到時候，我們會在<code>kind</code>引數中傳入 "method"，這樣錯誤資訊就會針對被解析的宣告型別來展示。</p>
+<blockquote>
+<p>Next, we parse the parameter list and the pair of parentheses wrapped around it.</p>
+</blockquote>
+<p>接下來，我們要解析引數列表和包裹著它們的一對小括號。</p>
+<p><em><u>lox/Parser.java，在 function()方法中新增：</u></em></p>
+<pre><code class="language-java">    Token name = consume(IDENTIFIER, "Expect " + kind + " name.");
+    // 新增部分開始
+    consume(LEFT_PAREN, "Expect '(' after " + kind + " name.");
+    List&lt;Token&gt; parameters = new ArrayList&lt;&gt;();
+    if (!check(RIGHT_PAREN)) {
+      do {
+        if (parameters.size() &gt;= 255) {
+          error(peek(), "Can't have more than 255 parameters.");
+        }
+
+        parameters.add(
+            consume(IDENTIFIER, "Expect parameter name."));
+      } while (match(COMMA));
+    }
+    consume(RIGHT_PAREN, "Expect ')' after parameters.");
+    // 新增部分結束
+  }
+</code></pre>
+<blockquote>
+<p>This is like the code for handling arguments in a call, except not split out into a helper method. The outer <code>if</code> statement handles the zero parameter case, and the inner <code>while</code> loop parses parameters as long as we find commas to separate them. The result is the list of tokens for each parameter’s name.</p>
+</blockquote>
+<p>這就像在函式呼叫中處理引數的程式碼一樣，只是沒有拆分到一個輔助方法中。外部的<code>if</code>語句用於處理零引數的情況，內部的<code>while</code>會迴圈解析引數，只要能找到分隔引數的逗號。其結果是包含每個引數名稱的標記列表。</p>
+<blockquote>
+<p>Just like we do with arguments to function calls, we validate at parse time that you don’t exceed the maximum number of parameters a function is allowed to have.</p>
+</blockquote>
+<p>就像我們處理函式呼叫的引數一樣，我們在解析時驗證是否超過了一個函式所允許的最大引數數。</p>
+<blockquote>
+<p>Finally, we parse the body and wrap it all up in a function node.</p>
+</blockquote>
+<p>最後，我們解析函式主體，並將其封裝為一個函式節點。</p>
+<p><em><u>lox/Parser.java，在 function()方法中新增：</u></em></p>
+<pre><code class="language-java">    consume(RIGHT_PAREN, "Expect ')' after parameters.");
+    // 新增部分開始
+    consume(LEFT_BRACE, "Expect '{' before " + kind + " body.");
+    List&lt;Stmt&gt; body = block();
+    return new Stmt.Function(name, parameters, body);
+    // 新增部分結束
+  }
+</code></pre>
+<blockquote>
+<p>Note that we consume the <code>{</code> at the beginning of the body here before calling <code>block()</code>. That’s because <code>block()</code> assumes the brace token has already been matched. Consuming it here lets us report a more precise error message if the <code>{</code> isn’t found since we know it’s in the context of a function declaration.</p>
+</blockquote>
+<p>請注意，在呼叫<code>block()</code>方法之前，我們已經消費了函式體開頭的<code>{</code>。這是因為<code>block()</code>方法假定大括號標記已經匹配了。在這裡消費該標記可以讓我們在找不到<code>{</code>的情況下報告一個更精確的錯誤資訊，因為我們知道當前是在一個函式宣告的上下文中。</p>
+<blockquote>
+<h2 id="10--4-function-objects"><a class="header" href="#10--4-function-objects">10 . 4 Function Objects</a></h2>
+</blockquote>
+<h2 id="104-函式物件"><a class="header" href="#104-函式物件">10.4 函式物件</a></h2>
+<blockquote>
+<p>We’ve got some syntax parsed so usually we’re ready to interpret, but first we need to think about how to represent a Lox function in Java. We need to keep track of the parameters so that we can bind them to argument values when the function is called. And, of course, we need to keep the code for the body of the function so that we can execute it.</p>
+</blockquote>
+<p>我們已經解析了一些語法，通常我們要開始準備解釋了，但是我們首先需要思考一下，在Java中如何表示一個Lox函式。我們需要跟蹤形參，以便在函式被呼叫時可以將形參與實參值進行繫結。當然，我們也要保留函式體的程式碼，以便我們可以執行它。</p>
+<blockquote>
+<p>That’s basically what the Stmt.Function class is. Could we just use that? Almost, but not quite. We also need a class that implements LoxCallable so that we can call it. We don’t want the runtime phase of the interpreter to bleed into the front end’s syntax classes so we don’t want Stmt.Function itself to implement that. Instead, we wrap it in a new class.</p>
+</blockquote>
+<p>這基本上就是Stmt.Function的內容。我們可以用這個嗎？差不多，但還不夠。我們還需要一個實現LoxCallable的類，以便我們可以呼叫它。我們不希望直譯器的執行時階段滲入到前端語法類中，所以我們不希望使用Stmt.Function本身來實現它。相反，我們將它包裝在一個新類中。</p>
+<p><em><u>lox/LoxFunction.java， 建立新檔案：</u></em></p>
+<pre><code class="language-java">package com.craftinginterpreters.lox;
+
+import java.util.List;
+
+class LoxFunction implements LoxCallable {
+  private final Stmt.Function declaration;
+  LoxFunction(Stmt.Function declaration) {
+    this.declaration = declaration;
+  }
+}
+</code></pre>
+<blockquote>
+<p>We implement the <code>call()</code> of LoxCallable like so:</p>
+</blockquote>
+<p>使用如下方式實現LoxCallable的<code>call()</code>方法：</p>
+<p><em><u>lox/LoxFunction.java，在 LoxFunction()方法後新增：</u></em></p>
+<pre><code class="language-java">  @Override
+  public Object call(Interpreter interpreter,
+                     List&lt;Object&gt; arguments) {
+    Environment environment = new Environment(interpreter.globals);
+    for (int i = 0; i &lt; declaration.params.size(); i++) {
+      environment.define(declaration.params.get(i).lexeme,
+          arguments.get(i));
+    }
+
+    interpreter.executeBlock(declaration.body, environment);
+    return null;
+  }
+</code></pre>
+<blockquote>
+<p>This handful of lines of code is one of the most fundamental, powerful pieces of our interpreter. As we saw in <a href="http://craftinginterpreters.com/statements-and-state.html">the chapter on statements and state</a>, managing name environments is a core part of a language implementation. Functions are deeply tied to that.</p>
+</blockquote>
+<p>這幾行程式碼是我們的直譯器中最基本、最強大的部分之一。正如我們在上一章中所看到的，管理名稱環境是語言實現中的核心部分。函式與此緊密相關。</p>
+<blockquote>
+<p>Parameters are core to functions, especially the fact that a function <em>encapsulates</em> its parameters—no other code outside of the function can see them. This means each function gets its own environment where it stores those variables.</p>
+</blockquote>
+<p>引數是函式的核心，尤其是考慮到函式<em>封裝</em>了其引數——函式之外的程式碼看不到這些引數。這意味著每個函式都會維護自己的環境，其中儲存著那些變數。</p>
+<blockquote>
+<p>Further, this environment must be created dynamically. Each function <em>call</em> gets its own environment. Otherwise, recursion would break. If there are multiple calls to the same function in play at the same time, each needs its <em>own</em> environment, even though they are all calls to the same function.</p>
+</blockquote>
+<p>此外，這個環境必須是動態建立的。每次函式<em>呼叫</em>都會獲得自己的環境，否則，遞迴就會中斷。如果在同一時刻對相同的函式有多次呼叫，那麼每個呼叫都需要自身的環境，即便它們都是對相同函式的呼叫。</p>
+<blockquote>
+<p>For example, here’s a convoluted way to count to three:</p>
+</blockquote>
+<p>舉例來說，下面是一個計數到3的複雜方法：</p>
+<pre><code class="language-js">fun count(n) {
+  if (n &gt; 1) count(n - 1);
+  print n;
+}
+
+count(3);
+</code></pre>
+<blockquote>
+<p>Imagine we pause the interpreter right at the point where it’s about to print 1 in the innermost nested call. The outer calls to print 2 and 3 haven’t printed their values yet, so there must be environments somewhere in memory that still store the fact that <code>n</code> is bound to 3 in one context, 2 in another, and 1 in the innermost, like:</p>
+</blockquote>
+<p>假設一下，如果我們在最內層的巢狀呼叫中即將列印1的時候暫停了直譯器。列印2和3的外部呼叫還沒有打印出它們的值，所以在記憶體的某個地方一定有環境仍然儲存著這樣的資料：n在一個上下文中被繫結到3，在另一個上下文中被繫結到2，而在最內層呼叫中繫結為1，比如：</p>
+<p><img src="10.%E5%87%BD%E5%BC%8F/recursion.png" alt="A separate environment for each recursive call." /></p>
+<blockquote>
+<p>That’s why we create a new environment at each <em>call</em>, not at the function <em>declaration</em>. The <code>call()</code> method we saw earlier does that. At the beginning of the call, it creates a new environment. Then it walks the parameter and argument lists in lockstep. For each pair, it creates a new variable with the parameter’s name and binds it to the argument’s value.</p>
+</blockquote>
+<p>這就是為什麼我們在每次<em>呼叫</em>時建立一個新的環境，而不是在函式宣告時建立。我們前面看到的<code>call()</code>方法就是這樣做的。在呼叫開始的時候，它建立了一個新環境。然後它以同步的方式遍歷形參和實參列表。對於每一對引數，它用形參的名字建立一個新的變數，並將其與實參的值繫結。</p>
+<blockquote>
+<p>So, for a program like this:</p>
+</blockquote>
+<p>所以，對於類似下面這樣的程式碼：</p>
+<pre><code class="language-java">fun add(a, b, c) {
+  print a + b + c;
+}
+
+add(1, 2, 3);
+</code></pre>
+<blockquote>
+<p>At the point of the call to <code>add()</code>, the interpreter creates something like this:</p>
+</blockquote>
+<p>在呼叫<code>add()</code>時，直譯器會建立類似下面這樣的內容：</p>
+<p><img src="10.%E5%87%BD%E5%BC%8F/binding.png" alt="Binding arguments to their parameters." /></p>
+<blockquote>
+<p>Then <code>call()</code> tells the interpreter to execute the body of the function in this new function-local environment. Up until now, the current environment was the environment where the function was being called. Now, we teleport from there inside the new parameter space we’ve created for the function.</p>
+</blockquote>
+<p>然後<code>call()</code>會告訴直譯器在這個新的函式區域性環境中執行函式體。在此之前，當前環境是函式被呼叫的位置所處的環境。現在，我們轉入了為函式建立的新的引數空間中。</p>
+<blockquote>
+<p>This is all that’s required to pass data into the function. By using different environments when we execute the body, calls to the same function with the same code can produce different results.</p>
+</blockquote>
+<p>這就是將資料傳入函式所需的全部內容。透過在執行函式主體時使用不同的環境，用同樣的程式碼呼叫相同的函式可以產生不同的結果。</p>
+<blockquote>
+<p>Once the body of the function has finished executing, <code>executeBlock()</code> discards that function-local environment and restores the previous one that was active back at the callsite. Finally, <code>call()</code> returns <code>null</code>, which returns <code>nil</code> to the caller. (We’ll add return values later.)</p>
+</blockquote>
+<p>一旦函式的主體執行完畢，<code>executeBlock()</code>就會丟棄該函式的本地環境，並恢復呼叫該函式前的活躍環境。最後，<code>call()</code>方法會返回<code>null</code>，它向呼叫者返回<code>nil</code>。（我們會在稍後新增返回值）</p>
+<blockquote>
+<p>Mechanically, the code is pretty simple. Walk a couple of lists. Bind some new variables. Call a method. But this is where the crystalline <em>code</em> of the function declaration becomes a living, breathing <em>invocation</em>. This is one of my favorite snippets in this entire book. Feel free to take a moment to meditate on it if you’re so inclined.</p>
+</blockquote>
+<p>從機制上講，這段程式碼是非常簡單的。遍歷幾個列表，繫結一些新變數，呼叫一個方法。但這就是將程式碼塊變成有生命力的呼叫執行的地方。這是我在整本書中最喜歡的片段之一。如果你願意的話，可以花點時間好好思考一下。</p>
+<blockquote>
+<p>Done? OK. Note when we bind the parameters, we assume the parameter and argument lists have the same length. This is safe because <code>visitCallExpr()</code> checks the arity before calling <code>call()</code>. It relies on the function reporting its arity to do that.</p>
+</blockquote>
+<p>完成了嗎？好的。注意當我們繫結引數時，我們假設引數和引數列表具有相同的長度。這是安全的，因為<code>visitCallExpr()</code>在呼叫<code>call()</code>之前會檢查元數。它依靠報告其元數的函式來做到這一點。</p>
+<p><em><u>lox/LoxFunction.java，在 LoxFunction()方法後新增：</u></em></p>
+<pre><code class="language-java">  @Override
+  public int arity() {
+    return declaration.params.size();
+  }
+</code></pre>
+<blockquote>
+<p>That’s most of our object representation. While we’re in here, we may as well implement <code>toString()</code>.</p>
+</blockquote>
+<p>這基本就是我們的函式物件表示了。既然已經到了這一步，我們也可以實現toString()。</p>
+<p><em><u>lox/LoxFunction.java，在 LoxFunction()方法後新增：</u></em></p>
+<pre><code class="language-java">  @Override
+  public String toString() {
+    return "&lt;fn " + declaration.name.lexeme + "&gt;";
+  }
+</code></pre>
+<blockquote>
+<p>This gives nicer output if a user decides to print a function value.</p>
+</blockquote>
+<p>如果使用者要列印函式的值，該方法能提供一個更漂亮的輸出值。</p>
+<pre><code class="language-javascript">fun add(a, b) {
+  print a + b;
+}
+
+print add; // "&lt;fn add&gt;".
+</code></pre>
+<blockquote>
+<h3 id="10--4--1-interpreting-function-declarations"><a class="header" href="#10--4--1-interpreting-function-declarations">10 . 4 . 1 Interpreting function declarations</a></h3>
+</blockquote>
+<h3 id="1041-解釋函式宣告"><a class="header" href="#1041-解釋函式宣告">10.4.1 解釋函式宣告</a></h3>
+<blockquote>
+<p>We’ll come back and refine LoxFunction soon, but that’s enough to get started. Now we can visit a function declaration.</p>
+</blockquote>
+<p>我們很快就會回頭來完善LoxFunction，但是現在已足夠開始進行解釋了。現在，我們可以訪問函式宣告節點了。</p>
+<p><em><u>lox/Interpreter.java，在 visitExpressionStmt()方法後新增：</u></em></p>
+<pre><code class="language-java">  @Override
+  public Void visitFunctionStmt(Stmt.Function stmt) {
+    LoxFunction function = new LoxFunction(stmt);
+    environment.define(stmt.name.lexeme, function);
+    return null;
+  }
+</code></pre>
+<blockquote>
+<p>This is similar to how we interpret other literal expressions. We take a function <em>syntax node</em>—a compile-time representation of the function—and convert it to its runtime representation. Here, that’s a LoxFunction that wraps the syntax node.</p>
+</blockquote>
+<p>這類似於我們介紹其它文字表示式的方式。我們會接收一個函式<em>語法</em>節點——函式的編譯時表示形式——然後將其轉換為執行時表示形式。在這裡就是一個封裝了語法節點的LoxFunction例項。</p>
+<blockquote>
+<p>Function declarations are different from other literal nodes in that the declaration <em>also</em> binds the resulting object to a new variable. So, after creating the LoxFunction, we create a new binding in the current environment and store a reference to it there.</p>
+</blockquote>
+<p>函式宣告與其它文字節點的不同之處在於，宣告還會將結果物件繫結到一個新的變數。因此，在建立LoxFunction之後，我們在當前環境中建立一個新的繫結，並在其中儲存對該函式的引用。</p>
+<blockquote>
+<p>With that, we can define and call our own functions all within Lox. Give it a try:</p>
+</blockquote>
+<p>這樣，我們就可以在Lox中定義和呼叫我們自己的函式。試一下：</p>
+<pre><code class="language-javascript">fun sayHi(first, last) {
+  print "Hi, " + first + " " + last + "!";
+}
+
+sayHi("Dear", "Reader");
+</code></pre>
+<blockquote>
+<p>I don’t know about you, but that looks like an honest-to-God programming language to me.</p>
+</blockquote>
+<p>我不知道你怎麼想的，但對我來說，這看起來像是一種虔誠的程式語言。</p>
+<blockquote>
+<h2 id="10--5-return-statements"><a class="header" href="#10--5-return-statements">10 . 5 Return Statements</a></h2>
+</blockquote>
+<h2 id="105-return語句"><a class="header" href="#105-return語句">10.5 Return語句</a></h2>
+<blockquote>
+<p>We can get data into functions by passing parameters, but we’ve got no way to get results back <em>out</em>. If Lox were an expression-oriented language like Ruby or Scheme, the body would be an expression whose value is implicitly the function’s result. But in Lox, the body of a function is a list of statements which don’t produce values, so we need dedicated syntax for emitting a result. In other words, <code>return</code> statements. I’m sure you can guess the grammar already.</p>
+</blockquote>
+<p>我們可以透過傳遞引數將資料輸入函式中，但是我們沒有辦法將結果<em>傳出來</em>。如果Lox是像Ruby或Scheme那樣的面向表示式的語言，那麼函式體就是一個表示式，其值就隱式地作為函式的結果。但是在Lox中，函式體是一個不產生值的語句列表，所有我們需要專門的語句來發出結果。換句話說，就是<code>return</code>語句。我相信你已經能猜出語法了。</p>
+<pre><code>statement      → exprStmt
+               | forStmt
+               | ifStmt
+               | printStmt
+               | returnStmt
+               | whileStmt
+               | block ;
+
+returnStmt     → "return" expression? ";" ;
+</code></pre>
+<blockquote>
+<p>We’ve got one more—the final, in fact—production under the venerable <code>statement</code> rule. A <code>return</code> statement is the <code>return</code> keyword followed by an optional expression and terminated with a semicolon.</p>
+</blockquote>
+<p>我們又得到一個<code>statement</code>規則下的新產生式（實際上也是最後一個）。一個<code>return</code>語句就是一個<code>return</code>關鍵字，後跟一個可選的表示式，並以一個分號結尾。</p>
+<blockquote>
+<p>The return value is optional to support exiting early from a function that doesn’t return a useful value. In statically typed languages, “void” functions don’t return a value and non-void ones do. Since Lox is dynamically typed, there are no true void functions. The compiler has no way of preventing you from taking the result value of a call to a function that doesn’t contain a <code>return</code> statement.</p>
+</blockquote>
+<p>返回值是可選的，用以支援從一個不返回有效值的函式中提前退出。在靜態型別語言中，void函式不返回值，而非void函式返回值。由於Lox是動態型別的，所以沒有真正的void函式。在呼叫一個不包含<code>return</code>語句的函式時，編譯器沒有辦法阻止你獲取其結果值。</p>
+<pre><code class="language-javascript">fun procedure() {
+  print "don't return anything";
+}
+
+var result = procedure();
+print result; // ?
+</code></pre>
+<blockquote>
+<p>This means every Lox function must return <em>something</em>, even if it contains no <code>return</code> statements at all. We use <code>nil</code> for this, which is why LoxFunction’s implementation of <code>call()</code> returns <code>null</code> at the end. In that same vein, if you omit the value in a <code>return</code> statement, we simply treat it as equivalent to:</p>
+</blockquote>
+<p>這意味著每個Lox函式都要返回一些內容，即使其中根本不包含<code>return</code>語句。我們使用<code>nil</code>，這就是為什麼LoxFunction的<code>call()</code>實現在最後返回<code>null</code>。同樣，如果你省略了<code>return </code>語句中的值，我們將其視為等價於：</p>
+<pre><code class="language-java">return nil;
+</code></pre>
+<blockquote>
+<p>Over in our AST generator, we add a new node.</p>
+</blockquote>
+<p>在AST生成器中，新增一個新節點。</p>
+<p><em><u>tool/GenerateAst.java，在 main()方法中新增：</u></em></p>
+<pre><code class="language-java">      "Print      : Expr expression",
+      // 新增部分開始
+      "Return     : Token keyword, Expr value",
+      // 新增部分結束
+      "Var        : Token name, Expr initializer",
+</code></pre>
+<blockquote>
+<p>It keeps the <code>return</code> keyword token so we can use its location for error reporting, and the value being returned, if any. We parse it like other statements, first by recognizing the initial keyword.</p>
+</blockquote>
+<p>其中保留了<code>return</code>關鍵字標記（這樣我們可以使用該標記的位置來報告錯誤），以及返回的值（如果有的話）。我們像解析其它語句一樣來解析它，首先識別起始的關鍵字。</p>
+<p><em><u>lox/Parser.java，在 statement()方法中新增：</u></em></p>
+<pre><code class="language-java">    if (match(PRINT)) return printStatement();
+    // 新增部分開始
+    if (match(RETURN)) return returnStatement();
+    // 新增部分結束
+    if (match(WHILE)) return whileStatement();
+</code></pre>
+<blockquote>
+<p>That branches out to:</p>
+</blockquote>
+<p>分支會跳轉到：</p>
+<p><em><u>lox/Parser.java，在 printStatement()方法後新增：</u></em></p>
+<pre><code class="language-java">  private Stmt returnStatement() {
+    Token keyword = previous();
+    Expr value = null;
+    if (!check(SEMICOLON)) {
+      value = expression();
+    }
+
+    consume(SEMICOLON, "Expect ';' after return value.");
+    return new Stmt.Return(keyword, value);
+  }
+</code></pre>
+<blockquote>
+<p>After snagging the previously consumed <code>return</code> keyword, we look for a value expression. Since many different tokens can potentially start an expression, it’s hard to tell if a return value is <em>present</em>. Instead, we check if it’s <em>absent</em>. Since a semicolon can’t begin an expression, if the next token is that, we know there must not be a value.</p>
+</blockquote>
+<p>在捕獲先前消耗的<code>return</code>關鍵字之後，我們會尋找一個值表示式。因為很多不同的標記都可以引出一個表示式，所以很難判斷是否存在返回值。相反，我們檢查它是否不存在。因為分號不能作為表示式的開始，如果下一個標記是分號，我們就知道一定沒有返回值。</p>
+<blockquote>
+<h3 id="10--5--1-returning-from-calls"><a class="header" href="#10--5--1-returning-from-calls">10 . 5 . 1 Returning from calls</a></h3>
+</blockquote>
+<h3 id="1051-從函式呼叫中返回"><a class="header" href="#1051-從函式呼叫中返回">10.5.1 從函式呼叫中返回</a></h3>
+<blockquote>
+<p>Interpreting a <code>return</code> statement is tricky. You can return from anywhere within the body of a function, even deeply nested inside other statements. When the return is executed, the interpreter needs to jump all the way out of whatever context it’s currently in and cause the function call to complete, like some kind of jacked up control flow construct.</p>
+</blockquote>
+<p>解釋<code>return</code>語句是很棘手的。你可以從函式體中的任何位置返回，甚至是深深巢狀在其它語句中的位置。當返回語句被執行時，直譯器需要完全跳出當前所在的上下文，完成函式呼叫，就像某種頂層的控制流結構。</p>
+<blockquote>
+<p>For example, say we’re running this program and we’re about to execute the <code>return</code> statement:</p>
+</blockquote>
+<p>舉例來說，假設我們正在執行下面的程式碼，並且我們即將執行<code>return</code>語句：</p>
+<pre><code class="language-java">fun count(n) {
+  while (n &lt; 100) {
+    if (n == 3) return n; // &lt;--
+    print n;
+    n = n + 1;
+  }
+}
+
+count(1);
+</code></pre>
+<blockquote>
+<p>The Java call stack currently looks roughly like this:</p>
+</blockquote>
+<p>Java呼叫棧目前看起來大致如下所示：</p>
+<pre><code class="language-java">Interpreter.visitReturnStmt()
+Interpreter.visitIfStmt()
+Interpreter.executeBlock()
+Interpreter.visitBlockStmt()
+Interpreter.visitWhileStmt()
+Interpreter.executeBlock()
+LoxFunction.call()
+Interpreter.visitCallExpr()
+</code></pre>
+<blockquote>
+<p>We need to get from the top of the stack all the way back to <code>call()</code>. I don’t know about you, but to me that sounds like exceptions. When we execute a <code>return</code> statement, we’ll use an exception to unwind the interpreter past the visit methods of all of the containing statements back to the code that began executing the body.</p>
+</blockquote>
+<p>我們需要從棧頂一直回退到<code>call()</code>。我不知道你怎麼想，但是對我來說，這聽起來很像是異常。當我們執行<code>return</code>語句時，我們會使用一個異常來解開直譯器，經過所有函式內含語句的visit方法，一直回退到開始執行函式體的程式碼。</p>
+<blockquote>
+<p>The visit method for our new AST node looks like this:</p>
+</blockquote>
+<p>新的AST節點的visit方法如下所示：</p>
+<p><em><u>lox/Interpreter.java，在 visitPrintStmt()方法後新增：</u></em></p>
+<pre><code class="language-java">  @Override
+  public Void visitReturnStmt(Stmt.Return stmt) {
+    Object value = null;
+    if (stmt.value != null) value = evaluate(stmt.value);
+
+    throw new Return(value);
+  }
+</code></pre>
+<blockquote>
+<p>If we have a return value, we evaluate it, otherwise, we use <code>nil</code>. Then we take that value and wrap it in a custom exception class and throw it.</p>
+</blockquote>
+<p>如果我們有返回值，就對其求值，否則就使用<code>nil</code>。然後我們取這個值並將其封裝在一個自定義的異常類中，並丟擲該異常。</p>
+<p><em><u>lox/Return.java，建立新檔案：</u></em></p>
+<pre><code class="language-java">package com.craftinginterpreters.lox;
+
+class Return extends RuntimeException {
+  final Object value;
+
+  Return(Object value) {
+    super(null, null, false, false);
+    this.value = value;
+  }
+}
+</code></pre>
+<blockquote>
+<p>This class wraps the return value with the accoutrements Java requires for a runtime exception class. The weird super constructor call with those <code>null</code> and <code>false</code> arguments disables some JVM machinery that we don’t need. Since we’re using our exception class for control flow and not actual error handling, we don’t need overhead like stack traces.</p>
+</blockquote>
+<p>這個類使用Java執行時異常類來封裝返回值。其中那個奇怪的帶有<code>null</code>和<code>false</code>的父類構造器方法，停用了一些我們不需要的JVM機制。因為我們只是使用該異常類來控制流，而不是真正的錯誤處理，所以我們不需要像堆疊跟蹤這樣的開銷。</p>
+<blockquote>
+<p>We want this to unwind all the way to where the function call began, the <code>call()</code> method in LoxFunction.</p>
+</blockquote>
+<p>我們希望可以一直跳出到函式呼叫開始的地方，也就是LoxFunction中的<code>call()</code>方法。</p>
+<p><em><u>lox/LoxFunction.java，在 call()方法中替換一行：</u></em></p>
+<pre><code class="language-java">         arguments.get(i));
+    }
+    // 替換部分開始
+    try {
+      interpreter.executeBlock(declaration.body, environment);
+    } catch (Return returnValue) {
+      return returnValue.value;
+    }
+    // 替換部分結束
+    return null;
+</code></pre>
+<blockquote>
+<p>We wrap the call to <code>executeBlock()</code> in a try-catch block. When it catches a return exception, it pulls out the value and makes that the return value from <code>call()</code>. If it never catches one of these exceptions, it means the function reached the end of its body without hitting a <code>return</code> statement. In that case, it implicitly returns <code>nil</code>.</p>
+</blockquote>
+<p>我們將對<code>executeBlock()</code>的呼叫封裝在一個try-catch塊中。當捕獲一個返回異常時，它會取出其中的值並將其作為<code>call()</code>方法的返回值。如果沒有捕獲任何異常，意味著函式到達了函式體的末尾，而且沒有遇到<code>return</code>語句。在這種情況下，隱式地返回<code>nil</code>。</p>
+<blockquote>
+<p>Let’s try it out. We finally have enough power to support this classic example—a recursive function to calculate Fibonacci numbers:</p>
+</blockquote>
+<p>我們來試一下。我們終於有能力支援這個經典的例子——遞迴函式計算Fibonacci數<sup class="footnote-reference" id="fr-7-1"><a href="#footnote-7">7</a></sup>：</p>
+<pre><code class="language-java">fun fib(n) {
+  if (n &lt;= 1) return n;
+  return fib(n - 2) + fib(n - 1);
+}
+
+for (var i = 0; i &lt; 20; i = i + 1) {
+  print fib(i);
+}
+</code></pre>
+<blockquote>
+<p>This tiny program exercises almost every language feature we have spent the past several chapters implementing—expressions, arithmetic, branching, looping, variables, functions, function calls, parameter binding, and returns.</p>
+</blockquote>
+<p>這個小程式練習了我們在過去幾章中實現的幾乎所有語言特性，包括表示式、算術運算、分支、迴圈、變數、函式、函式呼叫、引數繫結和返回。</p>
+<blockquote>
+<h2 id="10--6-local-functions-and-closures"><a class="header" href="#10--6-local-functions-and-closures">10 . 6 Local Functions and Closures</a></h2>
+</blockquote>
+<h2 id="106-區域性函式和閉包"><a class="header" href="#106-區域性函式和閉包">10.6 區域性函式和閉包</a></h2>
+<blockquote>
+<p>Our functions are pretty full featured, but there is one hole to patch. In fact, it’s a big enough gap that we’ll spend most of the <a href="http://craftinginterpreters.com/resolving-and-binding.html">next chapter</a> sealing it up, but we can get started here.</p>
+</blockquote>
+<p>我們的函式功能已經相當全面了，但是還有一個漏洞需要修補。實際上，這是一個很大的問題，我們將會在下一章中花費大部分時間來修補它，但是我們可以從這裡開始。</p>
+<blockquote>
+<p>LoxFunction’s implementation of <code>call()</code> creates a new environment where it binds the function’s parameters. When I showed you that code, I glossed over one important point: What is the <em>parent</em> of that environment?</p>
+</blockquote>
+<p>LoxFunction中的<code>call()</code>實現建立了一個新的環境，並在其中綁定了函式的引數。當我向你展示這段程式碼時，我忽略了一個重要的問題：這個環境的父類是什麼？</p>
+<blockquote>
+<p>Right now, it is always <code>globals</code>, the top-level global environment. That way, if an identifier isn’t defined inside the function body itself, the interpreter can look outside the function in the global scope to find it. In the Fibonacci example, that’s how the interpreter is able to look up the recursive call to <code>fib</code> inside the function’s own body—<code>fib</code> is a global variable.</p>
+</blockquote>
+<p>目前，它始終是<code>globals</code>，即頂級的全域性環境。這樣，如果一個識別符號不是在函式體內部定義的，直譯器可以在函式外部的全域性作用域中查詢它。在Fibonacci的例子中，這就是直譯器如何能夠在函式體中實現對<code>fib</code>的遞迴呼叫——<code>fib</code>是一個全域性變數。</p>
+<blockquote>
+<p>But recall that in Lox, function declarations are allowed <em>anywhere</em> a name can be bound. That includes the top level of a Lox script, but also the inside of blocks or other functions. Lox supports <strong>local functions</strong> that are defined inside another function, or nested inside a block.</p>
+</blockquote>
+<p>但請記住，在Lox中，允許在可以繫結名字的<em>任何地方</em>進行函式宣告。其中包括Lox指令碼的頂層，但也包括塊或其他函式的內部。Lox支援在另一個函式內定義或在一個塊內巢狀的<strong>區域性函式</strong>。</p>
+<blockquote>
+<p>Consider this classic example:</p>
+</blockquote>
+<p>考慮下面這個經典的例子：</p>
+<pre><code class="language-java">fun makeCounter() {
+  var i = 0;
+  fun count() {
+    i = i + 1;
+    print i;
+  }
+
+  return count;
+}
+
+var counter = makeCounter();
+counter(); // "1".
+counter(); // "2".
+</code></pre>
+<blockquote>
+<p>Here, <code>count()</code> uses <code>i</code>, which is declared outside of itself in the containing function <code>makeCounter()</code>. <code>makeCounter()</code> returns a reference to the <code>count()</code> function and then its own body finishes executing completely.</p>
+</blockquote>
+<p>這個例子中，<code>count()</code>使用了<code>i</code>，它是在該函式外部的 <code>makeCounter()</code>宣告的。<code>makeCounter()</code> 返回對<code>count()</code>函式的引用，然後它的函式體就執行完成了。</p>
+<blockquote>
+<p>Meanwhile, the top-level code invokes the returned <code>count()</code> function. That executes the body of <code>count()</code>, which assigns to and reads <code>i</code>, even though the function where <code>i</code> was defined has already exited.</p>
+</blockquote>
+<p>同時，頂層程式碼呼叫了返回的<code>count()</code>函式。這就執行了<code>count()</code>函式的主體，它會對<code>i</code>賦值並讀取<code>i</code>，儘管定義<code>i</code>的函式已經退出。</p>
+<blockquote>
+<p>If you’ve never encountered a language with nested functions before, this might seem crazy, but users do expect it to work. Alas, if you run it now, you get an undefined variable error in the call to <code>counter()</code> when the body of <code>count()</code> tries to look up <code>i</code>. That’s because the environment chain in effect looks like this:</p>
+</blockquote>
+<p>如果你以前從未遇到過帶有巢狀函式的語言，那麼這可能看起來很瘋狂，但使用者確實希望它能工作。唉，如果你現在執行它，當<code>count()</code>的函式體試圖查詢<code>i</code>時，會在對<code>counter()</code>的呼叫中得到一個未定義的變數錯誤，這是因為當前的環境鏈看起來像是這樣的：</p>
+<p><img src="10.%E5%87%BD%E5%BC%8F/global.png" alt="The environment chain from count()&#39;s body to the global scope." /></p>
+<blockquote>
+<p>When we call <code>count()</code> (through the reference to it stored in <code>counter</code>), we create a new empty environment for the function body. The parent of that is the global environment. We lost the environment for <code>makeCounter()</code> where <code>i</code> is bound.</p>
+</blockquote>
+<p>當我們呼叫<code>count()</code>時（透過<code>counter</code>中儲存的引用），我們會為函式體建立一個新的空環境，它的父環境就是全域性環境。我們丟失了<code>i</code>所在的<code>makeCounter()</code>環境。</p>
+<blockquote>
+<p>Let’s go back in time a bit. Here’s what the environment chain looked like right when we declared <code>count()</code> inside the body of <code>makeCounter()</code>:</p>
+</blockquote>
+<p>我們把時間往回撥一點。我們在<code>makeCounter()</code>的函式體中宣告<code>count()</code>時，環境鏈的樣子是下面這樣：</p>
+<p><img src="10.%E5%87%BD%E5%BC%8F/body.png" alt="The environment chain inside the body of makeCounter()." /></p>
+<blockquote>
+<p>So at the point where the function is declared, we can see <code>i</code>. But when we return from <code>makeCounter()</code> and exit its body, the interpreter discards that environment. Since the interpreter doesn’t keep the environment surrounding <code>count()</code> around, it’s up to the function object itself to hang on to it.</p>
+</blockquote>
+<p>所以，在函式宣告的地方，我們可以看到<code>i</code>。但是當我們從 <code>makeCounter()</code> 返回並退出其主體時，直譯器會丟棄這個環境。因為直譯器不會保留<code>count()</code> 外圍的環境，所以要靠函式物件本身來儲存它。</p>
+<blockquote>
+<p>This data structure is called a <strong>closure</strong> because it “closes over” and holds on to the surrounding variables where the function is declared. Closures have been around since the early Lisp days, and language hackers have come up with all manner of ways to implement them. For jlox, we’ll do the simplest thing that works. In LoxFunction, we add a field to store an environment.</p>
+</blockquote>
+<p>這種資料結構被稱為<strong>閉包</strong>，因為它 "封閉 "並保留著函式宣告的外圍變數。閉包早在Lisp時代就已經存在了，語言駭客們想出了各種方法來實現閉包。在jlox中，我們將採用最簡單的方式。在LoxFunction中，我們新增一個欄位來儲存環境。</p>
+<p><em><u>lox/LoxFunction.java，在 LoxFunction類中新增：</u></em></p>
+<pre><code class="language-java">  private final Stmt.Function declaration;
+  // 新增部分開始
+  private final Environment closure;
+  // 新增部分結束
+  LoxFunction(Stmt.Function declaration) {
+</code></pre>
+<blockquote>
+<p>We initialize that in the constructor.</p>
+</blockquote>
+<p>我們在建構函式中對其初始化。</p>
+<p><em><u>lox/LoxFunction.java，在 LoxFunction()構造方法中替換一行：</u></em></p>
+<pre><code class="language-java">  //替換部分開始
+  LoxFunction(Stmt.Function declaration, Environment closure) {
+    this.closure = closure;
+    // 替換部分結束
+    this.declaration = declaration;
+</code></pre>
+<blockquote>
+<p>When we create a LoxFunction, we capture the current environment.</p>
+</blockquote>
+<p>當我們建立LoxFunction時，我們會捕獲當前環境。</p>
+<p><em><u>lox/Interpreter.java，在 visitFunctionStmt()方法中替換一行：</u></em></p>
+<pre><code class="language-java">    public Void visitFunctionStmt(Stmt.Function stmt) {
+      // 替換部分開始
+      LoxFunction function = new LoxFunction(stmt, environment);
+      // 替換部分結束
+      environment.define(stmt.name.lexeme, function);
+</code></pre>
+<blockquote>
+<p>This is the environment that is active when the function is <em>declared</em> not when it’s <em>called</em>, which is what we want. It represents the lexical scope surrounding the function declaration. Finally, when we call the function, we use that environment as the call’s parent instead of going straight to <code>globals</code>.</p>
+</blockquote>
+<p>這是函式宣告時生效的環境，而不是函式被呼叫時的環境，這正是我們想要的。它代表了函式宣告時的詞法作用域。最後，當我們呼叫函式時，我們使用該環境作為呼叫的父環境，而不是直接使用<code>globals</code>。</p>
+<p><em><u>lox/LoxFunction.java，在 call()方法中替換一行：</u></em></p>
+<pre><code class="language-java">                      List&lt;Object&gt; arguments) {
+    // 替換部分開始                  
+    Environment environment = new Environment(closure);
+    // 替換部分結束
+    for (int i = 0; i &lt; declaration.params.size(); i++) {
+</code></pre>
+<blockquote>
+<p>This creates an environment chain that goes from the function’s body out through the environments where the function is declared, all the way out to the global scope. The runtime environment chain matches the textual nesting of the source code like we want. The end result when we call that function looks like this:</p>
+</blockquote>
+<p>這樣就建立了一個環境鏈，從函式體開始，經過函式被宣告的環境，然後到全域性作用域。執行時環境鏈與原始碼的文字巢狀相匹配，跟我們想要的一致。當我們呼叫該函式時，最終的結果是這樣的：</p>
+<p><img src="10.%E5%87%BD%E5%BC%8F/closure.png" alt="The environment chain with the closure." /></p>
+<blockquote>
+<p>Now, as you can see, the interpreter can still find <code>i</code> when it needs to because it’s in the middle of the environment chain. Try running that <code>makeCounter()</code> example now. It works!</p>
+</blockquote>
+<p>如你所見，現在直譯器可以在需要的時候找到<code>i</code>，因為它在環境鏈中。現在嘗試執行makeCounter()的例子，起作用了！</p>
+<blockquote>
+<p>Functions let us abstract over, reuse, and compose code. Lox is much more powerful than the rudimentary arithmetic calculator it used to be. Alas, in our rush to cram closures in, we have let a tiny bit of dynamic scoping leak into the interpreter. In the <a href="http://craftinginterpreters.com/resolving-and-binding.html">next chapter</a>, we will explore deeper into lexical scope and close that hole.</p>
+</blockquote>
+<p>函式讓我們對程式碼進行抽象、重用和編排。Lox比之前的初級算術計算器要強大得多。唉，在我們匆匆忙忙支援閉包時，已經讓一小部分動態作用域洩露到直譯器中了。在下一章中，我們將深入探索詞法作用域，堵住這個漏洞。</p>
+<hr />
+<blockquote>
+<h2 id="challenges"><a class="header" href="#challenges">CHALLENGES</a></h2>
+</blockquote>
+<h2 id="習題"><a class="header" href="#習題">習題</a></h2>
+<blockquote>
+<p>1、Our interpreter carefully checks that the number of arguments passed to a function matches the number of parameters it expects. Since this check is done at runtime on every call, it has a performance cost. Smalltalk implementations don’t have that problem. Why not?</p>
+</blockquote>
+<p>1、直譯器會仔細檢查傳給函式的實引數量是否與期望的形引數量匹配。由於該檢查是在執行時，針對每一次呼叫執行的，所以會有效能成本。Smalltalk的實現則沒有這個問題。為什麼呢？</p>
+<blockquote>
+<p>2、Lox’s function declaration syntax performs two independent operations. It creates a function and also binds it to a name. This improves usability for the common case where you do want to associate a name with the function. But in functional-styled code, you often want to create a function to immediately pass it to some other function or return it. In that case, it doesn’t need a name.</p>
+<p>Languages that encourage a functional style usually support <strong>anonymous functions</strong> or <strong>lambdas</strong>—an expression syntax that creates a function without binding it to a name. Add anonymous function syntax to Lox so that this works:</p>
+<pre><code class="language-java">fun thrice(fn) {
+  for (var i = 1; i &lt;= 3; i = i + 1) {
+    fn(i);
+  }
+}
+
+thrice(fun (a) {
+  print a;
+});
+// "1".
+// "2".
+// "3".
+</code></pre>
+<p>How do you handle the tricky case of an anonymous function expression occurring in an expression statement:</p>
+<pre><code>fun () {};
+</code></pre>
+</blockquote>
+<p>2、Lox的函式宣告語法執行了兩個獨立的操作。它建立了一個函式，並將其與一個名稱繫結。這提高了常見情況下的可用性，即你確實想把一個名字和函式聯絡起來。但在函式式的程式碼中，你經常想建立一個函式，以便立即將它傳遞給其他函式或返回它。在這種情況下，它不需要一個名字。</p>
+<p>鼓勵函式式風格的語言通常支援<strong>匿名函式</strong>或<strong>lambdas</strong>——一個建立函式而不用將其與名稱繫結的表示式語法。在Lox中加入匿名函式的語法，已支援下面的程式碼：</p>
+<pre><code class="language-java">fun thrice(fn) {
+  for (var i = 1; i &lt;= 3; i = i + 1) {
+    fn(i);
+  }
+}
+
+thrice(fun (a) {
+  print a;
+});
+// "1".
+// "2".
+// "3".
+</code></pre>
+<p>如何處理在表示式語句中出現匿名函式表示式的棘手情況：</p>
+<pre><code class="language-java">fun () {};
+</code></pre>
+<blockquote>
+<p>3、Is this program valid?</p>
+<pre><code>fun scope(a) {
+  var a = "local";
+}
+</code></pre>
+<p>In other words, are a function’s parameters in the <em>same</em> scope as its local variables, or in an outer scope? What does Lox do? What about other languages you are familiar with? What do you think a language <em>should</em> do?</p>
+</blockquote>
+<p>3、下面的程式碼可用嗎？</p>
+<pre><code class="language-java">fun scope(a) {
+  var a = "local";
+}
+</code></pre>
+<p>換句話說，一個函式的引數是跟它的區域性變數在同一個作用域內，還是在一個外部作用域內？Lox 是怎麼做的？你所熟悉的其他語言呢？你認為一種語言應該怎麼做？</p>
+<hr>
+<ol class="footnote-definition"><li id="footnote-1">
+<p>該規則中使用<code>*</code>符號匹配類似<code>fn(1)(2)(3)</code>的系列函式呼叫。這樣的程式碼不是常見的C語言風格，但是在ML衍生的語言族中很常見。在ML中，定義接受多個引數的函式的常規方式是將其定義為一系列巢狀函式。每個函式接受一個引數並返回一個新函式。該函式使用下一個引數，返回另一個函式，以此類推。最終，一旦所有引數都被使用，最後一個函式就完成了操作。這種風格被稱為柯里化，是以Haskell Curry（他的名字出現在另一個廣為人知的函式式語言中）的名字命名的，它被直接整合到語言的語法中，所以它不像這裡看起來那麼奇怪。 <a href="#fr-1-1">↩</a></p>
+</li>
+<li id="footnote-2">
+<p>這段程式碼可以簡化為<code>while (match(LEFT_PAREN))</code>形式，而不是使用這種愚蠢的<code>while (true)</code> 和 <code>break</code>形式。但是不用擔心，稍後使用解析器處理物件屬性的時候，這種寫法就有意義了。 <a href="#fr-2-1">↩</a></p>
+</li>
+<li id="footnote-3">
+<p>如果該方法是一個例項方法，則限制為254個引數。因為<code>this</code>（方法的接收者）就像一個被隱式傳遞給方法的引數一樣，所以也會佔用一個引數位置。 <a href="#fr-3-1">↩</a></p>
+</li>
+<li id="footnote-4">
+<p>這是另一個微妙的語義選擇。由於參數列達式可能有副作用，因此它們的執行順序可能是使用者可見的。即便如此，有些語言如Scheme和C並沒有指定順序。這樣編譯器可以自由地重新排序以提高效率，但這意味著如果引數沒有按照使用者期望的順序計算，使用者可能會感到不愉快。 <a href="#fr-4-1">↩</a></p>
+</li>
+<li id="footnote-5">
+<p>奇怪的是，這些函式的兩個名稱native和foreign是反義詞。也許這取決於選擇這個詞的人的角度。如果您認為自己生活在執行時實現中(在我們的例子中是Java)，那麼用它編寫的函式就是本機的。但是，如果您站在語言使用者的角度，那麼執行時就是用其他“外來”語言實現的。或者本機指的是底層硬體的機器程式碼語言。在Java中，本機方法是用C或c++實現並編譯為本機機器碼的方法。 <a href="#fr-5-1">↩</a></p>
+</li>
+<li id="footnote-6">
+<p>幾乎每種語言都提供的一個經典的本地函式是將文字列印到標準輸出。在Lox中，我將<code>print</code>作為了內建語句，以便可以在前面的章節中看到程式碼結果。一旦我們有了函式，我們就可以刪除之前的<code>print</code>語法並用一個本機函式替換它，從而簡化語言。但這意味著書中前面的例子不能在後面章節的直譯器上執行，反之亦然。所以，在這本書中，我不去修改它。但是，如果您正在為自己的語言構建一個直譯器，您可能需要考慮一下。 <a href="#fr-6-1">↩</a></p>
+</li>
+<li id="footnote-7">
+<p>你可能會注意到這是很慢的。顯然，遞迴併不是計算斐波那契數的最有效方法，但作為一個微基準測試，它很好地測試了我們的直譯器實現函式呼叫的速度。 <a href="#fr-7-1">↩</a></p>
+</li>
+</ol>
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../../content/9.控制流.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../../content/11.解析和綁定.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../../content/9.控制流.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../../content/11.解析和綁定.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+
+    </div>
+    </body>
+</html>
