@@ -1,0 +1,1376 @@
+<!DOCTYPE HTML>
+<html lang="zh" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>16.按需掃描 - 手撸解释器教程</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="../highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="../tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "../";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "../searchindex.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">手撸解释器教程</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="16按需掃描-scanning-on-demand"><a class="header" href="#16按需掃描-scanning-on-demand">16.按需掃描 Scanning on Demand</a></h1>
+<blockquote>
+<p>Literature is idiosyncratic arrangements in horizontal lines in only twenty-six phonetic symbols, ten Arabic numbers, and about eight punctuation marks.</p>
+<p>——  Kurt Vonnegut, <em>Like Shaking Hands With God: A Conversation about Writing</em></p>
+</blockquote>
+<p>文學就是26個字母、10個阿拉伯數字和大概8個標點符號的水平排列。（馮尼古特《像與上帝握手：關於寫作的談話》）</p>
+<blockquote>
+<p>Our second interpreter, clox, has three phases—scanner, compiler, and virtual machine. A data structure joins each pair of phases. Tokens flow from scanner to compiler, and chunks of bytecode from compiler to VM. We began our implementation near the end with <a href="http://www.craftinginterpreters.com/chunks-of-bytecode.html">chunks</a> and the <a href="http://www.craftinginterpreters.com/a-virtual-machine.html">VM</a>. Now, we’re going to hop back to the beginning and build a scanner that makes tokens. In the <a href="http://www.craftinginterpreters.com/compiling-expressions.html">next chapter</a>, we’ll tie the two ends together with our bytecode compiler.</p>
+</blockquote>
+<p>我們的第二個直譯器clox分為三個階段——掃描器、編譯器和虛擬機器。每兩個階段之間有一個資料結構進行銜接。詞法標識從掃描器流入編譯器，位元組碼塊從編譯器流向虛擬機器。我們是從尾部開始先實現了位元組碼塊和虛擬機器。現在，我們要回到起點，構建一個生成詞法標識的掃描器。在下一章中，我們將用位元組碼編譯器將這兩部分連線起來。</p>
+<p><img src="16.%E6%8C%89%E9%9C%80%E6%8E%83%E6%8F%8F/pipeline.png" alt="Source code → scanner → tokens → compiler → bytecode chunk → VM." /></p>
+<blockquote>
+<p>I’ll admit, this is not the most exciting chapter in the book. With two implementations of the same language, there’s bound to be some redundancy. I did sneak in a few interesting differences compared to jlox’s scanner. Read on to see what they are.</p>
+</blockquote>
+<p>我承認，這並不是書中最精彩的一章。對於同一種語言的兩個實現，肯定會有一些冗餘。與jlox的掃描器相比，我確實添加了一些有趣的差異點。往下讀，看看它們是什麼。</p>
+<h2 id="16--1-spinning-up-the-interpreter"><a class="header" href="#16--1-spinning-up-the-interpreter">16 . 1 Spinning Up the Interpreter</a></h2>
+<blockquote>
+<p>Now that we’re building the front end, we can get clox running like a real interpreter. No more hand-authored chunks of bytecode. It’s time for a REPL and script loading. Tear out most of the code in <code>main()</code> and replace it with:</p>
+</blockquote>
+<p>現在我們正在構建前端，我們可以讓clox像一個真正的直譯器一樣執行。不需要再手動編寫位元組碼塊。現在是時候實現REPL和指令碼載入了。刪除<code>main()</code>方法中的大部分程式碼，替換成：</p>
+<p><em><u>main.c，在 main()方法中替換26行：</u></em></p>
+<pre><code class="language-c">int main(int argc, const char* argv[]) {
+  initVM();
+  // 替換部分開始
+  if (argc == 1) {
+    repl();
+  } else if (argc == 2) {
+    runFile(argv[1]);
+  } else {
+    fprintf(stderr, "Usage: clox [path]\n");
+    exit(64);
+  }
+  
+  freeVM();
+  // 替換部分結束
+  return 0;
+}
+</code></pre>
+<blockquote>
+<p>If you pass no arguments to the executable, you are dropped into the REPL. A single command line argument is understood to be the path to a script to run.</p>
+</blockquote>
+<p>如果你沒有向可執行檔案傳遞任何引數，就會進入REPL。如果傳入一個引數，就將其當做要執行的指令碼的路徑<sup class="footnote-reference" id="fr-1-1"><a href="#footnote-1">1</a></sup>。</p>
+<blockquote>
+<p>We’ll need a few system headers, so let’s get them all out of the way.</p>
+</blockquote>
+<p>我們需要一些系統標頭檔案，所以把它們都列出來。</p>
+<p><em><u>main.c，在檔案頂部新增：</u></em></p>
+<pre><code class="language-c">// 新增部分開始
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;string.h&gt;
+// 新增部分結束
+#include "common.h"
+</code></pre>
+<blockquote>
+<p>Next, we get the REPL up and REPL-ing.</p>
+</blockquote>
+<p>接下來，我們啟動REPL並執行。</p>
+<p><em><u>main.c，新增程式碼：</u></em></p>
+<pre><code class="language-c">#include "vm.h"
+// 新增部分開始
+static void repl() {
+  char line[1024];
+  for (;;) {
+    printf("&gt; ");
+
+    if (!fgets(line, sizeof(line), stdin)) {
+      printf("\n");
+      break;
+    }
+
+    interpret(line);
+  }
+}
+// 新增部分結束
+</code></pre>
+<blockquote>
+<p>A quality REPL handles input that spans multiple lines gracefully and doesn’t have a hardcoded line length limit. This REPL here is a little more, ahem, austere, but it’s fine for our purposes.</p>
+</blockquote>
+<p>一個高質量的REPL可以優雅地處理多行的輸入，並且沒有硬編碼的行長度限制。這裡的REPL有點……簡樸，但足以滿足我們的需求。</p>
+<blockquote>
+<p>The real work happens in <code>interpret()</code>. We’ll get to that soon, but first let’s take care of loading scripts.</p>
+</blockquote>
+<p>真正的工作發生在<code>interpret()</code>中。我們很快會講到這個問題，但首先讓我們來看看如何載入指令碼。</p>
+<p><em><u>main.c，在repl()方法後新增：</u></em></p>
+<pre><code class="language-c">// 新增部分開始
+static void runFile(const char* path) {
+  char* source = readFile(path);
+  InterpretResult result = interpret(source);
+  free(source); 
+
+  if (result == INTERPRET_COMPILE_ERROR) exit(65);
+  if (result == INTERPRET_RUNTIME_ERROR) exit(70);
+}
+// 新增部分結束
+</code></pre>
+<blockquote>
+<p>We read the file and execute the resulting string of Lox source code. Then, based on the result of that, we set the exit code appropriately because we’re scrupulous tool builders and care about little details like that.</p>
+</blockquote>
+<p>我們讀取檔案並執行生成的Lox原始碼字串。然後，根據其結果，我們適當地設定退出碼，因為我們是嚴謹的工具製作者，並且關心這樣的小細節。</p>
+<blockquote>
+<p>We also need to free the source code string because <code>readFile()</code> dynamically allocates it and passes ownership to its caller. That function looks like this:</p>
+</blockquote>
+<p>我們還需要釋放原始碼字串，因為<code>readFile()</code>會動態地分配記憶體，並將所有權傳遞給它的呼叫者<sup class="footnote-reference" id="fr-2-1"><a href="#footnote-2">2</a></sup>。這個函式看起來像這樣：</p>
+<p><em><u>main.c，在 repl()方法後新增程式碼：</u></em></p>
+<pre><code class="language-c">static char* readFile(const char* path) {
+  FILE* file = fopen(path, "rb");
+
+  fseek(file, 0L, SEEK_END);
+  size_t fileSize = ftell(file);
+  rewind(file);
+
+  char* buffer = (char*)malloc(fileSize + 1);
+  size_t bytesRead = fread(buffer, sizeof(char), fileSize, file);
+  buffer[bytesRead] = '\0';
+
+  fclose(file);
+  return buffer;
+}
+</code></pre>
+<blockquote>
+<p>Like a lot of C code, it takes more effort than it seems like it should, especially for a language expressly designed for operating systems. The difficult part is that we want to allocate a big enough string to read the whole file, but we don’t know how big the file is until we’ve read it.</p>
+</blockquote>
+<p>像很多C語言程式碼一樣，它所花費的精力比看起來要多，尤其是對於一門專為作業系統而設計的語言而言。困難的地方在於，我們想分配一個足以讀取整個檔案的字串，但是我們在讀取檔案之前並不知道它有多大。</p>
+<blockquote>
+<p>The code here is the classic trick to solve that. We open the file, but before reading it, we seek to the very end using <code>fseek()</code>. Then we call <code>ftell()</code> which tells us how many bytes we are from the start of the file. Since we seeked (sought?) to the end, that’s the size. We rewind back to the beginning, allocate a string of that size, and read the whole file in a single batch.</p>
+</blockquote>
+<p>這裡的程式碼是解決這個問題的經典技巧。我們開啟檔案，但是在讀之前，先透過<code>fseek()</code>尋找到檔案的最末端。接下來我們呼叫<code>ftell()</code>，它會告訴我們裡檔案起始點有多少位元組。既然我們定位到了最末端，那它就是檔案大小<sup class="footnote-reference" id="fr-3-1"><a href="#footnote-3">3</a></sup>。我們退回到起始位置，分配一個相同大小的字串，然後一次性讀取整個檔案。</p>
+<blockquote>
+<p>So we’re done, right? Not quite. These function calls, like most calls in the C standard library, can fail. If this were Java, the failures would be thrown as exceptions and automatically unwind the stack so we wouldn’t <em>really</em> need to handle them. In C, if we don’t check for them, they silently get ignored.</p>
+</blockquote>
+<p>這樣就完成了嗎？不完全是。這些函式呼叫，像C語言標準庫中的大多數呼叫一樣，可能會失敗。如果是在Java中，這些失敗會被當做異常丟擲，並自動清除堆疊，所以我們實際上並不需要處理它們。但在C語言中，如果我們不檢查，它們就會被忽略。</p>
+<blockquote>
+<p>This isn’t really a book on good C programming practice, but I hate to encourage bad style, so let’s go ahead and handle the errors. It’s good for us, like eating our vegetables or flossing.</p>
+</blockquote>
+<p>這並不是一本關於良好C語言程式設計實踐的書，但我討厭鼓勵糟糕的程式設計風格，所以讓我們繼續處理這些錯誤。這對我們有好處，就像吃蔬菜或使用牙線清潔牙齒一樣。</p>
+<blockquote>
+<p>Fortunately, we don’t need to do anything particularly clever if a failure occurs. If we can’t correctly read the user’s script, all we can really do is tell the user and exit the interpreter gracefully. First of all, we might fail to open the file.</p>
+</blockquote>
+<p>幸運地是，如果發生故障，我們不需要特別聰明的做法。如果我們不能正確地讀取使用者的指令碼，我們真正能做的就是告訴使用者並優雅地退出直譯器。首先，我們可能無法開啟檔案。</p>
+<p><em><u>main.c，在readFile()方法中新增程式碼：</u></em></p>
+<pre><code class="language-c">  FILE* file = fopen(path, "rb");
+  // 新增部分開始
+  if (file == NULL) {
+    fprintf(stderr, "Could not open file \"%s\".\n", path);
+    exit(74);
+  }
+  // 新增部分結束
+  fseek(file, 0L, SEEK_END);
+</code></pre>
+<blockquote>
+<p>This can happen if the file doesn’t exist or the user doesn’t have access to it. It’s pretty common—people mistype paths all the time.</p>
+</blockquote>
+<p>如果檔案不存在或使用者沒有訪問許可權，就會發生這種情況。這是很常見的——人們經常會輸入錯誤的路徑。</p>
+<blockquote>
+<p>This failure is much rarer:</p>
+</blockquote>
+<p>下面這種錯誤要少見得多：</p>
+<p><em><u>main.c，在readFile()方法中新增程式碼：</u></em></p>
+<pre><code class="language-c">  char* buffer = (char*)malloc(fileSize + 1);
+  // 新增部分開始
+  if (buffer == NULL) {
+    fprintf(stderr, "Not enough memory to read \"%s\".\n", path);
+    exit(74);
+  }
+  // 新增部分結束
+  size_t bytesRead = fread(buffer, sizeof(char), fileSize, file);
+</code></pre>
+<blockquote>
+<p>If we can’t even allocate enough memory to read the Lox script, the user’s probably got bigger problems to worry about, but we should do our best to at least let them know.</p>
+</blockquote>
+<p>如果我們甚至不能分配足夠的記憶體來讀取Lox指令碼，那麼使用者可能會有更大的問題需要擔心，但我們至少應該盡最大努力讓他們知道。</p>
+<blockquote>
+<p>Finally, the read itself may fail.</p>
+</blockquote>
+<p>最後，讀取本身可能會失敗。</p>
+<p><em><u>main.c，在readFile()方法中新增程式碼：</u></em></p>
+<pre><code class="language-c">  size_t bytesRead = fread(buffer, sizeof(char), fileSize, file);
+  // 新增部分開始
+  if (bytesRead &lt; fileSize) {
+    fprintf(stderr, "Could not read file \"%s\".\n", path);
+    exit(74);
+  }
+  // 新增部分結束
+  buffer[bytesRead] = '\0';
+</code></pre>
+<blockquote>
+<p>This is also unlikely. Actually, the calls to <code>fseek()</code>, <code>ftell()</code>, and <code>rewind()</code> could theoretically fail too, but let’s not go too far off in the weeds, shall we?</p>
+</blockquote>
+<p>這也是不大可能發生的。實際上，<code>fseek()</code>, <code>ftell()</code>, 和<code>rewind()</code> 的呼叫在理論上也可能會失敗，但是我們不要太過深入，好嗎？</p>
+<blockquote>
+<h3 id="16--1--1-opening-the-compilation-pipeline"><a class="header" href="#16--1--1-opening-the-compilation-pipeline">16 . 1 . 1 Opening the compilation pipeline</a></h3>
+</blockquote>
+<h3 id="1611-開啟編譯管道"><a class="header" href="#1611-開啟編譯管道">16.1.1 開啟編譯管道</a></h3>
+<blockquote>
+<p>We’ve got ourselves a string of Lox source code, so now we’re ready to set up a pipeline to scan, compile, and execute it. It’s driven by <code>interpret()</code>. Right now, that function runs our old hardcoded test chunk. Let’s change it to something closer to its final incarnation.</p>
+</blockquote>
+<p>我們已經得到了Lox原始碼字串，所以現在我們準備建立一個管道來掃描、編譯和執行它。管道是由<code>interpret()</code>驅動的。現在，該函式執行的是舊的硬編碼測試位元組碼塊。我們來把它改成更接近其最終形態的東西。</p>
+<p><em><u>vm.h，函式interpret()中替換1行：</u></em></p>
+<pre><code class="language-c">void freeVM();
+// 替換部分開始
+InterpretResult interpret(const char* source);
+// 替換部分結束
+void push(Value value);
+</code></pre>
+<blockquote>
+<p>Where before we passed in a Chunk, now we pass in the string of source code. Here’s the new implementation:</p>
+</blockquote>
+<p>以前我們傳入一個位元組碼塊，現在我們傳入的是原始碼的字串。下面是新的實現：</p>
+<p><em><u>vm.c，函式interpret()中替換4行：</u></em></p>
+<pre><code class="language-c">// 替換部分開始
+InterpretResult interpret(const char* source) {
+  compile(source);
+  return INTERPRET_OK;
+//  替換部分結束
+}
+</code></pre>
+<blockquote>
+<p>We won’t build the actual <em>compiler</em> yet in this chapter, but we can start laying out its structure. It lives in a new module.</p>
+</blockquote>
+<p>在本章中，我們還不會構建真正的<em>編譯器</em>，但我們可以開始佈局它的結構。它存在於一個新的模組中。</p>
+<p><em><u>vm.c，新增程式碼：</u></em></p>
+<pre><code class="language-c">#include "common.h"
+// 新增部分開始
+#include "compiler.h"
+// 新增部分結束
+#include "debug.h"
+</code></pre>
+<blockquote>
+<p>For now, the one function in it is declared like so:</p>
+</blockquote>
+<p>目前，其中有一個函式宣告如下：</p>
+<p><em><u>compiler.h，建立新檔案：</u></em></p>
+<pre><code class="language-c">#ifndef clox_compiler_h
+#define clox_compiler_h
+
+void compile(const char* source);
+
+#endif
+</code></pre>
+<blockquote>
+<p>That signature will change, but it gets us going.</p>
+</blockquote>
+<p>這個簽名以後會變，但現在足以讓我們繼續工作。</p>
+<blockquote>
+<p>The first phase of compilation is scanning—the thing we’re doing in this chapter—so right now all the compiler does is set that up.</p>
+</blockquote>
+<p>編譯的第一階段是掃描——即我們在本章中要做的事情——所以現在編譯器所做的就是設定掃描。</p>
+<p><em><u>compiler.c，建立新檔案：</u></em></p>
+<pre><code class="language-c">#include &lt;stdio.h&gt;
+
+#include "common.h"
+#include "compiler.h"
+#include "scanner.h"
+
+void compile(const char* source) {
+  initScanner(source);
+}
+</code></pre>
+<blockquote>
+<p>This will also grow in later chapters, naturally.</p>
+</blockquote>
+<p>當然，這在後面的章節中也會繼續擴充套件。</p>
+<blockquote>
+<h3 id="16--1--2-the-scanner-scans"><a class="header" href="#16--1--2-the-scanner-scans">16 . 1 . 2 The scanner scans</a></h3>
+</blockquote>
+<h3 id="1612-掃描器掃描"><a class="header" href="#1612-掃描器掃描">16.1.2 掃描器掃描</a></h3>
+<blockquote>
+<p>There are still a few more feet of scaffolding to stand up before we can start writing useful code. First, a new header:</p>
+</blockquote>
+<p>在我們開始編寫實際有用的程式碼之前，還有一些腳手架需要先搭建起來。首先，是一個新的標頭檔案：</p>
+<p><em><u>scanner.h，建立新檔案：</u></em></p>
+<pre><code class="language-c">#ifndef clox_scanner_h
+#define clox_scanner_h
+
+void initScanner(const char* source);
+
+#endif
+</code></pre>
+<blockquote>
+<p>And its corresponding implementation:</p>
+</blockquote>
+<p>還有其對應的實現：</p>
+<p><em><u>scanner.c，建立新檔案：</u></em></p>
+<pre><code class="language-c">#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+
+#include "common.h"
+#include "scanner.h"
+
+typedef struct {
+  const char* start;
+  const char* current;
+  int line;
+} Scanner;
+
+Scanner scanner;
+</code></pre>
+<blockquote>
+<p>As our scanner chews through the user’s source code, it tracks how far it’s gone. Like we did with the VM, we wrap that state in a struct and then create a single top-level module variable of that type so we don’t have to pass it around all of the various functions.</p>
+</blockquote>
+<p>當我們的掃描器一點點處理使用者的原始碼時，它會跟蹤自己已經走了多遠。就像我們在虛擬機器中所做的那樣，我們將狀態封裝在一個結構體中，然後建立一個該型別的頂層模組變數，這樣就不必在所有的函式之間傳遞它。</p>
+<blockquote>
+<p>There are surprisingly few fields. The <code>start</code> pointer marks the beginning of the current lexeme being scanned, and <code>current</code> points to the current character being looked at.</p>
+</blockquote>
+<p>這裡的欄位少得驚人。<code>start</code>指標標識正在被掃描的詞素的起點，而<code>current</code>指標指向當前正在檢視的字元。</p>
+<p><img src="16.%E6%8C%89%E9%9C%80%E6%8E%83%E6%8F%8F/fields.png" alt="The start and current fields pointing at &#39;print bacon;&#39;. Start points at &#39;b&#39; and current points at &#39;o&#39;." /></p>
+<blockquote>
+<p>We have a <code>line</code> field to track what line the current lexeme is on for error reporting. That’s it! We don’t even keep a pointer to the beginning of the source code string. The scanner works its way through the code once and is done after that.</p>
+</blockquote>
+<p>我們還有一個<code>line</code>欄位，用於跟蹤當前詞素在哪一行，以便進行錯誤報告。就是這樣！我們甚至沒有保留指向原始碼字串起點的指標。掃描器只處理一遍程式碼，然後就結束了。</p>
+<blockquote>
+<p>Since we have some state, we should initialize it.</p>
+</blockquote>
+<p>因為我們有一些狀態，我們還應該初始化它。</p>
+<p><em><u>scanner.c，在變數scanner後新增程式碼：</u></em></p>
+<pre><code class="language-c">void initScanner(const char* source) {
+  scanner.start = source;
+  scanner.current = source;
+  scanner.line = 1;
+}
+</code></pre>
+<blockquote>
+<p>We start at the very first character on the very first line, like a runner crouched at the starting line.</p>
+</blockquote>
+<p>我們從第一行的第一個字元開始，就像一個運動員蹲在起跑線上。</p>
+<blockquote>
+<h2 id="16--2-a-token-at-a-time"><a class="header" href="#16--2-a-token-at-a-time">16 . 2 A Token at a Time</a></h2>
+</blockquote>
+<h2 id="162-一次一個標識"><a class="header" href="#162-一次一個標識">16.2 一次一個標識</a></h2>
+<blockquote>
+<p>In jlox, when the starting gun went off, the scanner raced ahead and eagerly scanned the whole program, returning a list of tokens. This would be a challenge in clox. We’d need some sort of growable array or list to store the tokens in. We’d need to manage allocating and freeing the tokens, and the collection itself. That’s a lot of code, and a lot of memory churn.</p>
+</blockquote>
+<p>在jlox中，當發令槍響起時，掃描器飛快地前進，急切地掃描整個程式，並返回一個詞法標識序列。這在clox中有點困難。我們需要某種可增長的陣列或列表來儲存標識。我們需要管理標識的分配和釋放，以及集合本身。這需要大量的程式碼和大量的記憶體。</p>
+<blockquote>
+<p>At any point in time, the compiler needs only one or two tokens—remember our grammar requires only a single token of lookahead—so we don’t need to keep them <em>all</em> around at the same time. Instead, the simplest solution is to not scan a token until the compiler needs one. When the scanner provides one, it returns the token by value. It doesn’t need to dynamically allocate anything—it can just pass tokens around on the C stack.</p>
+</blockquote>
+<p>在任何時間點，編譯器只需要一個或兩個詞法標識——記住我們的語法只需要前瞻一個詞法標識——所以我們不需要同時保留它們。相反，最簡單的解決方案是在編譯器需要標識的時候再去掃描。當掃描器提供一個標識時，它按值返回標識。它不需要動態分配任何東西——只需要在C棧上傳遞詞法標識即可。</p>
+<blockquote>
+<p>Unfortunately, we don’t have a compiler yet that can ask the scanner for tokens, so the scanner will just sit there doing nothing. To kick it into action, we’ll write some temporary code to drive it.</p>
+</blockquote>
+<p>不巧的是，我們還沒有可以向掃描器請求詞法標識的編譯器，所以掃描器只能乾等著什麼也不做。為了讓它工作起來，我們要編寫一些臨時程式碼來驅動它<sup class="footnote-reference" id="fr-4-1"><a href="#footnote-4">4</a></sup>。</p>
+<p><em><u>compiler.c，在compile()方法中新增程式碼：</u></em></p>
+<pre><code class="language-c">  initScanner(source);
+  // 新增部分開始
+  int line = -1;
+  for (;;) {
+    Token token = scanToken();
+    if (token.line != line) {
+      printf("%4d ", token.line);
+      line = token.line;
+    } else {
+      printf("   | ");
+    }
+    printf("%2d '%.*s'\n", token.type, token.length, token.start); 
+
+    if (token.type == TOKEN_EOF) break;
+  }
+  // 新增部分結束
+}
+</code></pre>
+<blockquote>
+<p>This loops indefinitely. Each turn through the loop, it scans one token and prints it. When it reaches a special “end of file” token or an error, it stops. For example, if we run the interpreter on this program:</p>
+</blockquote>
+<p>這個迴圈是無限的。每迴圈一次，它就會掃描一個詞法標識並打印出來。當它遇到特殊的“檔案結束”標識或錯誤時，就會停止。例如，如果我們對下面的程式執行直譯器：</p>
+<pre><code class="language-c">print 1 + 2;
+</code></pre>
+<blockquote>
+<p>It prints out:</p>
+</blockquote>
+<p>就會打印出：</p>
+<pre><code class="language-c">   1 31 'print'
+   | 21 '1'
+   |  7 '+'
+   | 21 '2'
+   |  8 ';'
+   2 39 ''
+</code></pre>
+<blockquote>
+<p>The first column is the line number, the second is the numeric value of the token type, and then finally the lexeme. That last empty lexeme on line 2 is the EOF token.</p>
+</blockquote>
+<p>第一列是行號，第二列是標識型別的數值，最後是詞素。第2行中最後一個空詞素就是EOF標識。</p>
+<blockquote>
+<p>The goal for the rest of the chapter is to make that blob of code work by implementing this key function:</p>
+</blockquote>
+<p>本章其餘部分的目標就是透過實現下面這個關鍵函式，使這塊程式碼能正常工作：</p>
+<p><em><u>scanner.h，在initScanner()方法後新增：</u></em></p>
+<pre><code class="language-c">void initScanner(const char* source);
+// 新增部分開始
+Token scanToken();
+// 新增部分結束
+#endif
+</code></pre>
+<blockquote>
+<p>Each call scans and returns the next token in the source code. A token looks like this:</p>
+</blockquote>
+<p>該函式的每次呼叫都會掃描並返回原始碼中的下一個詞法標識。一個詞法標識結構如下：</p>
+<p><em><u>scanner.h，新增程式碼：</u></em></p>
+<pre><code class="language-c">#define clox_scanner_h
+// 新增部分開始
+typedef struct {
+  TokenType type;
+  const char* start;
+  int length;
+  int line;
+} Token;
+// 新增部分結束
+void initScanner(const char* source);
+</code></pre>
+<blockquote>
+<p>It’s pretty similar to jlox’s Token class. We have an enum identifying what type of token it is—number, identifier, <code>+</code> operator, etc. The enum is virtually identical to the one in jlox, so let’s just hammer out the whole thing.</p>
+</blockquote>
+<p>它和jlox中的Token類很相似。我們用一個列舉來標記它是什麼型別的詞法標識——數字、識別符號、<code>+</code>運算子等等。這個列舉與jlox中的列舉幾乎完全相同，所以我們直接來敲定整個事情。</p>
+<p><em><u>scanner.h，新增程式碼：</u></em></p>
+<pre><code class="language-c">#ifndef clox_scanner_h
+#define clox_scanner_h
+// 新增部分開始
+typedef enum {
+  // Single-character tokens. 單字元詞法
+  TOKEN_LEFT_PAREN, TOKEN_RIGHT_PAREN,
+  TOKEN_LEFT_BRACE, TOKEN_RIGHT_BRACE,
+  TOKEN_COMMA, TOKEN_DOT, TOKEN_MINUS, TOKEN_PLUS,
+  TOKEN_SEMICOLON, TOKEN_SLASH, TOKEN_STAR,
+  // One or two character tokens. 一或兩字元詞法
+  TOKEN_BANG, TOKEN_BANG_EQUAL,
+  TOKEN_EQUAL, TOKEN_EQUAL_EQUAL,
+  TOKEN_GREATER, TOKEN_GREATER_EQUAL,
+  TOKEN_LESS, TOKEN_LESS_EQUAL,
+  // Literals. 字面量
+  TOKEN_IDENTIFIER, TOKEN_STRING, TOKEN_NUMBER,
+  // Keywords. 關鍵字
+  TOKEN_AND, TOKEN_CLASS, TOKEN_ELSE, TOKEN_FALSE,
+  TOKEN_FOR, TOKEN_FUN, TOKEN_IF, TOKEN_NIL, TOKEN_OR,
+  TOKEN_PRINT, TOKEN_RETURN, TOKEN_SUPER, TOKEN_THIS,
+  TOKEN_TRUE, TOKEN_VAR, TOKEN_WHILE,
+
+  TOKEN_ERROR, TOKEN_EOF
+} TokenType;
+
+// 新增部分結束
+typedef struct {
+</code></pre>
+<blockquote>
+<p>Aside from prefixing all the names with <code>TOKEN_</code> (since C tosses enum names in the top-level namespace) the only difference is that extra <code>TOKEN_ERROR</code> type. What’s that about?</p>
+</blockquote>
+<p>除了在所有名稱前都加上<code>TOKEN_</code>字首（因為C語言會將列舉名稱拋出到頂層名稱空間）之外，唯一的區別就是多了一個<code>TOKEN_ERROR</code>型別。那是什麼呢？</p>
+<blockquote>
+<p>There are only a couple of errors that get detected during scanning: unterminated strings and unrecognized characters. In jlox, the scanner reports those itself. In clox, the scanner produces a synthetic “error” token for that error and passes it over to the compiler. This way, the compiler knows an error occurred and can kick off error recovery before reporting it.</p>
+</blockquote>
+<p>在掃描過程中只會檢測到幾種錯誤：未終止的字串和無法識別的字元。在jlox中，掃描器會自己報告這些錯誤。在clox中，掃描器會針對這些錯誤生成一個合成的“錯誤”標識，並將其傳遞給編譯器。這樣一來，編譯器就知道發生了一個錯誤，並可以在報告錯誤之前啟動錯誤恢復。</p>
+<blockquote>
+<p>The novel part in clox’s Token type is how it represents the lexeme. In jlox, each Token stored the lexeme as its own separate little Java string. If we did that for clox, we’d have to figure out how to manage the memory for those strings. That’s especially hard since we pass tokens by value—multiple tokens could point to the same lexeme string. Ownership gets weird.</p>
+</blockquote>
+<p>在clox的Token型別中，新穎之處在於它如何表示一個詞素。在jlox中，每個Token將詞素儲存到其單獨的Java字串中。如果我們在clox中也這樣做，我們就必須想辦法管理這些字串的記憶體。這非常困難，因為我們是透過值傳遞詞法標識的——多個標識可能指向相同的詞素字串。所有權會變得混亂。</p>
+<blockquote>
+<p>Instead, we use the original source string as our character store. We represent a lexeme by a pointer to its first character and the number of characters it contains. This means we don’t need to worry about managing memory for lexemes at all and we can freely copy tokens around. As long as the main source code string outlives all of the tokens, everything works fine.</p>
+</blockquote>
+<p>相反，我們將原始的原始碼字串作為我們的字元儲存。我們用指向第一個字元的指標和其中包含的字元數來表示一個詞素。這意味著我們完全不需要擔心管理詞素的記憶體，而且我們可以自由地複製詞法標識。只要主原始碼字串的壽命超過所有詞法標識，一切都可以正常工作<sup class="footnote-reference" id="fr-5-1"><a href="#footnote-5">5</a></sup>。</p>
+<blockquote>
+<h3 id="16--2--1-scanning-tokens"><a class="header" href="#16--2--1-scanning-tokens">16 . 2 . 1 Scanning tokens</a></h3>
+</blockquote>
+<h3 id="1621-掃描標識"><a class="header" href="#1621-掃描標識">16.2.1 掃描標識</a></h3>
+<blockquote>
+<p>We’re ready to scan some tokens. We’ll work our way up to the complete implementation, starting with this:</p>
+</blockquote>
+<p>我們已經準備好掃描一些標識了。我們將從下面的程式碼開始，逐步達成完整的實現：</p>
+<p><em><u>scanner.c，在initScanner()方法後新增程式碼：</u></em></p>
+<pre><code class="language-c">Token scanToken() {
+  scanner.start = scanner.current;
+
+  if (isAtEnd()) return makeToken(TOKEN_EOF);
+
+  return errorToken("Unexpected character.");
+}
+</code></pre>
+<blockquote>
+<p>Since each call to this function scans a complete token, we know we are at the beginning of a new token when we enter the function. Thus, we set <code>scanner.start</code> to point to the current character so we remember where the lexeme we’re about to scan starts.</p>
+</blockquote>
+<p>由於對該函式的每次呼叫都會掃描一個完整的詞法標識，所以當我們進入該函式時，就知道我們正處於一個新詞法標識的開始處。因此，我們將<code>scanner.start</code>設定為指向當前字元，這樣我們就能記住我們將要掃描的詞素的開始位置。</p>
+<blockquote>
+<p>Then we check to see if we’ve reached the end of the source code. If so, we return an EOF token and stop. This is a sentinel value that signals to the compiler to stop asking for more tokens.</p>
+</blockquote>
+<p>然後檢查是否已達到原始碼的結尾。如果是，我們返回一個EOF標識並停止。這是一個標記值，它向編譯器發出訊號，停止請求更多標記。</p>
+<blockquote>
+<p>If we aren’t at the end, we do some . . . stuff . . . to scan the next token. But we haven’t written that code yet. We’ll get to that soon. If that code doesn’t successfully scan and return a token, then we reach the end of the function. That must mean we’re at a character that the scanner can’t recognize, so we return an error token for that.</p>
+</blockquote>
+<p>如果我們沒有達到結尾，我們會做一些……事情……來掃描下一個標識。但我們還沒有寫這些程式碼。我們很快就會講到。如果這段程式碼沒有成功掃描並返回一個詞法標識，那麼我們就到達了函式的終點。這肯定意味著我們遇到了一個掃描器無法識別的字元，所以我們為此返回一個錯誤標識。</p>
+<blockquote>
+<p>This function relies on a couple of helpers, most of which are familiar from jlox. First up:</p>
+</blockquote>
+<p>這個函式依賴於幾個輔助函式，其中大部分都是在jlox中已熟悉的。首先是：</p>
+<p><em><u>scanner.c，在initScanner()方法後新增程式碼：</u></em></p>
+<pre><code class="language-c">static bool isAtEnd() {
+  return *scanner.current == '\0';
+}
+</code></pre>
+<blockquote>
+<p>We require the source string to be a good null-terminated C string. If the current character is the null byte, then we’ve reached the end.</p>
+</blockquote>
+<p>我們要求源字串是一個良好的以null結尾的C字串。如果當前字元是null位元組，那我們就到達了終點。</p>
+<blockquote>
+<p>To create a token, we have this constructor-like function:</p>
+</blockquote>
+<p>要建立一個標識，我們還需要這個類似於建構函式的函式：</p>
+<p><em><u>scanner.c，在isAtEnd()方法後新增程式碼：</u></em></p>
+<pre><code class="language-c">static Token makeToken(TokenType type) {
+  Token token;
+  token.type = type;
+  token.start = scanner.start;
+  token.length = (int)(scanner.current - scanner.start);
+  token.line = scanner.line;
+  return token;
+}
+</code></pre>
+<blockquote>
+<p>It uses the scanner’s <code>start</code> and <code>current</code> pointers to capture the token’s lexeme. It sets a couple of other obvious fields then returns the token. It has a sister function for returning error tokens.</p>
+</blockquote>
+<p>其中使用掃描器的<code>start</code>和<code>current</code>指標來捕獲標識的詞素。它還設定了其它幾個明顯的欄位，如何返回標識。它還有一個用於返回錯誤標識的姊妹函式。</p>
+<p><em><u>scanner.c，在makeToken()方法後新增程式碼：</u></em></p>
+<pre><code class="language-c">static Token errorToken(const char* message) {
+  Token token;
+  token.type = TOKEN_ERROR;
+  token.start = message;
+  token.length = (int)strlen(message);
+  token.line = scanner.line;
+  return token;
+}
+</code></pre>
+<blockquote>
+<p>The only difference is that the “lexeme” points to the error message string instead of pointing into the user’s source code. Again, we need to ensure that the error message sticks around long enough for the compiler to read it. In practice, we only ever call this function with C string literals. Those are constant and eternal, so we’re fine.</p>
+</blockquote>
+<p>唯一的區別在於，“詞素”指向錯誤資訊字串而不是使用者的原始碼。同樣，我們需要確保錯誤資訊能保持足夠長的時間，以便編譯器能夠讀取它。在實踐中，我們只會用C語言的字串字面量來呼叫這個函式。它們是恆定不變的，所以我們不會有問題。</p>
+<blockquote>
+<p>What we have now is basically a working scanner for a language with an empty lexical grammar. Since the grammar has no productions, every character is an error. That’s not exactly a fun language to program in, so let’s fill in the rules.</p>
+</blockquote>
+<p>我們現在所擁有的是一個基本可用的掃描器，用於掃描空語法語言。因為語法沒有產生式，所以每個字元都是一個錯誤。這並不是一種有趣的程式語言，所以讓我們把規則填進去。</p>
+<blockquote>
+<h2 id="16--3-a-lexical-grammar-for-lox"><a class="header" href="#16--3-a-lexical-grammar-for-lox">16 . 3 A Lexical Grammar for Lox</a></h2>
+</blockquote>
+<h2 id="163-lox語法"><a class="header" href="#163-lox語法">16.3 Lox語法</a></h2>
+<blockquote>
+<p>The simplest tokens are only a single character. We recognize those like so:</p>
+</blockquote>
+<p>最簡單的詞法標識只有一個字元。我們這樣來識別它們：</p>
+<p><em><u>scanner.c，在scanToken()方法中新增程式碼：</u></em></p>
+<pre><code class="language-c">  if (isAtEnd()) return makeToken(TOKEN_EOF);
+  // 新增部分開始
+  char c = advance();
+
+  switch (c) {
+    case '(': return makeToken(TOKEN_LEFT_PAREN);
+    case ')': return makeToken(TOKEN_RIGHT_PAREN);
+    case '{': return makeToken(TOKEN_LEFT_BRACE);
+    case '}': return makeToken(TOKEN_RIGHT_BRACE);
+    case ';': return makeToken(TOKEN_SEMICOLON);
+    case ',': return makeToken(TOKEN_COMMA);
+    case '.': return makeToken(TOKEN_DOT);
+    case '-': return makeToken(TOKEN_MINUS);
+    case '+': return makeToken(TOKEN_PLUS);
+    case '/': return makeToken(TOKEN_SLASH);
+    case '*': return makeToken(TOKEN_STAR);
+  }
+  // 新增部分結束
+  return errorToken("Unexpected character.");
+</code></pre>
+<blockquote>
+<p>We read the next character from the source code, and then do a straightforward switch to see if it matches any of Lox’s one-character lexemes. To read the next character, we use a new helper which consumes the current character and returns it.</p>
+</blockquote>
+<p>我們從原始碼中讀取下一個字元，然後做一個簡單的switch判斷，看它是否與Lox中的某個單字元詞素相匹配。為了讀取下一個字元，我們使用一個新的輔助函式，它會消費當前字元並將其返回。</p>
+<p><em><u>scanner.c，在isAtEnd()方法後新增程式碼：</u></em></p>
+<pre><code class="language-c">static char advance() {
+  scanner.current++;
+  return scanner.current[-1];
+}
+</code></pre>
+<blockquote>
+<p>Next up are the two-character punctuation tokens like <code>!=</code> and <code>&gt;=</code>. Each of these also has a corresponding single-character token. That means that when we see a character like <code>!</code>, we don’t know if we’re in a <code>!</code> token or a <code>!=</code> until we look at the next character too. We handle those like so:</p>
+</blockquote>
+<p>接下來是兩個字元的符號，如<code>!=</code>和<code>&gt;=</code>，其中每一個都包含對應的單字元標識。這意味著，當我們看到一個像<code>!</code>這樣的字元時，我們只有看到下一個字元，才能確認當前是<code>!</code>標識還是<code>!=</code>標識。我們是這樣處理的：</p>
+<p><em>scanner.c</em>
+in <em>scanToken</em>()</p>
+<pre><code class="language-c">    case '*': return makeToken(TOKEN_STAR);
+    // 新增部分開始
+    case '!':
+      return makeToken(
+          match('=') ? TOKEN_BANG_EQUAL : TOKEN_BANG);
+    case '=':
+      return makeToken(
+          match('=') ? TOKEN_EQUAL_EQUAL : TOKEN_EQUAL);
+    case '&lt;':
+      return makeToken(
+          match('=') ? TOKEN_LESS_EQUAL : TOKEN_LESS);
+    case '&gt;':
+      return makeToken(
+          match('=') ? TOKEN_GREATER_EQUAL : TOKEN_GREATER);
+    // 新增部分結束      
+  }
+</code></pre>
+<blockquote>
+<p>After consuming the first character, we look for an <code>=</code>. If found, we consume it and return the corresponding two-character token. Otherwise, we leave the current character alone (so it can be part of the <em>next</em> token) and return the appropriate one-character token.</p>
+</blockquote>
+<p>在消費第一個字元之後，我們會嘗試尋找一個<code>=</code>。如果找到了，我們就消費它並返回對應的雙字元標識。否則，我們就不處理當前字元（這樣它就是下一個標識的一部分）並返回相應的單字元標識。</p>
+<blockquote>
+<p>That logic for conditionally consuming the second character lives here:</p>
+</blockquote>
+<p>這個有條件地消費第二個字元的邏輯如下：</p>
+<p><em><u>scanner.c，在advance()方法後新增：</u></em></p>
+<pre><code class="language-c">static bool match(char expected) {
+  if (isAtEnd()) return false;
+  if (*scanner.current != expected) return false;
+  scanner.current++;
+  return true;
+}
+</code></pre>
+<blockquote>
+<p>If the current character is the desired one, we advance and return <code>true</code>. Otherwise, we return <code>false</code> to indicate it wasn’t matched.</p>
+</blockquote>
+<p>如果當前字元是所需的字元，則指標前進並返回<code>true</code>。否則，我們返回<code>false</code>表示沒有匹配。</p>
+<blockquote>
+<p>Now our scanner supports all of the punctuation-like tokens. Before we get to the longer ones, let’s take a little side trip to handle characters that aren’t part of a token at all.</p>
+</blockquote>
+<p>現在我們的掃描器支援所有類似標點符號的標識。在我們處理更長的字元之前，我們先來處理一下那些根本不屬於標識的字元。</p>
+<blockquote>
+<h3 id="16--3--1-whitespace"><a class="header" href="#16--3--1-whitespace">16 . 3 . 1 Whitespace</a></h3>
+</blockquote>
+<h3 id="1631-空白字元"><a class="header" href="#1631-空白字元">16.3.1 空白字元</a></h3>
+<blockquote>
+<p>Our scanner needs to handle spaces, tabs, and newlines, but those characters don’t become part of any token’s lexeme. We could check for those inside the main character switch in <code>scanToken()</code> but it gets a little tricky to ensure that the function still correctly finds the next token <em>after</em> the whitespace when you call it. We’d have to wrap the whole body of the function in a loop or something.</p>
+</blockquote>
+<p>我們的掃描器需要處理空格、製表符和換行符，但是這些字元不會成為任何標識詞素的一部分。我們可以在<code>scanToken()</code>中的主要的字元switch語句中檢查這些字元，但要想確保當你呼叫該函式時，它仍然能正確地找到空白字元後的下一個標識，這就有點棘手了。我們必須將整個函式封裝在一個迴圈或其它東西中。</p>
+<blockquote>
+<p>Instead, before starting the token, we shunt off to a separate function.</p>
+</blockquote>
+<p>相應地，在開始掃描標識之前，我們切換到一個單獨的函式。</p>
+<p><em><u>scanner.c，在scanToken()方法中新增程式碼：</u></em></p>
+<pre><code class="language-c">Token scanToken() {
+  // 新增部分開始
+  skipWhitespace();
+  // 新增部分結束
+  scanner.start = scanner.current;
+</code></pre>
+<blockquote>
+<p>This advances the scanner past any leading whitespace. After this call returns, we know the very next character is a meaningful one (or we’re at the end of the source code).</p>
+</blockquote>
+<p>這將使掃描器跳過所有的前置空白字元。在這個呼叫返回後，我們知道下一個字元是一個有意義的字元（或者我們到達了原始碼的末尾）。</p>
+<p><em><u>scanner.c，在errorToken()方法後新增：</u></em></p>
+<pre><code class="language-c">static void skipWhitespace() {
+  for (;;) {
+    char c = peek();
+    switch (c) {
+      case ' ':
+      case '\r':
+      case '\t':
+        advance();
+        break;
+      default:
+        return;
+    }
+  }
+}
+</code></pre>
+<blockquote>
+<p>It’s sort of a separate mini-scanner. It loops, consuming every whitespace character it encounters. We need to be careful that it does <em>not</em> consume any <em>non</em>-whitespace characters. To support that, we use this:</p>
+</blockquote>
+<p>這有點像一個獨立的微型掃描器。它迴圈，消費遇到的每一個空白字元。我們需要注意的是，它<em>不會</em>消耗任何非空白字元。為了支援這一點，我們使用下面的函式：</p>
+<p><em><u>scanner.c，在 advance()方法後新增程式碼：</u></em></p>
+<pre><code class="language-c">static char peek() {
+  return *scanner.current;
+}
+</code></pre>
+<blockquote>
+<p>This simply returns the current character, but doesn’t consume it. The previous code handles all the whitespace characters except for newlines.</p>
+</blockquote>
+<p>這只是簡單地返回當前字元，但並不消費它。前面的程式碼已經處理了除換行符外的所有空白字元。</p>
+<p><em><u>scanner.c，在skipWhitespace()方法內新增程式碼：</u></em></p>
+<pre><code class="language-c">        break;
+      // 新增部分開始
+      case '\n':
+        scanner.line++;
+        advance();
+        break;
+      // 新增部分結束  
+      default:
+        return;
+</code></pre>
+<blockquote>
+<p>When we consume one of those, we also bump the current line number.</p>
+</blockquote>
+<p>當我們消費換行符時，也會增加當前行數。</p>
+<blockquote>
+<h3 id="16--3--2-comments"><a class="header" href="#16--3--2-comments">16 . 3 . 2 Comments</a></h3>
+</blockquote>
+<h3 id="1632-註釋"><a class="header" href="#1632-註釋">16.3.2 註釋</a></h3>
+<blockquote>
+<p>Comments aren’t technically “whitespace”, if you want to get all precise with your terminology, but as far as Lox is concerned, they may as well be, so we skip those too.</p>
+</blockquote>
+<p>如果你想用精確的術語，那註釋在技術上來說不是“空白字元”，但就Lox目前而言，它們也可以是，所以我們也跳過它們。</p>
+<p><em><u>scanner.c，在skipWhitespace()函式內新增程式碼：</u></em></p>
+<pre><code class="language-c">        break;
+      // 新增部分開始  
+      case '/':
+        if (peekNext() == '/') {
+          // A comment goes until the end of the line.
+          while (peek() != '\n' &amp;&amp; !isAtEnd()) advance();
+        } else {
+          return;
+        }
+        break;
+      // 新增部分結束  
+      default:
+        return;
+</code></pre>
+<blockquote>
+<p>Comments start with <code>//</code> in Lox, so as with <code>!=</code> and friends, we need a second character of lookahead. However, with <code>!=</code>, we still wanted to consume the <code>!</code> even if the <code>=</code> wasn’t found. Comments are different. If we don’t find a second <code>/</code>, then <code>skipWhitespace()</code> needs to not consume the <em>first</em> slash either.</p>
+</blockquote>
+<p>Lox中的註釋以<code>//</code>開頭，因此與<code>!=</code>類似，我們需要前瞻第二個字元。然而，在處理<code>!=</code>時，即使沒有找到<code>=</code>，也仍然希望消費<code>!</code>。註釋是不同的。如果我們沒有找到第二個<code>/</code>，那麼<code>skipWhitespace()</code>也不需要消費第一個斜槓。</p>
+<blockquote>
+<p>To handle that, we add:</p>
+</blockquote>
+<p>為此，我們新增以下函式：</p>
+<p><em><u>scanner.c，在peek()方法後新增程式碼：</u></em></p>
+<pre><code class="language-c">static char peekNext() {
+  if (isAtEnd()) return '\0';
+  return scanner.current[1];
+}
+</code></pre>
+<blockquote>
+<p>This is like <code>peek()</code> but for one character past the current one. If the current character and the next one are both <code>/</code>, we consume them and then any other characters until the next newline or the end of the source code.</p>
+</blockquote>
+<p>這就像<code>peek()</code>一樣，但是是針對當前字元之後的一個字元。如果當前字元和下一個字元都是<code>/</code>，則消費它們，然後再消費其它字元，直到遇見下一個換行符或原始碼結束。</p>
+<blockquote>
+<p>We use <code>peek()</code> to check for the newline but not consume it. That way, the newline will be the current character on the next turn of the outer loop in <code>skipWhitespace()</code> and we’ll recognize it and increment <code>scanner.line</code>.</p>
+</blockquote>
+<p>我們使用<code>peek()</code>來檢查換行符，但是不消費它。這樣一來，換行符將成為<code>skipWhitespace()</code>外部下一輪迴圈中的當前字元，我們就能識別它並增加<code>scanner.line</code>。</p>
+<blockquote>
+<h3 id="16--3--3-literal-tokens"><a class="header" href="#16--3--3-literal-tokens">16 . 3 . 3 Literal tokens</a></h3>
+</blockquote>
+<h3 id="1633-字面量標識"><a class="header" href="#1633-字面量標識">16.3.3 字面量標識</a></h3>
+<blockquote>
+<p>Number and string tokens are special because they have a runtime value associated with them. We’ll start with strings because they are easy to recognize—they always begin with a double quote.</p>
+</blockquote>
+<p>數字和字串標識比較特殊，因為它們有一個與之關聯的執行時值。我們會從字串開始，因為它們很容易識別——總是以雙引號開始。</p>
+<p><em><u>scanner.c，在 scanToken()方法中新增程式碼：</u></em></p>
+<pre><code class="language-c">          match('=') ? TOKEN_GREATER_EQUAL : TOKEN_GREATER);
+    // 新增部分開始
+    case '"': return string();
+    // 新增部分結束
+  }
+</code></pre>
+<blockquote>
+<p>That calls a new function.</p>
+</blockquote>
+<p>它會呼叫一個新函式：</p>
+<p><em><u>scanner.c，在 skipWhitespace()方法後新增程式碼：</u></em></p>
+<pre><code class="language-c">static Token string() {
+  while (peek() != '"' &amp;&amp; !isAtEnd()) {
+    if (peek() == '\n') scanner.line++;
+    advance();
+  }
+
+  if (isAtEnd()) return errorToken("Unterminated string.");
+
+  // The closing quote.
+  advance();
+  return makeToken(TOKEN_STRING);
+}
+</code></pre>
+<blockquote>
+<p>Similar to jlox, we consume characters until we reach the closing quote. We also track newlines inside the string literal. (Lox supports multi-line strings.) And, as ever, we gracefully handle running out of source code before we find the end quote.</p>
+</blockquote>
+<p>與jlox類似，我們消費字元，直到遇見右引號。我們也會追蹤字串字面量中的換行符（Lox支援多行字串）。並且，與之前一樣，我們會優雅地處理在找到結束引號之前原始碼耗盡的問題。</p>
+<blockquote>
+<p>The main change here in clox is something that’s <em>not</em> present. Again, it relates to memory management. In jlox, the Token class had a field of type Object to store the runtime value converted from the literal token’s lexeme.</p>
+</blockquote>
+<p>clox中的主要變化是一些不存在的東西。同樣，這與記憶體管理有關。在jlox中，Token類有一個Object型別的欄位，用於儲存從字面量詞素轉換而來的執行時值。</p>
+<blockquote>
+<p>Implementing that in C would require a lot of work. We’d need some sort of union and type tag to tell whether the token contains a string or double value. If it’s a string, we’d need to manage the memory for the string’s character array somehow.</p>
+</blockquote>
+<p>在C語言中實現這一點需要大量的工作。我們需要某種union和type標籤來告訴我們標識中是否包含字串或浮點數。如果是字串，我們還需要以某種方式管理字串中字元陣列的記憶體。</p>
+<blockquote>
+<p>Instead of adding that complexity to the scanner, we defer converting the literal lexeme to a runtime value until later. In clox, tokens only store the lexeme—the character sequence exactly as it appears in the user’s source code. Later in the compiler, we’ll convert that lexeme to a runtime value right when we are ready to store it in the chunk’s constant table.</p>
+</blockquote>
+<p>我們沒有給掃描器增加這種複雜性，我們把字面量詞素轉換為執行值的工作推遲到以後。在clox中，詞法標識只儲存詞素——即使用者原始碼中出現的字元序列。稍後在編譯器中，當我們準備將其儲存在位元組碼塊中的常量表中時，我們會將詞素轉換為執行時值<sup class="footnote-reference" id="fr-6-1"><a href="#footnote-6">6</a></sup>。</p>
+<blockquote>
+<p>Next up, numbers. Instead of adding a switch case for each of the ten digits that can start a number, we handle them here:</p>
+</blockquote>
+<p>接下來是數字。我們沒有為可能作為數字開頭的10個數位各新增對應的switch分支，而是使用如下方式處理：</p>
+<p><em><u>scanner.c，在scanToken()方法中新增程式碼：</u></em></p>
+<pre><code class="language-c">  char c = advance();
+  // 新增部分開始
+  if (isDigit(c)) return number();
+  // 新增部分結束
+  switch (c) {
+</code></pre>
+<blockquote>
+<p>That uses this obvious utility function:</p>
+</blockquote>
+<p>這裡使用了下面這個明顯的工具函式：</p>
+<p><em><u>scanner.c，在initScanner()方法後新增程式碼：</u></em></p>
+<pre><code class="language-c">static bool isDigit(char c) {
+  return c &gt;= '0' &amp;&amp; c &lt;= '9';
+}
+</code></pre>
+<blockquote>
+<p>We finish scanning the number using this:</p>
+</blockquote>
+<p>我們使用下面的函式完成掃描數字的工作：</p>
+<p><em><u>scanner.c，在skipWhitespace()方法後新增程式碼：</u></em></p>
+<pre><code class="language-c">static Token number() {
+  while (isDigit(peek())) advance();
+
+  // Look for a fractional part.
+  if (peek() == '.' &amp;&amp; isDigit(peekNext())) {
+    // Consume the ".".
+    advance();
+
+    while (isDigit(peek())) advance();
+  }
+
+  return makeToken(TOKEN_NUMBER);
+}
+</code></pre>
+<blockquote>
+<p>It’s virtually identical to jlox’s version except, again, we don’t convert the lexeme to a double yet.</p>
+</blockquote>
+<p>它與jlox版本幾乎是相同的，只是我們還沒有將詞素轉換為浮點數。</p>
+<blockquote>
+<h2 id="16--4-identifiers-and-keywords"><a class="header" href="#16--4-identifiers-and-keywords">16 . 4 Identifiers and Keywords</a></h2>
+</blockquote>
+<h2 id="164-識別符號和關鍵字"><a class="header" href="#164-識別符號和關鍵字">16.4 識別符號和關鍵字</a></h2>
+<blockquote>
+<p>The last batch of tokens are identifiers, both user-defined and reserved. This section should be fun—the way we recognize keywords in clox is quite different from how we did it in jlox, and touches on some important data structures.</p>
+</blockquote>
+<p>最後一批詞法是識別符號，包括使用者定義的和保留字。這一部分應該很有趣——我們在clox中識別關鍵字的方式與我們在jlox中的方式完全不同，而且涉及到一些重要的資料結構。</p>
+<blockquote>
+<p>First, though, we have to scan the lexeme. Names start with a letter or underscore.</p>
+</blockquote>
+<p>不過，首先我們需要掃描詞素。名稱以字母或下劃線開頭。</p>
+<p><em><u>scanner.c，在scanToken()方法中新增程式碼：</u></em></p>
+<pre><code class="language-c">  char c = advance();
+  // 新增部分開始
+  if (isAlpha(c)) return identifier();
+  // 新增部分結束
+  if (isDigit(c)) return number();
+</code></pre>
+<blockquote>
+<p>We recognize those using this:</p>
+</blockquote>
+<p>我們使用這個方法識別這些識別符號：</p>
+<p><em><u>scanner.c，在initScanner()方法後新增程式碼：</u></em></p>
+<pre><code class="language-c">static bool isAlpha(char c) {
+  return (c &gt;= 'a' &amp;&amp; c &lt;= 'z') ||
+         (c &gt;= 'A' &amp;&amp; c &lt;= 'Z') ||
+          c == '_';
+}
+</code></pre>
+<blockquote>
+<p>Once we’ve found an identifier, we scan the rest of it here:</p>
+</blockquote>
+<p>一旦我們發現一個識別符號，我們就透過下面的方法掃描其餘部分：</p>
+<p><em><u>scanner.c，在skipWhitespace()方法後新增程式碼：</u></em></p>
+<pre><code class="language-c">static Token identifier() {
+  while (isAlpha(peek()) || isDigit(peek())) advance();
+  return makeToken(identifierType());
+}
+</code></pre>
+<blockquote>
+<p>After the first letter, we allow digits too, and we keep consuming alphanumerics until we run out of them. Then we produce a token with the proper type. Determining that “proper” type is the unique part of this chapter.</p>
+</blockquote>
+<p>在第一個字母之後，我們也允許使用數字，並且我們會一直消費字母數字，直到消費完為止。然後我們生成一個具有適當型別的詞法標識。確定“適當”型別是本章的特點部分。</p>
+<p><em><u>scanner.c，在skipWhitespace()方法後新增程式碼：</u></em></p>
+<pre><code class="language-c">static TokenType identifierType() {
+  return TOKEN_IDENTIFIER;
+}
+</code></pre>
+<blockquote>
+<p>Okay, I guess that’s not very exciting yet. That’s what it looks like if we have no reserved words at all. How should we go about recognizing keywords? In jlox, we stuffed them all in a Java Map and looked them up by name. We don’t have any sort of hash table structure in clox, at least not yet.</p>
+</blockquote>
+<p>好吧，我想這還不算很令人興奮。如果我們沒有保留字，那就是這個樣子了。我們應該如何去識別關鍵字呢？在jlox中，我們將其都塞入一個Java Map中，然後按名稱查詢它們。在clox中，我們沒有任何型別的雜湊表結構，至少現在還沒有。</p>
+<blockquote>
+<p>A hash table would be overkill anyway. To look up a string in a hash table, we need to walk the string to calculate its hash code, find the corresponding bucket in the hash table, and then do a character-by-character equality comparison on any string it happens to find there.</p>
+</blockquote>
+<p>無論如何，雜湊表都是冗餘的。要在雜湊表中查詢一個字串，我們需要遍歷該字串以計算其雜湊碼，在雜湊表中找到對應的桶，然後對其中的所有字串逐個字元進行相等比較<sup class="footnote-reference" id="fr-7-1"><a href="#footnote-7">7</a></sup>。</p>
+<blockquote>
+<p>Let’s say we’ve scanned the identifier “gorgonzola”. How much work <em>should</em> we need to do to tell if that’s a reserved word? Well, no Lox keyword starts with “g”, so looking at the first character is enough to definitively answer no. That’s a lot simpler than a hash table lookup.</p>
+</blockquote>
+<p>假定我們已經掃描到了識別符號“gorgonzola”。我們需要做多少工作來判斷這是否是一個保留字？好吧，沒有Lox關鍵字是以“g”開頭的，所以看第一個字元就足以明確地回答不是。這比雜湊表查詢要簡單的多。</p>
+<blockquote>
+<p>What about “cardigan”? We do have a keyword in Lox that starts with “c”: “class”. But the second character in “cardigan”, “a”, rules that out. What about “forest”? Since “for” is a keyword, we have to go farther in the string before we can establish that we don’t have a reserved word. But, in most cases, only a character or two is enough to tell we’ve got a user-defined name on our hands. We should be able to recognize that and fail fast.</p>
+</blockquote>
+<p>那“cardigan”呢？我們在Lox中確實有一個以“c”開頭的關鍵字：“class”。但是“cardigan”中的第二個字元“a”就排除了這種情況。那“forest”呢？因為“for”是一個關鍵字，我們必須在字串中繼續遍歷，才能確定這不是一個保留字。但是，在大多數情況下，只有一兩個字元就足以告訴我們現在處理的是一個使用者定義的名稱。我們應該能夠意識到這一點，並快速失敗。</p>
+<blockquote>
+<p>Here’s a visual representation of that branching character-inspection logic:</p>
+</blockquote>
+<p>下面是這個分支字元檢查邏輯的一個視覺化表示<sup class="footnote-reference" id="fr-8-1"><a href="#footnote-8">8</a></sup>：</p>
+<p><img src="16.%E6%8C%89%E9%9C%80%E6%8E%83%E6%8F%8F/keywords.png" alt="A trie that contains all of Lox&#39;s keywords." /></p>
+<blockquote>
+<p>We start at the root node. If there is a child node whose letter matches the first character in the lexeme, we move to that node. Then repeat for the next letter in the lexeme and so on. If at any point the next letter in the lexeme doesn’t match a child node, then the identifier must not be a keyword and we stop. If we reach a double-lined box, and we’re at the last character of the lexeme, then we found a keyword.</p>
+</blockquote>
+<p>我們從根節點開始。如果有一個子節點的字母與詞素中的第一個字元相匹配，我們就移動到該節點上。然後對詞素中的下一個字母重複此操作，以此類推。如果在任意節點上，詞素的下一個字元沒有匹配到子節點，那麼該識別符號一定不是一個關鍵字，我們就停止。如果我們到達了一個雙線框，並且我們在詞素的最後一個字元處，那麼我們就找到了一個關鍵字。</p>
+<blockquote>
+<h3 id="16--4--1-tries-and-state-machines"><a class="header" href="#16--4--1-tries-and-state-machines">16 . 4 . 1 Tries and state machines</a></h3>
+</blockquote>
+<h3 id="1641-字典樹和狀態機"><a class="header" href="#1641-字典樹和狀態機">16.4.1 字典樹和狀態機</a></h3>
+<blockquote>
+<p>This tree diagram is an example of a thing called a <a href="https://en.wikipedia.org/wiki/Trie"><strong>trie</strong></a>. A trie stores a set of strings. Most other data structures for storing strings contain the raw character arrays and then wrap them inside some larger construct that helps you search faster. A trie is different. Nowhere in the trie will you find a whole string.</p>
+</blockquote>
+<p>這個樹狀圖是<a href="https://en.wikipedia.org/wiki/Trie"><strong>trie</strong></a><sup class="footnote-reference" id="fr-9-1"><a href="#footnote-9">9</a></sup>（字典樹）的一個例子。字典樹會儲存一組字串。大多數其它用於儲存字串的資料結構都包含原始字元陣列，然後將它們封裝在一些更大的結果中，以幫助你更快地搜尋。字典樹則不同，在其中你找不到一個完整的字串。</p>
+<blockquote>
+<p>Instead, each string the trie “contains” is represented as a <em>path</em> through the tree of character nodes, as in our traversal above. Nodes that match the last character in a string have a special marker—the double lined boxes in the illustration. That way, if your trie contains, say, “banquet” and “ban”, you are able to tell that it does <em>not</em> contain “banque”—the “e” node won’t have that marker, while the “n” and “t” nodes will.</p>
+</blockquote>
+<p>相應地，字典樹中“包含”的每個字串被表示為透過字元樹中節點的路徑，就像上面的遍歷一樣。用於匹配字串中最後一個字元的節點中有一個特殊的標記——插圖中的雙線框。這樣一來，假定你的字典樹中包含“banquet”和“ban”，你就能知道它不包括“banque”——“e”節點沒有這個標記，而“n”和“t”節點中有。</p>
+<blockquote>
+<p>Tries are a special case of an even more fundamental data structure: a <a href="https://en.wikipedia.org/wiki/Deterministic_finite_automaton"><strong>deterministic finite automaton</strong></a> (<strong>DFA</strong>). You might also know these by other names: <strong>finite state machine</strong>, or just <strong>state machine</strong>. State machines are rad. They end up useful in everything from <a href="http://gameprogrammingpatterns.com/state.html">game programming</a> to implementing networking protocols.</p>
+</blockquote>
+<p>字典樹是一種更基本的資料結構的特殊情況：確定性有限狀態機（<a href="https://en.wikipedia.org/wiki/Deterministic_finite_automaton"><strong>deterministic finite automaton</strong></a> ，<strong>DFA</strong>）。你可能還知道它的其它名字：<strong>有限狀態機</strong>，或就叫<strong>狀態機</strong>。狀態機是非常重要的，從<a href="http://gameprogrammingpatterns.com/state.html">遊戲程式設計</a>到實現網路協議的一切方面都很有用。</p>
+<blockquote>
+<p>In a DFA, you have a set of <em>states</em> with <em>transitions</em> between them, forming a graph. At any point in time, the machine is “in” exactly one state. It gets to other states by following transitions. When you use a DFA for lexical analysis, each transition is a character that gets matched from the string. Each state represents a set of allowed characters.</p>
+</blockquote>
+<p>在DFA中，你有一組<em>狀態</em>，它們之間有<em>轉換</em>，形成一個圖。在任何時間點，機器都“處於”其中一個狀態。它透過轉換過渡到其它狀態。當你使用DFA進行詞法分析時，每個轉換都是從字串中匹配到的一個字元。每個狀態代表一組允許的字元。</p>
+<blockquote>
+<p>Our keyword tree is exactly a DFA that recognizes Lox keywords. But DFAs are more powerful than simple trees because they can be arbitrary <em>graphs</em>. Transitions can form cycles between states. That lets you recognize arbitrarily long strings. For example, here’s a DFA that recognizes number literals:</p>
+</blockquote>
+<p>我們的關鍵字樹正是一個能夠識別Lox關鍵字的DFA。但是DFA比簡單的樹更強大，因為它們可以是任意的圖。轉換可以在狀態之間形成迴圈。這讓你可以識別任意長的字串。舉例來說，下面是一個可以識別數字字面量的DFA<sup class="footnote-reference" id="fr-10-1"><a href="#footnote-10">10</a></sup>：</p>
+<p><img src="16.%E6%8C%89%E9%9C%80%E6%8E%83%E6%8F%8F/numbers.png" alt="A syntax diagram that recognizes integer and floating point literals." /></p>
+<blockquote>
+<p>I’ve collapsed the nodes for the ten digits together to keep it more readable, but the basic process works the same—you work through the path, entering nodes whenever you consume a corresponding character in the lexeme. If we were so inclined, we could construct one big giant DFA that does <em>all</em> of the lexical analysis for Lox, a single state machine that recognizes and spits out all of the tokens we need.</p>
+</blockquote>
+<p>我把十個數位的節點摺疊在一起，以使其更易於閱讀，但是基本的過程是相同的——遍歷路徑，每當你消費詞素中的一個字元，就進入對應節點。如果我們願意的話，可以構建一個巨大的DFA來完成Lox的所有詞法分析，用一個狀態機來識別並輸出我們需要的所有詞法標識。</p>
+<blockquote>
+<p>However, crafting that mega-DFA by hand would be challenging. That’s why <a href="https://en.wikipedia.org/wiki/Lex_(software)">Lex</a> was created. You give it a simple textual description of your lexical grammar—a bunch of regular expressions—and it automatically generates a DFA for you and produces a pile of C code that implements it.</p>
+</blockquote>
+<p>然而，手工完成這種巨型DFA是一個巨大的挑戰。這就是<a href="https://en.wikipedia.org/wiki/Lex_(software)">Lex</a>誕生的原因。你給它一個關於語法的簡單文字描述——一堆正規表示式——它就會自動為你生成一個DFA，並生成一堆實現它的C程式碼<sup class="footnote-reference" id="fr-11-1"><a href="#footnote-11">11</a></sup>。</p>
+<p>This is also how most regular expression engines in programming languages and text editors work under the hood. They take your regex string and convert it to a DFA, which they then use to match strings.</p>
+<p>If you want to learn the algorithm to convert a regular expression into a DFA, <a href="https://en.wikipedia.org/wiki/Compilers:_Principles,_Techniques,_and_Tools">the dragon book</a> has you covered.</p>
+<blockquote>
+<p>We won’t go down that road. We already have a perfectly serviceable hand-rolled scanner. We just need a tiny trie for recognizing keywords. How should we map that to code?</p>
+</blockquote>
+<p>我們就不走這條路了。我們已經有了一個完全可用的簡單掃描器。我們只需要一個很小的字典樹來識別關鍵字。我們應該如何將其對映到程式碼中？</p>
+<blockquote>
+<p>The absolute simplest solution is to use a switch statement for each node with cases for each branch. We’ll start with the root node and handle the easy keywords.</p>
+</blockquote>
+<p>最簡單的解決方案是對每個節點使用一個switch語句，每個分支是一個case。我們從根節點開始，處理簡單的關鍵字<sup class="footnote-reference" id="fr-12-1"><a href="#footnote-12">12</a></sup>。</p>
+<p><em><u>scanner.c，在identifierType()方法中新增程式碼：</u></em></p>
+<pre><code class="language-c">static TokenType identifierType() {
+  // 新增部分開始
+  switch (scanner.start[0]) {
+    case 'a': return checkKeyword(1, 2, "nd", TOKEN_AND);
+    case 'c': return checkKeyword(1, 4, "lass", TOKEN_CLASS);
+    case 'e': return checkKeyword(1, 3, "lse", TOKEN_ELSE);
+    case 'i': return checkKeyword(1, 1, "f", TOKEN_IF);
+    case 'n': return checkKeyword(1, 2, "il", TOKEN_NIL);
+    case 'o': return checkKeyword(1, 1, "r", TOKEN_OR);
+    case 'p': return checkKeyword(1, 4, "rint", TOKEN_PRINT);
+    case 'r': return checkKeyword(1, 5, "eturn", TOKEN_RETURN);
+    case 's': return checkKeyword(1, 4, "uper", TOKEN_SUPER);
+    case 'v': return checkKeyword(1, 2, "ar", TOKEN_VAR);
+    case 'w': return checkKeyword(1, 4, "hile", TOKEN_WHILE);
+  }
+  // 新增部分結束
+  return TOKEN_IDENTIFIER;
+</code></pre>
+<blockquote>
+<p>These are the initial letters that correspond to a single keyword. If we see an “s”, the only keyword the identifier could possibly be is <code>super</code>. It might not be, though, so we still need to check the rest of the letters too. In the tree diagram, this is basically that straight path hanging off the “s”.</p>
+</blockquote>
+<p>這些是對應於單個關鍵字的首字母。如果我們看到一個“s”，那麼這個識別符號唯一可能的關鍵字就是<code>super</code>。但也可能不是，所以我們仍然需要檢查其餘的字母。在樹狀圖中，這基本上就是掛在“s”上的一條直線路徑。</p>
+<blockquote>
+<p>We won’t roll a switch for each of those nodes. Instead, we have a utility function that tests the rest of a potential keyword’s lexeme.</p>
+</blockquote>
+<p>我們不會為每個節點都增加一個switch語句。相反，我們有一個工具函式來測試潛在關鍵字詞素的剩餘部分。</p>
+<p><em><u>scanner.c，在skipWhitespace()方法後新增程式碼：</u></em></p>
+<pre><code class="language-c">static TokenType checkKeyword(int start, int length,
+    const char* rest, TokenType type) {
+  if (scanner.current - scanner.start == start + length &amp;&amp;
+      memcmp(scanner.start + start, rest, length) == 0) {
+    return type;
+  }
+
+  return TOKEN_IDENTIFIER;
+}
+</code></pre>
+<blockquote>
+<p>We use this for all of the unbranching paths in the tree. Once we’ve found a prefix that could only be one possible reserved word, we need to verify two things. The lexeme must be exactly as long as the keyword. If the first letter is “s”, the lexeme could still be “sup” or “superb”. And the remaining characters must match exactly—“supar” isn’t good enough.</p>
+</blockquote>
+<p>我們將此用於樹中的所有無分支路徑。一旦我們發現一個字首，其只有可能是一種保留字，我們需要驗證兩件事。詞素必須與關鍵字一樣長。如果第一個字母是“s”，詞素仍然可以是“sup”或“superb”。剩下的字元必須完全匹配——“supar”就不夠好。</p>
+<blockquote>
+<p>If we do have the right number of characters, and they’re the ones we want, then it’s a keyword, and we return the associated token type. Otherwise, it must be a normal identifier.</p>
+</blockquote>
+<p>如果我們字元數量確實正確，並且它們是我們想要的字元，那這就是一個關鍵字，我們返回相關的標識型別。否則，它必然是一個普通的識別符號。</p>
+<blockquote>
+<p>We have a couple of keywords where the tree branches again after the first letter. If the lexeme starts with “f”, it could be <code>false</code>, <code>for</code>, or <code>fun</code>. So we add another switch for the branches coming off the “f” node.</p>
+</blockquote>
+<p>我們有幾個關鍵字是在第一個字母之後又有樹的分支。如果詞素以“f”開頭，它可能是<code>false</code>、<code>for</code>或<code>fun</code>。因此我們在“f”節點下的分支中新增一個switch語句。</p>
+<p><em><u>scanner.c，在identifierType()方法中新增程式碼：</u></em></p>
+<pre><code class="language-c">    case 'e': return checkKeyword(1, 3, "lse", TOKEN_ELSE);
+    // 新增部分開始
+    case 'f':
+      if (scanner.current - scanner.start &gt; 1) {
+        switch (scanner.start[1]) {
+          case 'a': return checkKeyword(2, 3, "lse", TOKEN_FALSE);
+          case 'o': return checkKeyword(2, 1, "r", TOKEN_FOR);
+          case 'u': return checkKeyword(2, 1, "n", TOKEN_FUN);
+        }
+      }
+      break;
+    // 新增部分結束  
+    case 'i': return checkKeyword(1, 1, "f", TOKEN_IF);
+</code></pre>
+<blockquote>
+<p>Before we switch, we need to check that there even <em>is</em> a second letter. “f” by itself is a valid identifier too, after all. The other letter that branches is “t”.</p>
+</blockquote>
+<p>在我們進入switch語句之前，需要先檢查是否有第二個字母。畢竟，“f”本身也是一個有效的識別符號。另外一個需要分支的字母是“t”。</p>
+<p><em><u>scanner.c，在identifierType()方法中新增程式碼：</u></em></p>
+<pre><code class="language-c">    case 's': return checkKeyword(1, 4, "uper", TOKEN_SUPER);
+    // 新增部分開始
+    case 't':
+      if (scanner.current - scanner.start &gt; 1) {
+        switch (scanner.start[1]) {
+          case 'h': return checkKeyword(2, 2, "is", TOKEN_THIS);
+          case 'r': return checkKeyword(2, 2, "ue", TOKEN_TRUE);
+        }
+      }
+      break;
+    // 新增部分結束  
+    case 'v': return checkKeyword(1, 2, "ar", TOKEN_VAR);
+</code></pre>
+<blockquote>
+<p>That’s it. A couple of nested <code>switch</code> statements. Not only is this code short, but it’s very, very fast. It does the minimum amount of work required to detect a keyword, and bails out as soon as it can tell the identifier will not be a reserved one.</p>
+</blockquote>
+<p>就是這樣。幾個巢狀的<code>switch</code>語句。這段程式碼不僅短，而且非常非常快。它只做了檢測一個關鍵字所需的最少的工作，而且一旦知道這個識別符號不是一個保留字，就會直接結束<sup class="footnote-reference" id="fr-13-1"><a href="#footnote-13">13</a></sup>。</p>
+<blockquote>
+<p>And with that, our scanner is complete.</p>
+</blockquote>
+<p>這樣一來，我們的掃描器就完整了。</p>
+<hr />
+<blockquote>
+<h2 id="challenges"><a class="header" href="#challenges">CHALLENGES</a></h2>
+</blockquote>
+<h2 id="習題"><a class="header" href="#習題">習題</a></h2>
+<ol>
+<li>
+<blockquote>
+<p>Many newer languages support <a href="https://en.wikipedia.org/wiki/String_interpolation"><strong>string interpolation</strong></a>. Inside a string literal, you have some sort of special delimiters—most commonly <code>${</code> at the beginning and <code>}</code> at the end. Between those delimiters, any expression can appear. When the string literal is executed, the inner expression is evaluated, converted to a string, and then merged with the surrounding string literal.</p>
+</blockquote>
+<p>許多較新的語言都支援<a href="https://en.wikipedia.org/wiki/String_interpolation">字串插值</a>。在字串字面量中，有一些特殊的分隔符——最常見的是以<code>${</code>開頭以<code>}</code>結尾。在這些分隔符之間，可以出現任何表示式。當字串字面量被執行時，內部表示式也會求值，轉換為字串，然後與周圍的字串字面量合併。</p>
+<blockquote>
+<p>For example, if Lox supported string interpolation, then this . . .</p>
+</blockquote>
+<p>舉例來說，如果Lox支援字串插值，那麼下面的程式碼……</p>
+<pre><code class="language-c">var drink = "Tea";
+var steep = 4;
+var cool = 2;
+print "${drink} will be ready in ${steep + cool} minutes.";
+</code></pre>
+<blockquote>
+<p> . . . would print:</p>
+</blockquote>
+<p>將會輸出：</p>
+<pre><code>Tea will be ready in 6 minutes.
+</code></pre>
+<blockquote>
+<p>What token types would you define to implement a scanner for string interpolation? What sequence of tokens would you emit for the above string literal?</p>
+</blockquote>
+<p>你會定義什麼標識型別來實現支援字串插值的掃描器？對於上面的字串，你會生成什麼樣的標識序列？</p>
+<blockquote>
+<p>What tokens would you emit for:</p>
+</blockquote>
+<p>下面的字串會產生哪些標識：</p>
+<pre><code>"Nested ${"interpolation?! Are you ${"mad?!"}"}"
+</code></pre>
+<blockquote>
+<p>Consider looking at other language implementations that support interpolation to see how they handle it.</p>
+</blockquote>
+<p>可以考慮看看其它支援插值的語言實現，看它們是如何處理的。</p>
+</li>
+<li>
+<blockquote>
+<p>Several languages use angle brackets for generics and also have a <code>&gt;&gt;</code> right shift operator. This led to a classic problem in early versions of C++:</p>
+</blockquote>
+<p>有些語言使用尖括號來表示泛型，也有右移運算子<code>&gt;&gt;</code>。這就導致了C++早期版本中的一個經典問題：</p>
+<pre><code class="language-c">vector&lt;vector&lt;string&gt;&gt; nestedVectors;
+</code></pre>
+<blockquote>
+<p>This would produce a compile error because the <code>&gt;&gt;</code> was lexed to a single right shift token, not two <code>&gt;</code> tokens. Users were forced to avoid this by putting a space between the closing angle brackets.</p>
+</blockquote>
+<p>這將產生一個編譯錯誤，因為<code>&gt;&gt;</code>被詞法識別為一個右移符號，而不是兩個<code>&gt;</code>標識。使用者不得不在右側的兩個尖括號之間增加一個空格來避免這種情況。</p>
+<blockquote>
+<p>Later versions of C++ are smarter and can handle the above code. Java and C# never had the problem. How do those languages specify and implement this?</p>
+</blockquote>
+<p>後續的C++版本更加智慧，可以處理上述程式碼。Java和C#從未出現過這個問題。這些語言是如何規定和實現這一點的呢？</p>
+</li>
+<li>
+<blockquote>
+<p>Many languages, especially later in their evolution, define “contextual keywords”. These are identifiers that act like reserved words in some contexts but can be normal user-defined identifiers in others.</p>
+</blockquote>
+<p>許多語言，尤其是在其發展的後期，都定義了“上下文式關鍵字”。這些識別符號在某些情況下類似於保留字，但在其它上下文中可以是普通的使用者定義的識別符號。</p>
+<blockquote>
+<p>For example, <code>await</code> is a keyword inside an <code>async</code> method in C#, but in other methods, you can use <code>await</code> as your own identifier.</p>
+</blockquote>
+<p>例如，在C#中，<code>await</code>在<code>async</code>方法中是一個關鍵字，但在其它方法中，你可以使用<code>await</code>作為自己的識別符號。</p>
+<blockquote>
+<p>Name a few contextual keywords from other languages, and the context where they are meaningful. What are the pros and cons of having contextual keywords? How would you implement them in your language’s front end if you needed to?</p>
+</blockquote>
+<p>說出幾個來自其它語言中的上下文關鍵字，以及它們在哪些情況下是有意義的。擁有上下文關鍵字的優點和缺點是什麼？如果需要的話，你要如何在語言的前端中實現它們？</p>
+</li>
+</ol>
+<hr>
+<ol class="footnote-definition"><li id="footnote-1">
+<p>程式碼裡面校驗是一個引數還是兩個引數，而不是0和1，因為argv中的第一個引數總是被執行的可執行檔案的名稱。 <a href="#fr-1-1">↩</a></p>
+</li>
+<li id="footnote-2">
+<p>C語言不僅要求我們顯式地管理記憶體，而且要在精神上管理。我們程式設計師必須記住所有權規則，並在整個程式中手動實現。Java為我們做了這些。C++為我們提供了直接編碼策略的工具，這樣編譯器就會為我們驗證它。我喜歡C語言的簡潔，但是我們為此付出了真正的代價——這門語言要求我們更加認真。 <a href="#fr-2-1">↩</a></p>
+</li>
+<li id="footnote-3">
+<p>嗯，這個size要加1，永遠記得為null位元組留出空間。 <a href="#fr-3-1">↩</a></p>
+</li>
+<li id="footnote-4">
+<p>格式字串中的<code>%.*s</code>是一個很好的特性。通常情況下，你需要在格式字串中寫入一個數字來設定輸出精度——要顯示的字元數。使用<code>*</code>則可以把精度作為一個引數來傳遞。因此，<code>printf()</code>呼叫將字串從<code>token.start</code>開始的前<code>token.length</code>個字元。我們需要這樣限制長度，因為詞素指向原始的原始碼字串，並且在末尾沒有終止符。 <a href="#fr-4-1">↩</a></p>
+</li>
+<li id="footnote-5">
+<p>我並不想讓這個聽起來太輕率。我們確實需要考慮並確保在“main”模組中建立的源字串具有足夠長的生命週期。這就是<code>runFile()</code>中會在<code>interpret()</code>執行完程式碼並返回後才釋放字串的原因。 <a href="#fr-5-1">↩</a></p>
+</li>
+<li id="footnote-6">
+<p>在編譯器中進行詞素到執行時值的轉換確實會引入一些冗餘。掃描一個數字字面量的工作與將一串數字字元轉換為一個數值的工作非常相似。但是並沒有那麼多冗餘，它並不是任何效能上的關鍵點，而且能使得我們的掃描器更加簡單。 <a href="#fr-6-1">↩</a></p>
+</li>
+<li id="footnote-7">
+<p>如果你對此不熟悉，請不要擔心。當我們從頭開始構建我們自己的雜湊表時，將會學習關於它的所有細節。 <a href="#fr-7-1">↩</a></p>
+</li>
+<li id="footnote-8">
+<p>從上向下閱讀每個節點鏈，你將看到Lox的關鍵字。 <a href="#fr-8-1">↩</a></p>
+</li>
+<li id="footnote-9">
+<p>“Trie”是CS中最令人困惑的名字之一。Edward Fredkin從“檢索（retrieval）”中把這個詞提取出來，這意味著它的讀音應該像“tree”。但是，已經有一個非常重要的資料結構發音為“tree”，而trie只是一個特例。所以如果你談論這些東西時，沒人能分辨出你在說哪一個。因此，現在人們經常把它讀作“try”，以免頭痛。 <a href="#fr-9-1">↩</a></p>
+</li>
+<li id="footnote-10">
+<p>這種風格的圖被稱為<a href="https://en.wikipedia.org/wiki/Syntax_diagram">語法圖</a>或<strong>鐵路圖</strong>。後者的名字是因為它看起來像火車的排程場。<br>在Backus-Naur正規化出現之前，這是記錄語言語法的主要方式之一。如今，我們大多使用文字，但一種<em>文字語言</em>的官方規範依賴於<em>影象</em>，這一點很令人高興。 <a href="#fr-10-1">↩</a></p>
+</li>
+<li id="footnote-11">
+<p>這也是大多數程式語言和文字編輯器中的正規表示式引擎的工作原理。它們獲取你的正規表示式字串並將其轉換為DFA，然後使用DFA來匹配字串。<br>如果你想學習將正規表示式轉換為DFA的演算法，<a href="https://en.wikipedia.org/wiki/Compilers:_Principles,_Techniques,_and_Tools">龍書</a>中已經為你提供了答案。 <a href="#fr-11-1">↩</a></p>
+</li>
+<li id="footnote-12">
+<p>簡單並不意味著愚蠢。V8也採用了同樣的方法，而它是目前世界上最複雜、最快的語言實現之一。 <a href="#fr-12-1">↩</a></p>
+</li>
+<li id="footnote-13">
+<p>我們有時會陷入這樣的誤區：任務效能來自於複雜的資料結構、多級快取和其它花哨的最佳化。但是，很多時候所需要的就是做更少的工作，而我經常發現，編寫最簡單的程式碼就足以完成這些工作。 <a href="#fr-13-1">↩</a></p>
+</li>
+</ol>
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../../content/15.虛擬機.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../../content/17.編譯表達式.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../../content/15.虛擬機.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../../content/17.編譯表達式.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+
+    </div>
+    </body>
+</html>

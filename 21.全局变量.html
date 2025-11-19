@@ -1,0 +1,1296 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>21.全局变量</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="../highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="../tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "../";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "../searchindex.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title"></h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="21全局變量-global-variables"><a class="header" href="#21全局變量-global-variables">21.全局變量 Global Variables</a></h1>
+<blockquote>
+<p>If only there could be an invention that bottled up a memory, like scent. And it never faded, and it never got stale. And then, when one wanted it, the bottle could be uncorked, and it would be like living the moment all over again.</p>
+<p>​																		  —— Daphne du Maurier, <em>Rebecca</em></p>
+</blockquote>
+<p>如果有一種發明能把一段記憶裝進瓶子裡就好了，像香味一樣。它永遠不會褪色，也不會變質。然後，當一個人想要的時候，可以打開瓶塞，就像重新活在那個時刻一樣。（達芙妮-杜穆裡埃，《蝴蝶夢》）</p>
+<blockquote>
+<p>The <a href="http://www.craftinginterpreters.com/hash-tables.html">previous chapter</a> was a long exploration of one big, deep, fundamental computer science data structure. Heavy on theory and concept. There may have been some discussion of big-O notation and algorithms. This chapter has fewer intellectual pretensions. There are no large ideas to learn. Instead, it’s a handful of straightforward engineering tasks. Once we’ve completed them, our virtual machine will support variables.</p>
+</blockquote>
+<p>上一章對一個大的、深入的、基本的計算機科學數據結構進行了長時間的探索。偏重理論和概念。可能有一些關於大O符號和算法的討論。這一章沒有那麼多知識分子的自吹自擂。沒有什麼偉大的思想需要學習。相反，它是一些簡單的工程任務。一旦我們完成了這些任務，我們的虛擬機就可以支持變量。</p>
+<blockquote>
+<p>Actually, it will support only <em>global</em> variables. Locals are coming in the <a href="http://www.craftinginterpreters.com/local-variables.html">next chapter</a>. In jlox, we managed to cram them both into a single chapter because we used the same implementation technique for all variables. We built a chain of environments, one for each scope, all the way up to the top. That was a simple, clean way to learn how to manage state.</p>
+</blockquote>
+<p>事實上，它將只支持<em>全局</em>變量。局部變量將在下一章中支持。在jlox中，我們設法將它們塞進了一個章節，因為我們對所有變量都使用了相同的實現技術。我們建立了一個環境鏈，每個作用域都有一個，一直到頂部作用域。這是學習如何管理狀態的一種簡單、乾淨的方法。</p>
+<blockquote>
+<p>But it’s also <em>slow</em>. Allocating a new hash table each time you enter a block or call a function is not the road to a fast VM. Given how much code is concerned with using variables, if variables go slow, everything goes slow. For clox, we’ll improve that by using a much more efficient strategy for local variables, but globals aren’t as easily optimized.</p>
+</blockquote>
+<p>但它也很慢。每次進入一個代碼塊或調用一個函數時，都要分配一個新的哈希表，這不是通往快速虛擬機的道路。鑑於很多代碼都與使用變量有關，如果變量操作緩慢，一切都會變慢。對於clox，我們會通過對局部變量使用更有效的策略來改善這一點，但全局變量不那麼容易優化<sup class="footnote-reference" id="fr-1-1"><a href="#footnote-1">1</a></sup>。</p>
+<p>This is a common meta-strategy in sophisticated language implementations. Often, the same language feature will have multiple implementation techniques, each tuned for different use patterns. For example, JavaScript VMs often have a faster representation for objects that are used more like instances of classes compared to other objects whose set of properties is more freely modified. C and C++ compilers usually have a variety of ways to compile <code>switch</code> statements based on the number of cases and how densely packed the case values are.</p>
+<blockquote>
+<p>A quick refresher on Lox semantics: Global variables in Lox are “late bound”, or resolved dynamically. This means you can compile a chunk of code that refers to a global variable before it’s defined. As long as the code doesn’t <em>execute</em> before the definition happens, everything is fine. In practice, that means you can refer to later variables inside the body of functions.</p>
+</blockquote>
+<p>快速複習一下Lox語義：Lox中的全局變量是“後期綁定”的，或者說是動態解析的。這意味著，你可以在全局變量被定義之前，編譯引用它的一大塊代碼。只要代碼在定義發生之前沒有執行，就沒有問題。在實踐中，這意味著你可以在函數的主體中引用後面的變量。</p>
+<pre><code class="language-c">fun showVariable() {
+  print global;
+}
+
+var global = "after";
+showVariable();
+</code></pre>
+<blockquote>
+<p>Code like this might seem odd, but it’s handy for defining mutually recursive functions. It also plays nicer with the REPL. You can write a little function in one line, then define the variable it uses in the next.</p>
+</blockquote>
+<p>這樣的代碼可能看起來很奇怪，但它對於定義相互遞歸的函數很方便。它與REPL的配合也更好。你可以在一行中編寫一個小函數，然後在下一行中定義它使用的變量。</p>
+<blockquote>
+<p>Local variables work differently. Since a local variable’s declaration <em>always</em> occurs before it is used, the VM can resolve them at compile time, even in a simple single-pass compiler. That will let us use a smarter representation for locals. But that’s for the next chapter. Right now, let’s just worry about globals.</p>
+</blockquote>
+<p>局部變量的工作方式不同。因為局部變量的聲明總是發生在使用之前，虛擬機可以在編譯時解析它們，即使是在簡單的單遍編譯器中。這讓我們可以為局部變量使用更聰明的表示形式。但這是下一章的內容。現在，我們只考慮全局變量。</p>
+<blockquote>
+<h2 id="21--1-statements"><a class="header" href="#21--1-statements">21 . 1 Statements</a></h2>
+</blockquote>
+<h2 id="211-語句"><a class="header" href="#211-語句">21.1 語句</a></h2>
+<blockquote>
+<p>Variables come into being using variable declarations, which means now is also the time to add support for statements to our compiler. If you recall, Lox splits statements into two categories. “Declarations” are those statements that bind a new name to a value. The other kinds of statements—control flow, print, etc.—are just called “statements”. We disallow declarations directly inside control flow statements, like this:</p>
+</blockquote>
+<p>變量是通過變量聲明產生的，這意味著現在是時候向編譯器中添加對語句的支持了。如果你還記得的話，Lox將語句分為兩類。“聲明”是那些將一個新名稱與值綁定的語句。其它類型的語句——控制流、打印等——只被稱為“語句”。我們不允許在控制流語句中直接使用聲明，像這樣：</p>
+<pre><code class="language-c">if (monday) var croissant = "yes"; // Error.
+</code></pre>
+<blockquote>
+<p>Allowing it would raise confusing questions around the scope of the variable. So, like other languages, we prohibit it syntactically by having a separate grammar rule for the subset of statements that <em>are</em> allowed inside a control flow body.</p>
+</blockquote>
+<p>允許這種做法會引發圍繞變量作用域的令人困惑的問題。因此，像其它語言一樣，對於允許出現在控制流主體內的語句子集，我們制定單獨的語法規則，從而禁止這種做法。</p>
+<pre><code class="language-c">statement      → exprStmt
+               | forStmt
+               | ifStmt
+               | printStmt
+               | returnStmt
+               | whileStmt
+               | block ;
+</code></pre>
+<blockquote>
+<p>Then we use a separate rule for the top level of a script and inside a block.</p>
+</blockquote>
+<p>然後，我們為腳本的頂層和代碼塊內部使用單獨的規則。</p>
+<pre><code class="language-c">declaration    → classDecl
+               | funDecl
+               | varDecl
+               | statement ;
+</code></pre>
+<blockquote>
+<p>The <code>declaration</code> rule contains the statements that declare names, and also includes <code>statement</code> so that all statement types are allowed. Since <code>block</code> itself is in <code>statement</code>, you can put declarations inside a control flow construct by nesting them inside a block.</p>
+</blockquote>
+<p><code>declaration</code>包含聲明名稱的語句，也包含<code>statement</code>規則，這樣所有的語句類型都是允許的。因為<code>block</code>本身就在<code>statement</code>中，你可以通過將聲明嵌套在代碼塊中的方式將它們放在控制流結構中<sup class="footnote-reference" id="fr-2-1"><a href="#footnote-2">2</a></sup>。</p>
+<blockquote>
+<p>In this chapter, we’ll cover only a couple of statements and one declaration.</p>
+</blockquote>
+<p>在本章中，我們只討論幾個語句和一個聲明。</p>
+<pre><code class="language-c">statement      → exprStmt
+               | printStmt ;
+
+declaration    → varDecl
+               | statement ;
+</code></pre>
+<blockquote>
+<p>Up to now, our VM considered a “program” to be a single expression since that’s all we could parse and compile. In a full Lox implementation, a program is a sequence of declarations. We’re ready to support that now.</p>
+</blockquote>
+<p>到目前為止，我們的虛擬機都認為“程序”是一個表達式，因為我們只能解析和編譯一條表達式。在完整的Lox實現中，程序是一連串的聲明。我們現在已經準備要支持它了。</p>
+<p><em><u>compiler.c，在compile()方法中替換2行：</u></em></p>
+<pre><code class="language-c">  advance();
+  // 替換部分開始
+  while (!match(TOKEN_EOF)) {
+    declaration();
+  }
+  // 替換部分結束
+  endCompiler();
+</code></pre>
+<blockquote>
+<p>We keep compiling declarations until we hit the end of the source file. We compile a single declaration using this:</p>
+</blockquote>
+<p>我們會一直編譯聲明語句，直到到達源文件的結尾。我們用這個方法來編譯一條聲明語句：</p>
+<p><em><u>compiler.c，在expression()方法後添加代碼：</u></em></p>
+<pre><code class="language-c">static void declaration() {
+  statement();
+}
+</code></pre>
+<blockquote>
+<p>We’ll get to variable declarations later in the chapter, so for now, we simply forward to <code>statement()</code>.</p>
+</blockquote>
+<p>我們將在本章後面討論變量聲明，所以現在，我們直接使用<code>statement()</code>。</p>
+<p><em><u>compiler.c，在declaration()方法後添加代碼：</u></em></p>
+<pre><code class="language-c">static void statement() {
+  if (match(TOKEN_PRINT)) {
+    printStatement();
+  }
+}
+</code></pre>
+<blockquote>
+<p>Blocks can contain declarations, and control flow statements can contain other statements. That means these two functions will eventually be recursive. We may as well write out the forward declarations now.</p>
+</blockquote>
+<p>代碼塊可以包含聲明，而控制流語句可以包含其它語句。這意味著這兩個函數最終是遞歸的。我們不妨現在就把前置聲明寫出來。</p>
+<p><em><u>compiler.c，在expression()方法後添加代碼：</u></em></p>
+<pre><code class="language-c">static void expression();
+// 新增部分開始
+static void statement();
+static void declaration();
+// 新增部分結束
+static ParseRule* getRule(TokenType type);
+</code></pre>
+<blockquote>
+<h3 id="21--1--1-print-statements"><a class="header" href="#21--1--1-print-statements">21 . 1 . 1 Print statements</a></h3>
+</blockquote>
+<h3 id="2111-print語句"><a class="header" href="#2111-print語句">21.1.1 Print語句</a></h3>
+<blockquote>
+<p>We have two statement types to support in this chapter. Let’s start with <code>print</code> statements, which begin, naturally enough, with a <code>print</code> token. We detect that using this helper function:</p>
+</blockquote>
+<p>在本章中，我們有兩種語句類型需要支持。我們從<code>print</code>語句開始，它自然是以<code>print</code>標識開頭的。我們使用這個輔助函數來檢測：</p>
+<p><em><u>compiler.c，在consume()方法後添加代碼：</u></em></p>
+<pre><code class="language-c">static bool match(TokenType type) {
+  if (!check(type)) return false;
+  advance();
+  return true;
+}
+</code></pre>
+<blockquote>
+<p>You may recognize it from jlox. If the current token has the given type, we consume the token and return <code>true</code>. Otherwise we leave the token alone and return <code>false</code>. This helper function is implemented in terms of this other helper:</p>
+</blockquote>
+<p>你可能看出它是從jlox來的。如果當前的標識是指定類型，我們就消耗該標識並返回<code>true</code>。否則，我們就不處理該標識並返回<code>false</code>。這個輔助函數是通過另一個輔助函數實現的：</p>
+<p><em><u>compiler.c，在consume()方法後添加代碼：</u></em></p>
+<pre><code class="language-c">static bool check(TokenType type) {
+  return parser.current.type == type;
+}
+</code></pre>
+<blockquote>
+<p>The <code>check()</code> function returns <code>true</code> if the current token has the given type. It seems a little silly to wrap this in a function, but we’ll use it more later, and I think short verb-named functions like this make the parser easier to read.</p>
+</blockquote>
+<p>如果當前標識符合給定的類型，<code>check()</code>函數返回<code>true</code>。將它封裝在一個函數中似乎有點傻，但我們以後會更多地使用它，而且我們認為像這樣簡短的動詞命名的函數使解析器更容易閱讀<sup class="footnote-reference" id="fr-3-1"><a href="#footnote-3">3</a></sup>。</p>
+<blockquote>
+<p>If we did match the <code>print</code> token, then we compile the rest of the statement here:</p>
+</blockquote>
+<p>如果我們確實匹配到了<code>print</code>標識，那麼我們在下面這個方法中編譯該語句的剩餘部分：</p>
+<p><em><u>compiler.c，在expression()方法後添加代碼：</u></em></p>
+<pre><code class="language-c">static void printStatement() {
+  expression();
+  consume(TOKEN_SEMICOLON, "Expect ';' after value.");
+  emitByte(OP_PRINT);
+}
+</code></pre>
+<blockquote>
+<p>A <code>print</code> statement evaluates an expression and prints the result, so we first parse and compile that expression. The grammar expects a semicolon after that, so we consume it. Finally, we emit a new instruction to print the result.</p>
+</blockquote>
+<p><code>print</code>語句會對錶達式求值並打印出結果，所以我們首先解析並編譯這個表達式。語法要求在表達式之後有一個分號，所以我們消耗一個分號標識。最後，我們生成一條新指令來打印結果。</p>
+<p><em><u>chunk.h，在枚舉OpCode中添加代碼：</u></em></p>
+<pre><code class="language-c">  OP_NEGATE,
+  // 新增部分開始
+  OP_PRINT,
+  // 新增部分結束
+  OP_RETURN,
+</code></pre>
+<blockquote>
+<p>At runtime, we execute this instruction like so:</p>
+</blockquote>
+<p>在運行時，我們這樣執行這條指令：</p>
+<p><em><u>vm.c，在run()方法中添加代碼：</u></em></p>
+<pre><code class="language-c">        break;
+      // 新增部分開始  
+      case OP_PRINT: {
+        printValue(pop());
+        printf("\n");
+        break;
+      }
+      // 新增部分結束
+      case OP_RETURN: {
+</code></pre>
+<blockquote>
+<p>When the interpreter reaches this instruction, it has already executed the code for the expression, leaving the result value on top of the stack. Now we simply pop and print it.</p>
+</blockquote>
+<p>當解釋器到達這條指令時，它已經執行了表達式的代碼，將結果值留在了棧頂。現在我們只需要彈出該值並打印。</p>
+<blockquote>
+<p>Note that we don’t push anything else after that. This is a key difference between expressions and statements in the VM. Every bytecode instruction has a <strong>stack effect</strong> that describes how the instruction modifies the stack. For example, <code>OP_ADD</code> pops two values and pushes one, leaving the stack one element smaller than before.</p>
+</blockquote>
+<p>請注意，在此之後我們不會再向棧中壓入任何內容。這是虛擬機中表達式和語句之間的一個關鍵區別。每個字節碼指令都有<strong>堆棧效應</strong>，這個值用於描述指令如何修改堆棧內容。例如，<code>OP_ADD</code>會彈出兩個值並壓入一個值，使得棧中比之前少了一個元素<sup class="footnote-reference" id="fr-4-1"><a href="#footnote-4">4</a></sup>。</p>
+<blockquote>
+<p>You can sum the stack effects of a series of instructions to get their total effect. When you add the stack effects of the series of instructions compiled from any complete expression, it will total one. Each expression leaves one result value on the stack.</p>
+</blockquote>
+<p>你可以把一系列指令的堆棧效應相加，得到它們的總體效應。如果把從任何一個完整的表達式中編譯得到的一系列指令的堆棧效應相加，其總數是1。每個表達式會在棧中留下一個結果值。</p>
+<blockquote>
+<p>The bytecode for an entire statement has a total stack effect of zero. Since a statement produces no values, it ultimately leaves the stack unchanged, though it of course uses the stack while it’s doing its thing. This is important because when we get to control flow and looping, a program might execute a long series of statements. If each statement grew or shrank the stack, it might eventually overflow or underflow.</p>
+</blockquote>
+<p>整個語句對應字節碼的總堆棧效應為0。因為語句不產生任何值，所以它最終會保持堆棧不變，儘管它在執行自己的操作時難免會使用堆棧。這一點很重要，因為等我們涉及到控制流和循環時，一個程序可能會執行一長串的語句。如果每條語句都增加或減少堆棧，最終就可能會溢出或下溢。</p>
+<blockquote>
+<p>While we’re in the interpreter loop, we should delete a bit of code.</p>
+</blockquote>
+<p>在解釋器循環中，我們應該刪除一些代碼。</p>
+<p><em><u>vm.c，在run()方法中替換2行：</u></em></p>
+<pre><code class="language-c">      case OP_RETURN: {
+        // 替換部分開始
+        // Exit interpreter.
+        // 替換部分結束
+        return INTERPRET_OK;
+</code></pre>
+<blockquote>
+<p>When the VM only compiled and evaluated a single expression, we had some temporary code in <code>OP_RETURN</code> to output the value. Now that we have statements and <code>print</code>, we don’t need that anymore. We’re one step closer to the complete implementation of clox.</p>
+</blockquote>
+<p>當虛擬機只編譯和計算一條表達式時，我們在<code>OP_RETURN</code>中使用一些臨時代碼來輸出值。現在我們已經有了語句和<code>print</code>，就不再需要這些了。我們離clox的完全實現又近了一步<sup class="footnote-reference" id="fr-5-1"><a href="#footnote-5">5</a></sup>。</p>
+<blockquote>
+<p>As usual, a new instruction needs support in the disassembler.</p>
+</blockquote>
+<p>像往常一樣，一條新指令需要反彙編程序的支持。</p>
+<p><em><u>debug.c，在disassembleInstruction()方法中添加代碼：</u></em></p>
+<pre><code class="language-c">      return simpleInstruction("OP_NEGATE", offset);
+    // 新增部分開始  
+    case OP_PRINT:
+      return simpleInstruction("OP_PRINT", offset);
+    // 新增部分結束  
+    case OP_RETURN:
+</code></pre>
+<blockquote>
+<p>That’s our <code>print</code> statement. If you want, give it a whirl:</p>
+</blockquote>
+<p>這就是我們的<code>print</code>語句。如果你願意，可以試一試：</p>
+<pre><code class="language-c">print 1 + 2;
+print 3 * 4;
+</code></pre>
+<blockquote>
+<p>Exciting! OK, maybe not thrilling, but we can build scripts that contain as many statements as we want now, which feels like progress.</p>
+</blockquote>
+<p>令人興奮！好吧，也許沒有那麼激動人心，但是我們現在可以構建包含任意多語句的腳本，這感覺是一種進步。</p>
+<blockquote>
+<h3 id="21--1--2-expression-statements"><a class="header" href="#21--1--2-expression-statements">21 . 1 . 2 Expression statements</a></h3>
+</blockquote>
+<h3 id="2112-表達式語句"><a class="header" href="#2112-表達式語句">21.1.2 表達式語句</a></h3>
+<blockquote>
+<p>Wait until you see the next statement. If we <em>don’t</em> see a <code>print</code> keyword, then we must be looking at an expression statement.</p>
+</blockquote>
+<p>等待，直到你看到下一條語句。如果沒有看到<code>print</code>關鍵字，那麼我們看到的一定是一條表達式語句。</p>
+<p><em><u>compiler.c，在statement()方法中添加代碼：</u></em></p>
+<pre><code class="language-c">    printStatement();
+  // 新增部分開始  
+  } else {
+    expressionStatement();
+  // 新增部分結束  
+  }
+</code></pre>
+<blockquote>
+<p>It’s parsed like so:</p>
+</blockquote>
+<p>它是這樣解析的：</p>
+<p><em><u>compiler.c，在expression()方法後添加代碼：</u></em></p>
+<pre><code class="language-c">static void expressionStatement() {
+  expression();
+  consume(TOKEN_SEMICOLON, "Expect ';' after expression.");
+  emitByte(OP_POP);
+}
+</code></pre>
+<blockquote>
+<p>An “expression statement” is simply an expression followed by a semicolon. They’re how you write an expression in a context where a statement is expected. Usually, it’s so that you can call a function or evaluate an assignment for its side effect, like this:</p>
+</blockquote>
+<p>“表達式語句”就是一個表達式後面跟著一個分號。這是在需要語句的上下文中寫表達式的方式。通常來說，這樣你就可以調用函數或執行賦值操作以觸發其副作用，像這樣：</p>
+<pre><code class="language-c">brunch = "quiche";
+eat(brunch);
+</code></pre>
+<blockquote>
+<p>Semantically, an expression statement evaluates the expression and discards the result. The compiler directly encodes that behavior. It compiles the expression, and then emits an <code>OP_POP</code> instruction.</p>
+</blockquote>
+<p>從語義上說，表達式語句會對錶達式求值並丟棄結果。編譯器直接對這種行為進行編碼。它會編譯表達式，然後生成一條<code>OP_POP</code>指令。</p>
+<p><em><u>chunk.h，在枚舉OpCode中添加代碼：</u></em></p>
+<pre><code class="language-c">  OP_FALSE,
+  // 新增部分開始
+  OP_POP,
+  // 新增部分結束
+  OP_EQUAL,
+</code></pre>
+<blockquote>
+<p>As the name implies, that instruction pops the top value off the stack and forgets it.</p>
+</blockquote>
+<p>顧名思義，該指令會彈出棧頂的值並將其遺棄。</p>
+<p><em><u>vm.c，在run()方法中添加代碼：</u></em></p>
+<pre><code class="language-c">      case OP_FALSE: push(BOOL_VAL(false)); break;
+      // 新增部分開始 
+      case OP_POP: pop(); break;
+      // 新增部分結束
+      case OP_EQUAL: {
+</code></pre>
+<blockquote>
+<p>We can disassemble it too.</p>
+</blockquote>
+<p>我們也可以對它進行反彙編。</p>
+<p><em><u>debug.c，在disassembleInstruction()方法中添加代碼：</u></em></p>
+<pre><code class="language-c">      return simpleInstruction("OP_FALSE", offset);
+    // 新增部分開始  
+    case OP_POP:
+      return simpleInstruction("OP_POP", offset);
+    // 新增部分結束
+    case OP_EQUAL:
+</code></pre>
+<blockquote>
+<p>Expression statements aren’t very useful yet since we can’t create any expressions that have side effects, but they’ll be essential when we <a href="http://www.craftinginterpreters.com/calls-and-functions.html">add functions later</a>. The majority of statements in real-world code in languages like C are expression statements.</p>
+</blockquote>
+<p>表達式語句現在還不是很有用，因為我們無法創建任何有副作用的表達式，但等我們後面添加函數時，它們將是必不可少的。在像C這樣的真正語言中，大部分語句都是表達式語句<sup class="footnote-reference" id="fr-6-1"><a href="#footnote-6">6</a></sup>。</p>
+<blockquote>
+<h3 id="21--1--3-error-synchronization"><a class="header" href="#21--1--3-error-synchronization">21 . 1 . 3 Error synchronization</a></h3>
+</blockquote>
+<h3 id="2113-錯誤同步"><a class="header" href="#2113-錯誤同步">21.1.3 錯誤同步</a></h3>
+<blockquote>
+<p>While we’re getting this initial work done in the compiler, we can tie off a loose end we left <a href="http://www.craftinginterpreters.com/compiling-expressions.html#handling-syntax-errors">several chapters back</a>. Like jlox, clox uses panic mode error recovery to minimize the number of cascaded compile errors that it reports. The compiler exits panic mode when it reaches a synchronization point. For Lox, we chose statement boundaries as that point. Now that we have statements, we can implement synchronization.</p>
+</blockquote>
+<p>當我們在編譯器中完成這些初始化工作時，我們可以把前幾章遺留的一個小尾巴處理一下。與jlox一樣，clox也使用了恐慌模式下的錯誤恢復來減少它所報告的級聯編譯錯誤。當編譯器到達同步點時，就退出恐慌模式。對於Lox來說，我們選擇語句邊界作為同步點。現在我們有了語句，就可以實現同步了。</p>
+<p><em><u>compiler.c，在declaration()方法中添加代碼：</u></em></p>
+<pre><code class="language-c">  statement();
+  // 新增部分開始
+  if (parser.panicMode) synchronize();
+  // 新增部分結束
+}
+</code></pre>
+<blockquote>
+<p>If we hit a compile error while parsing the previous statement, we enter panic mode. When that happens, after the statement we start synchronizing.</p>
+</blockquote>
+<p>如果我們在解析前一條語句時遇到編譯錯誤，我們就會進入恐慌模式。當這種情況發生時，我們會在這條語句之後開始同步。</p>
+<p><em><u>compiler.c，在printStatement()方法後添加代碼：</u></em></p>
+<pre><code class="language-c">static void synchronize() {
+  parser.panicMode = false;
+
+  while (parser.current.type != TOKEN_EOF) {
+    if (parser.previous.type == TOKEN_SEMICOLON) return;
+    switch (parser.current.type) {
+      case TOKEN_CLASS:
+      case TOKEN_FUN:
+      case TOKEN_VAR:
+      case TOKEN_FOR:
+      case TOKEN_IF:
+      case TOKEN_WHILE:
+      case TOKEN_PRINT:
+      case TOKEN_RETURN:
+        return;
+
+      default:
+        ; // Do nothing.
+    }
+
+    advance();
+  }
+}
+</code></pre>
+<blockquote>
+<p>We skip tokens indiscriminately until we reach something that looks like a statement boundary. We recognize the boundary by looking for a preceding token that can end a statement, like a semicolon. Or we’ll look for a subsequent token that begins a statement, usually one of the control flow or declaration keywords.</p>
+</blockquote>
+<p>我們會不分青紅皂白地跳過標識，直到我們到達一個看起來像是語句邊界的位置。我們識別邊界的方式包括，查找可以結束一條語句的前驅標識，如分號；或者我們可以查找能夠開始一條語句的後續標識，通常是控制流或聲明語句的關鍵字之一。</p>
+<blockquote>
+<h2 id="21--2-variable-declarations"><a class="header" href="#21--2-variable-declarations">21 . 2 Variable Declarations</a></h2>
+</blockquote>
+<h2 id="212-變量聲明"><a class="header" href="#212-變量聲明">21.2 變量聲明</a></h2>
+<blockquote>
+<p>Merely being able to <em>print</em> doesn’t win your language any prizes at the programming language fair, so let’s move on to something a little more ambitious and get variables going. There are three operations we need to support:</p>
+</blockquote>
+<p>僅僅能夠<em>打印</em>並不能為你的語言在編程語言博覽會上贏得任何獎項，所以讓我們繼續做一些更有野心的事，讓變量發揮作用。我們需要支持三種操作：</p>
+<ul>
+<li>
+<blockquote>
+<p>Declaring a new variable using a <code>var</code> statement.</p>
+</blockquote>
+<p>使用<code>var</code>語句聲明一個新變量</p>
+</li>
+<li>
+<blockquote>
+<p>Accessing the value of a variable using an identifier expression.</p>
+</blockquote>
+<p>使用標識符表達式訪問一個變量的值</p>
+</li>
+<li>
+<blockquote>
+<p>Storing a new value in an existing variable using an assignment expression.</p>
+</blockquote>
+<p>使用賦值表達式將一個新的值存儲在現有的變量中</p>
+</li>
+</ul>
+<blockquote>
+<p>We can’t do either of the last two until we have some variables, so we start with declarations.</p>
+</blockquote>
+<p>等我們有了變量以後，才能做後面兩件事，所以我們從聲明開始。</p>
+<p><em><u>compiler.c，在declaration()方法中替換1行：</u></em></p>
+<pre><code class="language-c">static void declaration() {
+  // 替換部分開始
+  if (match(TOKEN_VAR)) {
+    varDeclaration();
+  } else {
+    statement();
+  }
+  // 替換部分結束
+  if (parser.panicMode) synchronize();
+</code></pre>
+<blockquote>
+<p>The placeholder parsing function we sketched out for the declaration grammar rule has an actual production now. If we match a <code>var</code> token, we jump here:</p>
+</blockquote>
+<p>我們為聲明語法規則建立的佔位解析函數現在已經有了實際的生成式。如果我們匹配到一個<code>var</code>標識，就跳轉到這裡：</p>
+<p><em><u>compiler.c，在expression()方法後添加代碼：</u></em></p>
+<pre><code class="language-c">static void varDeclaration() {
+  uint8_t global = parseVariable("Expect variable name.");
+
+  if (match(TOKEN_EQUAL)) {
+    expression();
+  } else {
+    emitByte(OP_NIL);
+  }
+  consume(TOKEN_SEMICOLON,
+          "Expect ';' after variable declaration.");
+
+  defineVariable(global);
+}
+</code></pre>
+<blockquote>
+<p>The keyword is followed by the variable name. That’s compiled by <code>parseVariable()</code>, which we’ll get to in a second. Then we look for an <code>=</code> followed by an initializer expression. If the user doesn’t initialize the variable, the compiler implicitly initializes it to <code>nil</code> by emitting an <code>OP_NIL</code> instruction. Either way, we expect the statement to be terminated with a semicolon.</p>
+</blockquote>
+<p>關鍵字後面跟著變量名。它是由<code>parseVariable()</code>編譯的，我們馬上就會講到。然後我們會尋找一個<code>=</code>，後跟初始化表達式。如果用戶沒有初始化變量，編譯器會生成<code>OP_NIL</code>指令隱式地將其初始化為<code>nil</code><sup class="footnote-reference" id="fr-7-1"><a href="#footnote-7">7</a></sup>。無論哪種方式，我們都希望語句以分號結束。</p>
+<blockquote>
+<p>There are two new functions here for working with variables and identifiers. Here is the first:</p>
+</blockquote>
+<p>這裡有兩個新函數用於處理變量和標識符。下面是第一個：</p>
+<p><em><u>compiler.c，在parsePrecedence()方法後添加代碼：</u></em></p>
+<pre><code class="language-c">static void parsePrecedence(Precedence precedence);
+// 新增部分開始
+static uint8_t parseVariable(const char* errorMessage) {
+  consume(TOKEN_IDENTIFIER, errorMessage);
+  return identifierConstant(&amp;parser.previous);
+}
+// 新增部分結束
+</code></pre>
+<blockquote>
+<p>It requires the next token to be an identifier, which it consumes and sends here:</p>
+</blockquote>
+<p>它要求下一個標識是一個標識符，它會消耗該標識併發送到這裡：</p>
+<p><em><u>compiler.c，在parsePrecedence()方法後添加代碼：</u></em></p>
+<pre><code class="language-c">static void parsePrecedence(Precedence precedence);
+// 新增部分開始
+static uint8_t identifierConstant(Token* name) {
+  return makeConstant(OBJ_VAL(copyString(name-&gt;start,
+                                         name-&gt;length)));
+}
+// 新增部分結束
+</code></pre>
+<blockquote>
+<p>This function takes the given token and adds its lexeme to the chunk’s constant table as a string. It then returns the index of that constant in the constant table.</p>
+</blockquote>
+<p>這個函數接受給定的標識，並將其詞素作為一個字符串添加到字節碼塊的常量表中。然後，它會返回該常量在常量表中的索引。</p>
+<blockquote>
+<p>Global variables are looked up <em>by name</em> at runtime. That means the VM—the bytecode interpreter loop—needs access to the name. A whole string is too big to stuff into the bytecode stream as an operand. Instead, we store the string in the constant table and the instruction then refers to the name by its index in the table.</p>
+</blockquote>
+<p>全局變量在運行時是按<em>名稱</em>查找的。這意味著虛擬機（字節碼解釋器循環）需要訪問該名稱。整個字符串太大，不能作為操作數塞進字節碼流中。相反，我們將字符串存儲到常量表中，然後指令通過該名稱在表中的索引來引用它。</p>
+<blockquote>
+<p>This function returns that index all the way to <code>varDeclaration()</code> which later hands it over to here:</p>
+</blockquote>
+<p>這個函數會將索引一直返回給<code>varDeclaration()</code>，隨後又將其傳遞到這裡：</p>
+<p><em><u>compiler.c，在parseVariable()方法後添加代碼：</u></em></p>
+<pre><code class="language-c">static void defineVariable(uint8_t global) {
+  emitBytes(OP_DEFINE_GLOBAL, global);
+}
+</code></pre>
+<blockquote>
+<p>This outputs the bytecode instruction that defines the new variable and stores its initial value. The index of the variable’s name in the constant table is the instruction’s operand. As usual in a stack-based VM, we emit this instruction last. At runtime, we execute the code for the variable’s initializer first. That leaves the value on the stack. Then this instruction takes that value and stores it away for later.</p>
+</blockquote>
+<p>它會輸出字節碼指令，用於定義新變量並存儲其初始化值。變量名在常量表中的索引是該指令的操作數。在基於堆棧的虛擬機中，我們通常是最後發出這條指令。在運行時，我們首先執行變量初始化器的代碼，將值留在棧中。然後這條指令會獲取該值並保存起來，以供日後使用<sup class="footnote-reference" id="fr-8-1"><a href="#footnote-8">8</a></sup>。</p>
+<blockquote>
+<p>Over in the runtime, we begin with this new instruction:</p>
+</blockquote>
+<p>在運行時，我們從這條新指令開始：</p>
+<p><em><u>chunk.h，在枚舉OpCode中添加代碼：</u></em></p>
+<pre><code class="language-c">  OP_POP,
+  // 新增部分開始
+  OP_DEFINE_GLOBAL,
+  // 新增部分結束
+  OP_EQUAL,
+</code></pre>
+<blockquote>
+<p>Thanks to our handy-dandy hash table, the implementation isn’t too hard.</p>
+</blockquote>
+<p>多虧了我們方便的哈希表，實現起來並不太難。</p>
+<p><em><u>vm.c，在run()方法中添加代碼：</u></em></p>
+<pre><code class="language-c">      case OP_POP: pop(); break;
+      // 新增部分開始
+      case OP_DEFINE_GLOBAL: {
+        ObjString* name = READ_STRING();
+        tableSet(&amp;vm.globals, name, peek(0));
+        pop();
+        break;
+      }
+      // 新增部分結束
+      case OP_EQUAL: {
+</code></pre>
+<blockquote>
+<p>We get the name of the variable from the constant table. Then we take the value from the top of the stack and store it in a hash table with that name as the key.</p>
+</blockquote>
+<p>我們從常量表中獲取變量的名稱，然後我們從棧頂獲取值，並以該名稱為鍵將其存儲在哈希表中<sup class="footnote-reference" id="fr-9-1"><a href="#footnote-9">9</a></sup>。</p>
+<blockquote>
+<p>This code doesn’t check to see if the key is already in the table. Lox is pretty lax with global variables and lets you redefine them without error. That’s useful in a REPL session, so the VM supports that by simply overwriting the value if the key happens to already be in the hash table.</p>
+</blockquote>
+<p>這段代碼並沒有檢查鍵是否已經在表中。Lox對全局變量的處理非常寬鬆，允許你重新定義它們而且不會出錯。這在REPL會話中很有用，如果鍵恰好已經在哈希表中，虛擬機通過簡單地覆蓋值來支持這一點。</p>
+<blockquote>
+<p>There’s another little helper macro:</p>
+</blockquote>
+<p>還有另一個小的輔助宏：</p>
+<p><em><u>vm.c，在run()方法中添加代碼：</u></em></p>
+<pre><code class="language-c">#define READ_CONSTANT() (vm.chunk-&gt;constants.values[READ_BYTE()])
+// 新增部分開始
+#define READ_STRING() AS_STRING(READ_CONSTANT())
+// 新增部分結束
+#define BINARY_OP(valueType, op) \
+</code></pre>
+<blockquote>
+<p>It reads a one-byte operand from the bytecode chunk. It treats that as an index into the chunk’s constant table and returns the string at that index. It doesn’t check that the value <em>is</em> a string—it just indiscriminately casts it. That’s safe because the compiler never emits an instruction that refers to a non-string constant.</p>
+</blockquote>
+<p>它從字節碼塊中讀取一個1字節的操作數。它將其視為字節碼塊的常量表的索引，並返回該索引處的字符串。它不檢查該值是否是字符串——它只是不加區分地進行類型轉換。這是安全的，因為編譯器永遠不會發出引用非字符串常量的指令。</p>
+<blockquote>
+<p>Because we care about lexical hygiene, we also undefine this macro at the end of the interpret function.</p>
+</blockquote>
+<p>因為我們關心詞法衛生，所以在解釋器函數的末尾也取消了這個宏的定義。</p>
+<p><em><u>vm.c，在run()方法中添加代碼：</u></em></p>
+<pre><code class="language-c">#undef READ_CONSTANT
+// 新增部分開始
+#undef READ_STRING
+// 新增部分結束
+#undef BINARY_OP
+</code></pre>
+<blockquote>
+<p>I keep saying “the hash table”, but we don’t actually have one yet. We need a place to store these globals. Since we want them to persist as long as clox is running, we store them right in the VM.</p>
+</blockquote>
+<p>我一直在說“哈希表”，但實際上我們還沒有哈希表。我們需要一個地方來存儲這些全局變量。因為我們希望它們在clox運行期間一直存在，所以我們將它們之間存儲在虛擬機中。</p>
+<p><em><u>vm.h，在結構體VM中添加代碼：</u></em></p>
+<pre><code class="language-c">  Value* stackTop;
+  // 新增部分開始
+  Table globals;
+  // 新增部分結束
+  Table strings;
+</code></pre>
+<blockquote>
+<p>As we did with the string table, we need to initialize the hash table to a valid state when the VM boots up.</p>
+</blockquote>
+<p>正如我們對字符串表所做的那樣，我們需要在虛擬機啟動時將哈希表初始化為有效狀態。</p>
+<p><em><u>vm.c，在initVM()方法中添加代碼：</u></em></p>
+<pre><code class="language-c">  vm.objects = NULL;
+  // 新增部分開始
+  initTable(&amp;vm.globals);
+  // 新增部分結束
+  initTable(&amp;vm.strings);
+</code></pre>
+<blockquote>
+<p>And we tear it down when we exit.</p>
+</blockquote>
+<p>當我們退出時，就將其刪掉<sup class="footnote-reference" id="fr-10-1"><a href="#footnote-10">10</a></sup>。</p>
+<p><em><u>vm.c，在freeVM()方法中添加代碼：</u></em></p>
+<pre><code class="language-c">void freeVM() {
+  // 新增部分開始
+  freeTable(&amp;vm.globals);
+  // 新增部分結束
+  freeTable(&amp;vm.strings);
+</code></pre>
+<blockquote>
+<p>As usual, we want to be able to disassemble the new instruction too.</p>
+</blockquote>
+<p>跟往常一樣，我們也希望能夠對新指令進行反彙編。</p>
+<p><em><u>debug.c，在disassembleInstruction()方法中添加代碼：</u></em></p>
+<pre><code class="language-c">      return simpleInstruction("OP_POP", offset);
+    // 新增部分開始  
+    case OP_DEFINE_GLOBAL:
+      return constantInstruction("OP_DEFINE_GLOBAL", chunk,
+                                 offset);
+    // 新增部分結束                             
+    case OP_EQUAL:
+</code></pre>
+<blockquote>
+<p>And with that, we can define global variables. Not that users can <em>tell</em> that they’ve done so, because they can’t actually <em>use</em> them. So let’s fix that next.</p>
+</blockquote>
+<p>有了這個，我們就可以定義全局變量了。但用戶並不能說他們可以定義全局變量，因為他們實際上還不能使用這些變量。所以，接下來我們解決這個問題。</p>
+<blockquote>
+<h2 id="21--3-reading-variables"><a class="header" href="#21--3-reading-variables">21 . 3 Reading Variables</a></h2>
+</blockquote>
+<h2 id="213-讀取變量"><a class="header" href="#213-讀取變量">21.3 讀取變量</a></h2>
+<blockquote>
+<p>As in every programming language ever, we access a variable’s value using its name. We hook up identifier tokens to the expression parser here:</p>
+</blockquote>
+<p>像所有編程語言中一樣，我們使用變量的名稱來訪問它的值。我們在這裡將標識符和表達式解析器進行掛鉤：</p>
+<p><em><u>compiler.c，替換1行：</u></em></p>
+<pre><code class="language-c">  [TOKEN_LESS_EQUAL]    = {NULL,     binary, PREC_COMPARISON},
+  // 替換部分開始
+  [TOKEN_IDENTIFIER]    = {variable, NULL,   PREC_NONE},
+  // 替換部分結束
+  [TOKEN_STRING]        = {string,   NULL,   PREC_NONE},
+</code></pre>
+<blockquote>
+<p>That calls this new parser function:</p>
+</blockquote>
+<p>這裡調用了這個新解析器函數：</p>
+<p><em><u>compiler.c，在string()方法後添加代碼：</u></em></p>
+<pre><code class="language-c">static void variable() {
+  namedVariable(parser.previous);
+}
+</code></pre>
+<blockquote>
+<p>Like with declarations, there are a couple of tiny helper functions that seem pointless now but will become more useful in later chapters. I promise.</p>
+</blockquote>
+<p>和聲明一樣，這裡有幾個小的輔助函數，現在看起來毫無意義，但在後面的章節中會變得更加有用。我保證。</p>
+<p><em><u>compiler.c，在string()方法後添加代碼：</u></em></p>
+<pre><code class="language-c">static void namedVariable(Token name) {
+  uint8_t arg = identifierConstant(&amp;name);
+  emitBytes(OP_GET_GLOBAL, arg);
+}
+</code></pre>
+<blockquote>
+<p>This calls the same <code>identifierConstant()</code> function from before to take the given identifier token and add its lexeme to the chunk’s constant table as a string. All that remains is to emit an instruction that loads the global variable with that name. Here’s the instruction:</p>
+</blockquote>
+<p>這裡會調用與之前相同的<code>identifierConstant()</code>函數，以獲取給定的標識符標識，並將其詞素作為字符串添加到字節碼塊的常量表中。剩下的工作就是生成一條指令，加載具有該名稱的全局變量。下面是這個指令：</p>
+<p><em><u>chunk.h，在枚舉OpCode中添加代碼：</u></em></p>
+<pre><code class="language-c">  OP_POP,
+  // 新增部分開始
+  OP_GET_GLOBAL,
+  // 新增部分結束
+  OP_DEFINE_GLOBAL,
+</code></pre>
+<blockquote>
+<p>Over in the interpreter, the implementation mirrors <code>OP_DEFINE_GLOBAL</code>.</p>
+</blockquote>
+<p>在解釋器中，它的實現是<code>OP_DEFINE_GLOBAL</code>的鏡像操作。</p>
+<p><em><u>vm.c，在run()方法中添加代碼：</u></em></p>
+<pre><code class="language-c">      case OP_POP: pop(); break;
+      // 新增部分開始
+      case OP_GET_GLOBAL: {
+        ObjString* name = READ_STRING();
+        Value value;
+        if (!tableGet(&amp;vm.globals, name, &amp;value)) {
+          runtimeError("Undefined variable '%s'.", name-&gt;chars);
+          return INTERPRET_RUNTIME_ERROR;
+        }
+        push(value);
+        break;
+      }
+      // 新增部分結束
+      case OP_DEFINE_GLOBAL: {
+</code></pre>
+<blockquote>
+<p>We pull the constant table index from the instruction’s operand and get the variable name. Then we use that as a key to look up the variable’s value in the globals hash table.</p>
+</blockquote>
+<p>我們從指令操作數中提取常量表索引並獲得變量名稱。然後我們使用它作為鍵，在全局變量哈希表中查找變量的值。</p>
+<blockquote>
+<p>If the key isn’t present in the hash table, it means that global variable has never been defined. That’s a runtime error in Lox, so we report it and exit the interpreter loop if that happens. Otherwise, we take the value and push it onto the stack.</p>
+</blockquote>
+<p>如果該鍵不在哈希表中，就意味著這個全局變量從未被定義過。這在Lox中是運行時錯誤，所以如果發生這種情況，我們要報告錯誤並退出解釋器循環。否則，我們獲取該值並將其壓入棧中。</p>
+<p><em><u>debug.c，在disassembleInstruction()方法中添加代碼：</u></em></p>
+<pre><code class="language-c">      return simpleInstruction("OP_POP", offset);
+    // 新增部分開始  
+    case OP_GET_GLOBAL:
+      return constantInstruction("OP_GET_GLOBAL", chunk, offset);
+    // 新增部分結束  
+    case OP_DEFINE_GLOBAL:
+</code></pre>
+<blockquote>
+<p>A little bit of disassembling, and we’re done. Our interpreter is now able to run code like this:</p>
+</blockquote>
+<p>稍微反彙編一下，就完成了。我們的解釋器現在可以運行這樣的代碼了：</p>
+<pre><code class="language-ruby">var beverage = "cafe au lait";
+var breakfast = "beignets with " + beverage;
+print breakfast;
+</code></pre>
+<blockquote>
+<p>There’s only one operation left.</p>
+</blockquote>
+<p>只剩一個操作了。</p>
+<blockquote>
+<h2 id="21--4-assignment"><a class="header" href="#21--4-assignment">21 . 4 Assignment</a></h2>
+</blockquote>
+<h2 id="214-賦值"><a class="header" href="#214-賦值">21.4 賦值</a></h2>
+<blockquote>
+<p>Throughout this book, I’ve tried to keep you on a fairly safe and easy path. I don’t avoid hard <em>problems</em>, but I try to not make the <em>solutions</em> more complex than they need to be. Alas, other design choices in our bytecode compiler make assignment annoying to implement.</p>
+</blockquote>
+<p>在這本書中，我一直試圖讓你走在一條相對安全和簡單的道路上。我並不迴避困難的<em>問題</em>，但是我儘量不讓解決方案過於複雜。可惜的是，我們的字節碼編譯器中的其它設計選擇使得賦值的實現變得很麻煩<sup class="footnote-reference" id="fr-11-1"><a href="#footnote-11">11</a></sup>。</p>
+<blockquote>
+<p>Our bytecode VM uses a single-pass compiler. It parses and generates bytecode on the fly without any intermediate AST. As soon as it recognizes a piece of syntax, it emits code for it. Assignment doesn’t naturally fit that. Consider:</p>
+</blockquote>
+<p>我們的字節碼虛擬機使用的是單遍編譯器。它在不需要任何中間AST的情況下，動態地解析並生成字節碼。一旦它識別出某個語法，它就會生成對應的字節碼。賦值操作天然不符合這一點。請考慮一下：</p>
+<pre><code class="language-c">menu.brunch(sunday).beverage = "mimosa";
+</code></pre>
+<blockquote>
+<p>In this code, the parser doesn’t realize <code>menu.brunch(sunday).beverage</code> is the target of an assignment and not a normal expression until it reaches <code>=</code>, many tokens after the first <code>menu</code>. By then, the compiler has already emitted bytecode for the whole thing.</p>
+</blockquote>
+<p>在這段代碼中，直到解析器遇見<code>=</code>（第一個<code>menu</code>之後很多個標識），它才能意識到<code>menu.brunch(sunday).beverage</code>是賦值操作的目標，而不是常規的表達式。到那時，編譯器已經為整個代碼生成字節碼了。</p>
+<blockquote>
+<p>The problem is not as dire as it might seem, though. Look at how the parser sees that example:</p>
+</blockquote>
+<p>不過，這個問題並不像看上去那麼可怕。看看解析器是如何處理這個例子的：</p>
+<p><img src="21.%E5%85%A8%E5%B1%80%E8%AE%8A%E9%87%8F/setter.png" alt="The &#39;menu.brunch(sunday).beverage = &quot;mimosa&quot;&#39; statement, showing that &#39;menu.brunch(sunday)&#39; is an expression." /></p>
+<blockquote>
+<p>Even though the <code>.beverage</code> part must not be compiled as a get expression, everything to the left of the <code>.</code> is an expression, with the normal expression semantics. The <code>menu.brunch(sunday)</code> part can be compiled and executed as usual.</p>
+</blockquote>
+<p>儘管<code>.beverage</code>部分無法被編譯為一個get表達式，<code>.</code>左側的其它部分是一個表達式，有著正常的表達式語義。<code>menu.brunch(sunday)</code>部分可以像往常一樣編譯和執行。</p>
+<blockquote>
+<p>Fortunately for us, the only semantic differences on the left side of an assignment appear at the very right-most end of the tokens, immediately preceding the <code>=</code>. Even though the receiver of a setter may be an arbitrarily long expression, the part whose behavior differs from a get expression is only the trailing identifier, which is right before the <code>=</code>. We don’t need much lookahead to realize <code>beverage</code> should be compiled as a set expression and not a getter.</p>
+</blockquote>
+<p>幸運的是，賦值語句左側部分唯一的語義差異在於其最右側的標識，緊挨著<code>=</code>之前。儘管setter的接收方可能是一個任意長的表達式，但與get表達式不同的部分在於尾部的標識符，它就在<code>=</code>之前。我們不需要太多的前瞻就可以意識到<code>beverage</code>應該被編譯為set表達式而不是getter。</p>
+<blockquote>
+<p>Variables are even easier since they are just a single bare identifier before an <code>=</code>. The idea then is that right <em>before</em> compiling an expression that can also be used as an assignment target, we look for a subsequent <code>=</code> token. If we see one, we compile it as an assignment or setter instead of a variable access or getter.</p>
+</blockquote>
+<p>變量就更簡單了，因為它們在<code>=</code>之前就是一個簡單的標識符。那麼我們的想法是，在編譯一個也可以作為賦值目標的表達式<em>之前</em>，我們會尋找隨後的<code>=</code>標識。如果我們看到了，那表明我們將其一個賦值表達式或setter來編譯，而不是變量訪問或getter。</p>
+<blockquote>
+<p>We don’t have setters to worry about yet, so all we need to handle are variables.</p>
+</blockquote>
+<p>我們還不需要考慮setter，所以我們需要處理的就是變量。</p>
+<p><em><u>compiler.c，在namedVariable()方法中替換1行：</u></em></p>
+<pre><code class="language-c">  uint8_t arg = identifierConstant(&amp;name);
+  // 替換部分開始
+  if (match(TOKEN_EQUAL)) {
+    expression();
+    emitBytes(OP_SET_GLOBAL, arg);
+  } else {
+    emitBytes(OP_GET_GLOBAL, arg);
+  }
+  // 替換部分結束
+}
+</code></pre>
+<blockquote>
+<p>In the parse function for identifier expressions, we look for an equals sign after the identifier. If we find one, instead of emitting code for a variable access, we compile the assigned value and then emit an assignment instruction.</p>
+</blockquote>
+<p>在標識符表達式的解析函數中，我們會查找標識符後面的等號。如果找到了，我們就不會生成變量訪問的代碼，我們會編譯所賦的值，然後生成一個賦值指令。</p>
+<blockquote>
+<p>That’s the last instruction we need to add in this chapter.</p>
+</blockquote>
+<p>這就是我們在本章中需要添加的最後一條指令。</p>
+<p><em><u>chunk.h，在枚舉OpCode中添加代碼：</u></em></p>
+<pre><code class="language-c">  OP_DEFINE_GLOBAL,
+  // 新增部分開始
+  OP_SET_GLOBAL,
+  // 新增部分結束
+  OP_EQUAL,
+</code></pre>
+<blockquote>
+<p>As you’d expect, its runtime behavior is similar to defining a new variable.</p>
+</blockquote>
+<p>如你所想，它的運行時行為類似於定義一個新變量。</p>
+<p><em><u>vm.c，在run()方法中添加代碼<sup class="footnote-reference" id="fr-12-1"><a href="#footnote-12">12</a></sup>：</u></em></p>
+<pre><code class="language-c">      }
+      // 新增部分開始
+      case OP_SET_GLOBAL: {
+        ObjString* name = READ_STRING();
+        if (tableSet(&amp;vm.globals, name, peek(0))) {
+          tableDelete(&amp;vm.globals, name); 
+          runtimeError("Undefined variable '%s'.", name-&gt;chars);
+          return INTERPRET_RUNTIME_ERROR;
+        }
+        break;
+      }
+      // 新增部分結束
+      case OP_EQUAL: {
+</code></pre>
+<blockquote>
+<p>The main difference is what happens when the key doesn’t already exist in the globals hash table. If the variable hasn’t been defined yet, it’s a runtime error to try to assign to it. Lox <a href="http://www.craftinginterpreters.com/statements-and-state.html#design-note">doesn’t do implicit variable declaration</a>.</p>
+</blockquote>
+<p>主要的區別在於，當鍵在全局變量哈希表中不存在時會發生什麼。如果這個變量還沒有定義，對其進行賦值就是一個運行時錯誤。Lox不做隱式的變量聲明。</p>
+<blockquote>
+<p>The other difference is that setting a variable doesn’t pop the value off the stack. Remember, assignment is an expression, so it needs to leave that value there in case the assignment is nested inside some larger expression.</p>
+</blockquote>
+<p>另一個區別是，設置變量並不會從棧中彈出值。記住，賦值是一個表達式，所以它需要把這個值保留在那裡，以防賦值嵌套在某個更大的表達式中。</p>
+<blockquote>
+<p>Add a dash of disassembly:</p>
+</blockquote>
+<p>加一點反彙編代碼：</p>
+<p><em><u>debug.c，在disassembleInstruction()方法中添加代碼：</u></em></p>
+<pre><code class="language-c">      return constantInstruction("OP_DEFINE_GLOBAL", chunk,
+                                 offset);
+    // 新增部分開始                             
+    case OP_SET_GLOBAL:
+      return constantInstruction("OP_SET_GLOBAL", chunk, offset);
+    // 新增部分結束  
+    case OP_EQUAL:
+</code></pre>
+<blockquote>
+<p>So we’re done, right? Well . . . not quite. We’ve made a mistake! Take a gander at:</p>
+</blockquote>
+<p>我們已經完成了，是嗎？嗯……不完全是。我們犯了一個錯誤！看一下這個：</p>
+<pre><code class="language-c">a * b = c + d;
+</code></pre>
+<blockquote>
+<p>According to Lox’s grammar, <code>=</code> has the lowest precedence, so this should be parsed roughly like:</p>
+</blockquote>
+<p>根據Lox語法，<code>=</code>的優先級最低，所以這大致應該解析為：</p>
+<p><img src="21.%E5%85%A8%E5%B1%80%E8%AE%8A%E9%87%8F/ast-good.png" alt="The expected parse, like &#39;(a * b) = (c + d)&#39;." /></p>
+<blockquote>
+<p>Obviously, <code>a * b</code> isn’t a valid assignment target, so this should be a syntax error. But here’s what our parser does:</p>
+</blockquote>
+<p>顯然，<code>a*b</code>不是一個有效的賦值目標<sup class="footnote-reference" id="fr-13-1"><a href="#footnote-13">13</a></sup>，所以這應該是一個語法錯誤。但我們的解析器是這樣的：</p>
+<blockquote>
+<ol>
+<li>First, <code>parsePrecedence()</code> parses <code>a</code> using the <code>variable()</code> prefix parser.</li>
+<li>After that, it enters the infix parsing loop.</li>
+<li>It reaches the <code>*</code> and calls <code>binary()</code>.</li>
+<li>That recursively calls <code>parsePrecedence()</code> to parse the right-hand operand.</li>
+<li>That calls <code>variable()</code> again for parsing <code>b</code>.</li>
+<li>Inside that call to <code>variable()</code>, it looks for a trailing <code>=</code>. It sees one and thus parses the rest of the line as an assignment.</li>
+</ol>
+</blockquote>
+<ol>
+<li>首先，<code>parsePrecedence()</code>使用<code>variable()</code>前綴解析器解析<code>a</code>。</li>
+<li>之後，會進入中綴解析循環。</li>
+<li>達到<code>*</code>，並調用<code>binary()</code>。</li>
+<li>遞歸地調用<code>parsePrecedence()</code>解析右操作數。</li>
+<li>再次調用<code>variable()</code>解析<code>b</code>。</li>
+<li>在對<code>variable()</code>的調用中，會查找尾部的<code>=</code>。它看到了，因此會將本行的其餘部分解析為一個賦值表達式。</li>
+</ol>
+<blockquote>
+<p>In other words, the parser sees the above code like:</p>
+</blockquote>
+<p>換句話說，解析器將上面的代碼看作：</p>
+<p><img src="21.%E5%85%A8%E5%B1%80%E8%AE%8A%E9%87%8F/ast-bad.png" alt="The actual parse, like &#39;a * (b = c + d)&#39;." /></p>
+<blockquote>
+<p>We’ve messed up the precedence handling because <code>variable()</code> doesn’t take into account the precedence of the surrounding expression that contains the variable. If the variable happens to be the right-hand side of an infix operator, or the operand of a unary operator, then that containing expression is too high precedence to permit the <code>=</code>.</p>
+</blockquote>
+<p>我們搞砸了優先級處理，因為<code>variable()</code>沒有考慮包含變量的外圍表達式的優先級。如果變量恰好是中綴操作符的右操作數，或者是一元操作符的操作數，那麼這個包含表達式的優先級太高，不允許使用<code>=</code>。</p>
+<blockquote>
+<p>To fix this, <code>variable()</code> should look for and consume the <code>=</code> only if it’s in the context of a low-precedence expression. The code that knows the current precedence is, logically enough, <code>parsePrecedence()</code>. The <code>variable()</code> function doesn’t need to know the actual level. It just cares that the precedence is low enough to allow assignment, so we pass that fact in as a Boolean.</p>
+</blockquote>
+<p>為了解決這個問題，<code>variable()</code>應該只在低優先級表達式的上下文中尋找並使用<code>=</code>。從邏輯上講，知道當前優先級的代碼是<code>parsePrecedence()</code>。<code>variable()</code>函數不需要知道實際的級別。它只關心優先級是否低到允許賦值表達式，所以我們把這個情況以布爾值傳入。</p>
+<p><em><u>compiler.c，在parsePrecedence()方法中替換1行：</u></em></p>
+<pre><code class="language-c">    error("Expect expression.");
+    return;
+  }
+  // 替換部分開始
+  bool canAssign = precedence &lt;= PREC_ASSIGNMENT;
+  prefixRule(canAssign);
+  // 替換部分結束
+  while (precedence &lt;= getRule(parser.current.type)-&gt;precedence) {
+</code></pre>
+<blockquote>
+<p>Since assignment is the lowest-precedence expression, the only time we allow an assignment is when parsing an assignment expression or top-level expression like in an expression statement. That flag makes its way to the parser function here:</p>
+</blockquote>
+<p>因為賦值是最低優先級的表達式，只有在解析賦值表達式或如表達式語句等頂層表達式時，才允許出現賦值。這個標誌會被傳入這個解析器函數：</p>
+<p><em><u>compiler.c，在variable()函數中替換3行：</u></em></p>
+<pre><code class="language-c">static void variable(bool canAssign) {
+  namedVariable(parser.previous, canAssign);
+}
+</code></pre>
+<blockquote>
+<p>Which passes it through a new parameter:</p>
+</blockquote>
+<p>通過一個新參數透傳該值：</p>
+<p><em><u>compiler.c，在namedVariable()方法中替換1行：</u></em></p>
+<pre><code class="language-c">// 替換部分開始
+static void namedVariable(Token name, bool canAssign) {
+  // 替換部分結束
+  uint8_t arg = identifierConstant(&amp;name);
+</code></pre>
+<blockquote>
+<p>And then finally uses it here:</p>
+</blockquote>
+<p>最後在這裡使用它：</p>
+<pre><code>  uint8_t arg = identifierConstant(&amp;name);
+</code></pre>
+<p><em><u>compiler.c，在namedVariable()方法中替換1行：</u></em></p>
+<pre><code class="language-c">  uint8_t arg = identifierConstant(&amp;name);
+  // 替換部分開始
+  if (canAssign &amp;&amp; match(TOKEN_EQUAL)) {
+  // 替換部分結束
+    expression();
+</code></pre>
+<blockquote>
+<p>That’s a lot of plumbing to get literally one bit of data to the right place in the compiler, but arrived it has. If the variable is nested inside some expression with higher precedence, <code>canAssign</code> will be <code>false</code> and this will ignore the <code>=</code> even if there is one there. Then <code>namedVariable()</code> returns, and execution eventually makes its way back to <code>parsePrecedence()</code>.</p>
+</blockquote>
+<p>為了把字面上的1比特數據送到編譯器的正確位置需要做很多工作，但它已經到達了。如果變量嵌套在某個優先級更高的表達式中，<code>canAssign</code>將為<code>false</code>，即使有<code>=</code>也會被忽略。然後<code>namedVariable()</code>返回，執行最終返回到了<code>parsePrecedence()</code>。</p>
+<blockquote>
+<p>Then what? What does the compiler do with our broken example from before? Right now, <code>variable()</code> won’t consume the <code>=</code>, so that will be the current token. The compiler returns back to <code>parsePrecedence()</code> from the <code>variable()</code> prefix parser and then tries to enter the infix parsing loop. There is no parsing function associated with <code>=</code>, so it skips that loop.</p>
+</blockquote>
+<p>然後呢？編譯器會對我們前面的負面例子做什麼？現在，<code>variable()</code>不會消耗<code>=</code>，所以它將是當前的標識。編譯器從<code>variable()</code>前綴解析器返回到<code>parsePrecedence()</code>，然後嘗試進入中綴解析循環。沒有與<code>=</code>相關的解析函數，因此也會跳過這個循環。</p>
+<blockquote>
+<p>Then <code>parsePrecedence()</code> silently returns back to the caller. That also isn’t right. If the <code>=</code> doesn’t get consumed as part of the expression, nothing else is going to consume it. It’s an error and we should report it.</p>
+</blockquote>
+<p>然後<code>parsePrecedence()</code>默默地返回到調用方。這也是不對的。如果<code>=</code>沒有作為表達式的一部分被消耗，那麼其它任何東西都不會消耗它。這是一個錯誤，我們應該報告它。</p>
+<p><em><u>compiler.c，在parsePrecedence()方法中添加代碼：</u></em></p>
+<pre><code class="language-c">    infixRule();
+  }
+  // 新增部分開始
+  if (canAssign &amp;&amp; match(TOKEN_EQUAL)) {
+    error("Invalid assignment target.");
+  }
+  // 新增部分結束
+}
+</code></pre>
+<blockquote>
+<p>With that, the previous bad program correctly gets an error at compile time. OK, <em>now</em> are we done? Still not quite. See, we’re passing an argument to one of the parse functions. But those functions are stored in a table of function pointers, so all of the parse functions need to have the same type. Even though most parse functions don’t support being used as an assignment target—setters are the only other one—our friendly C compiler requires them <em>all</em> to accept the parameter.</p>
+</blockquote>
+<p>這樣，前面的錯誤程序在編譯時就會正確地得到一個錯誤。好了，現在我們完成了嗎？也不盡然。看，我們正向一個解析函數傳遞參數。但是這些函數是存儲在一個函數指令表格中的，所以所有的解析函數需要具有相同的類型。儘管大多數解析函數都不支持被用作賦值目標——setter是唯一的一個<sup class="footnote-reference" id="fr-14-1"><a href="#footnote-14">14</a></sup>——但我們這個友好的C編譯器要求它們<em>都</em>接受相同的參數。</p>
+<blockquote>
+<p>So we’re going to finish off this chapter with some grunt work. First, let’s go ahead and pass the flag to the infix parse functions.</p>
+</blockquote>
+<p>所以我們要做一些苦差事來結束這一章。首先，讓我們繼續前進，將標誌傳給中綴解析函數。</p>
+<p><em><u>compiler.c，在parsePrecedence()方法中替換1行：</u></em></p>
+<pre><code class="language-c">    ParseFn infixRule = getRule(parser.previous.type)-&gt;infix;
+    // 替換部分開始
+    infixRule(canAssign);
+    // 替換部分結束
+  }
+</code></pre>
+<blockquote>
+<p>We’ll need that for setters eventually. Then we’ll fix the typedef for the function type.</p>
+</blockquote>
+<p>我們最終會在setter中需要它。然後，我們要修復函數類型的類型定義。</p>
+<p><em><u>compiler.c，在枚舉Precedence後替換1行：</u></em></p>
+<pre><code class="language-c">} Precedence;
+// 替換部分開始
+typedef void (*ParseFn)(bool canAssign);
+// 替換部分結束
+typedef struct {
+</code></pre>
+<blockquote>
+<p>And some completely tedious code to accept this parameter in all of our existing parse functions. Here:</p>
+</blockquote>
+<p>還有一些非常乏味的代碼，為了在所有的現有解析函數中接受這個參數。這裡：</p>
+<p><em><u>compiler.c，在binary()方法中替換1行：</u></em></p>
+<pre><code class="language-c">// 替換部分開始
+static void binary(bool canAssign) {
+// 替換部分結束
+  TokenType operatorType = parser.previous.type;
+</code></pre>
+<p>這裡:</p>
+<p><em><u>compiler.c，在literal()方法中替換1行：</u></em></p>
+<pre><code class="language-c">// 替換部分開始
+static void literal(bool canAssign) {
+// 替換部分結束
+  switch (parser.previous.type) {
+</code></pre>
+<p>這裡:</p>
+<p><em><u>compiler.c，在grouping()方法中替換1行：</u></em></p>
+<pre><code class="language-c">// 替換部分開始
+static void grouping(bool canAssign) {
+// 替換部分結束
+  expression();
+</code></pre>
+<p>這裡:</p>
+<p><em><u>compiler.c，在number()方法中替換1行：</u></em></p>
+<pre><code class="language-c">// 替換部分開始
+static void number(bool canAssign) {
+// 替換部分結束
+  double value = strtod(parser.previous.start, NULL);
+</code></pre>
+<p>還有這裡:</p>
+<p><em><u>compiler.c，在string()方法中替換1行：</u></em></p>
+<pre><code class="language-c">// 替換部分開始
+static void string(bool canAssign) {
+// 替換部分結束
+  emitConstant(OBJ_VAL(copyString(parser.previous.start + 1,
+</code></pre>
+<p>最後:</p>
+<p><em><u>compiler.c，在unary()方法中替換1行：</u></em></p>
+<pre><code class="language-c">// 替換部分開始
+static void unary(bool canAssign) {
+// 替換部分結束
+  TokenType operatorType = parser.previous.type;
+</code></pre>
+<blockquote>
+<p>Phew! We’re back to a C program we can compile. Fire it up and now you can run this:</p>
+</blockquote>
+<p>籲！我們又回到了可以編譯的C程序。啟動它，新增你可以運行這個：</p>
+<pre><code class="language-javascript">var breakfast = "beignets";
+var beverage = "cafe au lait";
+breakfast = "beignets with " + beverage;
+
+print breakfast;
+</code></pre>
+<blockquote>
+<p>It’s starting to look like real code for an actual language!</p>
+</blockquote>
+<p>它開始看起來像是實際語言的真正代碼了！</p>
+<hr />
+<h2 id="習題"><a class="header" href="#習題">習題</a></h2>
+<ol>
+<li>
+<blockquote>
+<p>The compiler adds a global variable’s name to the constant table as a string every time an identifier is encountered. It creates a new constant each time, even if that variable name is already in a previous slot in the constant table. That’s wasteful in cases where the same variable is referenced multiple times by the same function. That, in turn, increases the odds of filling up the constant table and running out of slots since we allow only 256 constants in a single chunk.</p>
+<p>Optimize this. How does your optimization affect the performance of the compiler compared to the runtime? Is this the right trade-off?</p>
+</blockquote>
+<p>每次遇到標識符時，編譯器都會將全局變量的名稱作為字符串添加到常量表中。它每次都會創建一個新的常量，即使這個變量的名字已經在常量表中的前一個槽中存在。在同一個函數多次引用同一個變量的情況下，這是一種浪費。這反過來又增加了填滿常量表的可能性，因為我們在一個字節碼塊中只允許有256個常量。</p>
+<p>對此進行優化。與運行時相比，你的優化對編譯器的性能有何影響？這是正確的取捨嗎？</p>
+</li>
+<li>
+<blockquote>
+<p>Looking up a global variable by name in a hash table each time it is used is pretty slow, even with a good hash table. Can you come up with a more efficient way to store and access global variables without changing the semantics?</p>
+</blockquote>
+<p>每次使用全局變量時，根據名稱在哈希表中查找變量是很慢的，即使有一個很好的哈希表。你能否想出一種更有效的方法來存儲和訪問全局變量而不改變語義？</p>
+</li>
+<li>
+<blockquote>
+<p>When running in the REPL, a user might write a function that references an unknown global variable. Then, in the next line, they declare the variable. Lox should handle this gracefully by not reporting an “unknown variable” compile error when the function is first defined.</p>
+<p>But when a user runs a Lox <em>script</em>, the compiler has access to the full text of the entire program before any code is run. Consider this program:</p>
+</blockquote>
+<p>當在REPL中運行時，用戶可能會編寫一個引用未知全局變量的函數。然後，在下一行中，他們聲明瞭這個變量。Lox應該優雅地處理這個問題，在第一次定義函數時不報告“未知變量”的編譯錯誤。</p>
+<p>但是，當用戶運行Lox腳本時，編譯器可以在任何代碼運行之前訪問整個程序的全部文本。考慮一下這個程序：</p>
+<pre><code class="language-javascript">fun useVar() {
+  print oops;
+}
+
+var ooops = "too many o's!";
+</code></pre>
+<blockquote>
+<p>Here, we can tell statically that <code>oops</code> will not be defined because there is <em>no</em> declaration of that global anywhere in the program. Note that <code>useVar()</code> is never called either, so even though the variable isn’t defined, no runtime error will occur because it’s never used either.</p>
+<p>We could report mistakes like this as compile errors, at least when running from a script. Do you think we should? Justify your answer. What do other scripting languages you know do?</p>
+</blockquote>
+<p>這裡，我們可以靜態地告知用戶<code>oops</code>不會被定義，因為在程序中沒有任何地方對該全局變量進行了聲明。請注意，<code>useVar()</code>也從未被調用，所以即使變量沒有被定義，也不會發生運行時錯誤，因為它從未被使用。</p>
+<p>我們可以將這樣的錯誤報告為編譯錯誤，至少在運行腳本時是這樣。你認為我們應該這樣做嗎？請說明你的答案。你知道其它腳本語言是怎麼做的嗎？</p>
+</li>
+</ol>
+<hr>
+<ol class="footnote-definition"><li id="footnote-1">
+<p>這是複雜的語言實現中常見的元策略。通常情況下，同一種語言特性會有多種實現技術，每種技術都針對不同的使用模式進行了優化。舉例來說，與屬性集可以自由修改的其它對象相比，Java Script虛擬機通常對那些使用起來像類實例對象有著更快的表示形式。C和C++編譯器通常由多種方法能夠根據case分支數量和case值的密集程度來編譯<code>switch</code>語句。 <a href="#fr-1-1">↩</a></p>
+</li>
+<li id="footnote-2">
+<p>代碼塊的作用有點像表達式中的括號。塊可以讓你把“低級別的”聲明語句放在只允許“高級別的”非聲明語句的地方。 <a href="#fr-2-1">↩</a></p>
+</li>
+<li id="footnote-3">
+<p>這聽起來微不足道，但是非玩具型語言的手寫解析器非常大。當你有數千行代碼時，如果一個實用函數可以將兩行代碼簡化為一行代碼，並使結果更易於閱讀，那它就很容易被接受。 <a href="#fr-3-1">↩</a></p>
+</li>
+<li id="footnote-4">
+<p><code>OP_ADD</code>執行過後堆棧會少一個元素，所以它的效應是<code>-1</code>：<img src="21.%E5%85%A8%E5%B1%80%E8%AE%8A%E9%87%8F/stack-effect.png" alt="The stack effect of an OP_ADD instruction." /> <a href="#fr-4-1">↩</a></p>
+</li>
+<li id="footnote-5">
+<p>不過，我們只是近了一步。等我們添加函數時，還會重新審視<code>OP_RETURN</code>。現在，它退出整個解釋器的循環即可。 <a href="#fr-5-1">↩</a></p>
+</li>
+<li id="footnote-6">
+<p>據我統計，在本章末尾的<code>compiler.c</code>版本中，149條語句中有80條是表達式語句。 <a href="#fr-6-1">↩</a></p>
+</li>
+<li id="footnote-7">
+<p>基本上，編譯器會對變量聲明進行脫糖處理，如<code>var a;</code>變成<code>var a = nil;</code>，它為前者生成的代碼和為後者生成的代碼是相同的。 <a href="#fr-7-1">↩</a></p>
+</li>
+<li id="footnote-8">
+<p>我知道這裡有一些函數現在看起來沒什麼意義。但是，隨著我們增加更多與名稱相關的語言特性，我們會從中獲得更多的好處。函數和類聲明都聲明瞭新的變量，而變量表達式和賦值表達式會訪問它們。 <a href="#fr-8-1">↩</a></p>
+</li>
+<li id="footnote-9">
+<p>請注意，直到將值添加到哈希表之後，我們才會彈出它。這確保瞭如果在將值添加到哈希表的過程中觸發了垃圾回收，虛擬機仍然可以找到這個值。這顯然是很可能的，因為哈希表在調整大小時需要動態分配。 <a href="#fr-9-1">↩</a></p>
+</li>
+<li id="footnote-10">
+<p>這個進程在退出時會釋放所有的東西，但要求操作系統來收拾我們的爛攤子，總感覺很不體面。 <a href="#fr-10-1">↩</a></p>
+</li>
+<li id="footnote-11">
+<p>如果你還記得，在jlox中賦值是很容易的。 <a href="#fr-11-1">↩</a></p>
+</li>
+<li id="footnote-12">
+<p>對<code>tableSet()</code>的調用會將值存儲在全局變量表中，即使該變量之前沒有定義。這個問題在REPL會話中是用戶可見的，因為即使報告了運行時錯誤，它仍然在運行。因此，我們也要注意從表中刪除殭屍值。 <a href="#fr-12-1">↩</a></p>
+</li>
+<li id="footnote-13">
+<p>如果<code>a*b</code>是一個有效的賦值目標，這豈不是很瘋狂？你可以想象一些類似代數的語言，試圖以某種合理的方式劃分所賦的值，並將其分配給<code>a</code>和<code>b</code>……這可能是一個很糟糕的主意。 <a href="#fr-13-1">↩</a></p>
+</li>
+<li id="footnote-14">
+<p>如果Lox有數組和下標操作符，如<code>array[index]</code>，那麼中綴操作符<code>[</code>也能允許賦值，支持：<code>array[index] = value</code>。 <a href="#fr-14-1">↩</a></p>
+</li>
+</ol>
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../../content/20.哈希表.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../../content/22.局部变量.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../../content/20.哈希表.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../../content/22.局部变量.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+
+    </div>
+    </body>
+</html>

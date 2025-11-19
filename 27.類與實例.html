@@ -1,0 +1,994 @@
+<!DOCTYPE HTML>
+<html lang="zh" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>27.類與實例 - 手撸解释器教程</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="../highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="../tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "../";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "../searchindex.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">手撸解释器教程</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="27類與例項-classes-and-instances"><a class="header" href="#27類與例項-classes-and-instances">27.類與例項 Classes and Instances</a></h1>
+<blockquote>
+<p>Caring too much for objects can destroy you. Only—if you care for a thing enough, it takes on a life of its own, doesn’t it? And isn’t the whole point of things—beautiful things—that they connect you to some larger beauty?</p>
+<p>​															——Donna Tartt, <em>The Goldfinch</em></p>
+</blockquote>
+<p>對物品過於關心會毀了你。只是，如果你對一件事物足夠關心，它就有了自己的生命，不是嗎？而事物——美麗的事物——的全部意義不就是把你和一些更大的美聯絡起來嗎？（唐娜 塔特，《金翅雀》）</p>
+<blockquote>
+<p>The last area left to implement in clox is object-oriented programming. OOP is a bundle of intertwined features: classes, instances, fields, methods, initializers, and inheritance. Using relatively high-level Java, we packed all that into two chapters. Now that we’re coding in C, which feels like building a model of the Eiffel tower out of toothpicks, we’ll devote three chapters to covering the same territory. This makes for a leisurely stroll through the implementation. After strenuous chapters like <a href="http://www.craftinginterpreters.com/closures.html">closures</a> and the <a href="http://www.craftinginterpreters.com/garbage-collection.html">garbage collector</a>, you have earned a rest. In fact, the book should be easy from here on out.</p>
+</blockquote>
+<p>clox中需要實現的最後一個領域是面向物件程式設計。OOP是一堆交織在一起的特性：類、例項、欄位、方法、初始化式和繼承<sup class="footnote-reference" id="fr-1-1"><a href="#footnote-1">1</a></sup>。使用相對高階的Java，我們可以把這些內容都裝進兩章中。現在我們用C語言編寫程式碼，感覺就像用牙籤搭建埃菲爾鐵塔的模型，我們將用三章的篇幅來涵蓋這些內容。這使得我們可以悠閒地漫步在實現中。在經歷了閉包和垃圾回收器這樣艱苦的章節之後，你贏得了休息的機會。事實上，從這裡開始，這本書都是很容易的。</p>
+<blockquote>
+<p>In this chapter, we cover the first three features: classes, instances, and fields. This is the stateful side of object orientation. Then in the next two chapters, we will hang behavior and code reuse off of those objects.</p>
+</blockquote>
+<p>在本章中，我們會介紹前三個特性：類、例項和欄位。這就是面向物件中表現出狀態的一面。然後在接下來的兩章中，我們會對這些物件掛上行為和程式碼重用能力。</p>
+<blockquote>
+<h2 id="27--1-class-objects"><a class="header" href="#27--1-class-objects">27 . 1 Class Objects</a></h2>
+</blockquote>
+<h2 id="271-class物件"><a class="header" href="#271-class物件">27.1 Class物件</a></h2>
+<blockquote>
+<p>In a class-based object-oriented language, everything begins with classes. They define what sorts of objects exist in the program and are the factories used to produce new instances. Going bottom-up, we’ll start with their runtime representation and then hook that into the language.</p>
+</blockquote>
+<p>在一門基於類的面向物件的語言中，一切都從類開始。它們定義了程式中存在什麼型別的物件，並且它們也是用來生產新例項的工廠。自下向上，我們將從它們的執行時表示形式開始，然後將其掛接到語言中。</p>
+<blockquote>
+<p>By this point, we’re well-acquainted with the process of adding a new object type to the VM. We start with a struct.</p>
+</blockquote>
+<p>至此，我們已經非常熟悉向VM新增新物件型別的過程了。我們從一個結構體開始。</p>
+<p><em><u>object.h，在結構體ObjClosure後新增程式碼：</u></em></p>
+<pre><code class="language-c">} ObjClosure;
+// 新增部分開始
+typedef struct {
+  Obj obj;
+  ObjString* name;
+} ObjClass;
+// 新增部分結束
+ObjClosure* newClosure(ObjFunction* function);
+</code></pre>
+<blockquote>
+<p>After the Obj header, we store the class’s name. This isn’t strictly needed for the user’s program, but it lets us show the name at runtime for things like stack traces.</p>
+</blockquote>
+<p>在Obj標頭檔案之後，我們儲存了類的名稱。對於使用者的程式來說，這一資訊並不是嚴格需要的，但是它讓我們可以在執行時顯示名稱，例如堆疊跟蹤。</p>
+<blockquote>
+<p>The new type needs a corresponding case in the ObjType enum.</p>
+</blockquote>
+<p>新型別需要在ObjType列舉中有一個對應的項。</p>
+<p><em><u>object.h，在列舉ObjType中新增程式碼：</u></em></p>
+<pre><code class="language-c">typedef enum {  
+  // 新增部分開始
+  OBJ_CLASS,
+  // 新增部分結束
+  OBJ_CLOSURE,
+</code></pre>
+<blockquote>
+<p>And that type gets a corresponding pair of macros. First, for testing an object’s type:</p>
+</blockquote>
+<p>而該型別會有一組對應的宏。首先，用於測試物件的型別：</p>
+<p><em><u>object.h，新增程式碼：</u></em></p>
+<pre><code class="language-c">#define OBJ_TYPE(value)        (AS_OBJ(value)-&gt;type)
+// 新增部分開始
+#define IS_CLASS(value)        isObjType(value, OBJ_CLASS)
+// 新增部分結束
+#define IS_CLOSURE(value)      isObjType(value, OBJ_CLOSURE)
+</code></pre>
+<blockquote>
+<p>And then for casting a Value to an ObjClass pointer:</p>
+</blockquote>
+<p>然後是用於將一個Value轉換為一個ObjClass指標：</p>
+<p><em><u>object.h，新增程式碼：</u></em></p>
+<pre><code class="language-c">#define IS_STRING(value)       isObjType(value, OBJ_STRING)
+// 新增部分開始
+#define AS_CLASS(value)        ((ObjClass*)AS_OBJ(value))
+// 新增部分結束
+#define AS_CLOSURE(value)      ((ObjClosure*)AS_OBJ(value))
+</code></pre>
+<blockquote>
+<p>The VM creates new class objects using this function:</p>
+</blockquote>
+<p>VM使用這個函式建立新的類物件：</p>
+<p><em><u>object.h，在結構體ObjClass後新增程式碼：</u></em></p>
+<pre><code class="language-c">} ObjClass;
+// 新增部分開始
+ObjClass* newClass(ObjString* name);
+// 新增部分結束
+ObjClosure* newClosure(ObjFunction* function);
+</code></pre>
+<blockquote>
+<p>The implementation lives over here:</p>
+</blockquote>
+<p>實現在這裡：</p>
+<p><em><u>object.c，在allocateObject()方法後新增程式碼：</u></em></p>
+<pre><code class="language-c">ObjClass* newClass(ObjString* name) {
+  ObjClass* klass = ALLOCATE_OBJ(ObjClass, OBJ_CLASS);
+  klass-&gt;name = name; 
+  return klass;
+}
+</code></pre>
+<blockquote>
+<p>Pretty much all boilerplate. It takes in the class’s name as a string and stores it. Every time the user declares a new class, the VM will create a new one of these ObjClass structs to represent it.</p>
+</blockquote>
+<p>幾乎都是模板程式碼。它接受並儲存字串形式的類名。每當使用者宣告一個新類時，VM會建立一個新的ObjClass結構體來表示它<sup class="footnote-reference" id="fr-2-1"><a href="#footnote-2">2</a></sup>。</p>
+<blockquote>
+<p>When the VM no longer needs a class, it frees it like so:</p>
+</blockquote>
+<p>當VM不再需要某個類時，這樣釋放它：</p>
+<p><em><u>memory.c，在freeObject()方法中新增程式碼：</u></em></p>
+<pre><code class="language-c">  switch (object-&gt;type) {
+    // 新增部分開始
+    case OBJ_CLASS: {
+      FREE(ObjClass, object);
+      break;
+    } 
+    // 新增部分結束
+    case OBJ_CLOSURE: {
+</code></pre>
+<blockquote>
+<p>We have a memory manager now, so we also need to support tracing through class objects.</p>
+</blockquote>
+<p>我們現在有一個記憶體管理器，所以我們也需要支援透過類物件進行跟蹤。</p>
+<p><em><u>memory.c，在blackenObject()方法中新增程式碼：</u></em></p>
+<pre><code class="language-c">  switch (object-&gt;type) {
+    // 新增部分開始
+    case OBJ_CLASS: {
+      ObjClass* klass = (ObjClass*)object;
+      markObject((Obj*)klass-&gt;name);
+      break;
+    }
+    // 新增部分結束
+    case OBJ_CLOSURE: {
+</code></pre>
+<blockquote>
+<p>When the GC reaches a class object, it marks the class’s name to keep that string alive too.</p>
+</blockquote>
+<p>當GC到達一個類物件時，它會標記該類的名稱，以保持該字串也能存活。</p>
+<blockquote>
+<p>The last operation the VM can perform on a class is printing it.</p>
+</blockquote>
+<p>VM可以對類執行的最後一個操作是列印它。</p>
+<p><em><u>object.c，在printObject()方法中新增程式碼：</u></em></p>
+<pre><code class="language-c">  switch (OBJ_TYPE(value)) {
+    // 新增部分開始
+    case OBJ_CLASS:
+      printf("%s", AS_CLASS(value)-&gt;name-&gt;chars);
+      break;
+    // 新增部分結束  
+    case OBJ_CLOSURE:
+</code></pre>
+<blockquote>
+<p>A class simply says its own name.</p>
+</blockquote>
+<p>類只是簡單地說出它的名稱。</p>
+<blockquote>
+<h2 id="27--2-class-declarations"><a class="header" href="#27--2-class-declarations">27 . 2 Class Declarations</a></h2>
+</blockquote>
+<h2 id="272-類宣告"><a class="header" href="#272-類宣告">27.2 類宣告</a></h2>
+<blockquote>
+<p>Runtime representation in hand, we are ready to add support for classes to the language. Next, we move into the parser.</p>
+</blockquote>
+<p>有了執行時表示形式，我們就可以向語言中新增對類的支援了。接下來，我們進入語法分析部分。</p>
+<p><em><u>compiler.c，在declaration()方法中替換1行：</u></em></p>
+<pre><code class="language-c">static void declaration() {
+  // 替換部分開始
+  if (match(TOKEN_CLASS)) {
+    classDeclaration();
+  } else if (match(TOKEN_FUN)) {
+  // 替換部分結束
+    funDeclaration();
+</code></pre>
+<blockquote>
+<p>Class declarations are statements, and the parser recognizes one by the leading <code>class</code> keyword. The rest of the compilation happens over here:</p>
+</blockquote>
+<p>類宣告是語句，直譯器透過前面的<code>class</code>關鍵字識別宣告語句。剩下部分的編譯工作在這裡進行：</p>
+<p><em><u>compiler.c，在function()方法後新增程式碼：</u></em></p>
+<pre><code class="language-c">static void classDeclaration() {
+  consume(TOKEN_IDENTIFIER, "Expect class name.");
+  uint8_t nameConstant = identifierConstant(&amp;parser.previous);
+  declareVariable();
+
+  emitBytes(OP_CLASS, nameConstant);
+  defineVariable(nameConstant);
+
+  consume(TOKEN_LEFT_BRACE, "Expect '{' before class body.");
+  consume(TOKEN_RIGHT_BRACE, "Expect '}' after class body.");
+}
+</code></pre>
+<blockquote>
+<p>Immediately after the <code>class</code> keyword is the class’s name. We take that identifier and add it to the surrounding function’s constant table as a string. As you just saw, printing a class shows its name, so the compiler needs to stuff the name string somewhere that the runtime can find. The constant table is the way to do that.</p>
+</blockquote>
+<p>緊跟在<code>class</code>關鍵字之後的是類名。我們將這個識別符號作為字串新增到外圍函式的常量表中。正如你剛才看到的，列印一個類會顯示它的名稱，所以編譯器需要把這個名稱字串放在執行時可以找到的地方。常量表就是實現這一目的的方法。</p>
+<blockquote>
+<p>The class’s name is also used to bind the class object to a variable of the same name. So we declare a variable with that identifier right after consuming its token.</p>
+</blockquote>
+<p>類名也被用來將類物件與一個同名變數繫結。因此，我們在使用完它的詞法標識後，馬上用這個識別符號宣告一個變數<sup class="footnote-reference" id="fr-3-1"><a href="#footnote-3">3</a></sup>。</p>
+<blockquote>
+<p>Next, we emit a new instruction to actually create the class object at runtime. That instruction takes the constant table index of the class’s name as an operand.</p>
+</blockquote>
+<p>接下來我們發出一條新指令，在執行時實際建立類物件。該指令以類名的常量表索引作為運算元。</p>
+<blockquote>
+<p>After that, but before compiling the body of the class, we define the variable for the class’s name. <em>Declaring</em> the variable adds it to the scope, but recall from <a href="http://www.craftinginterpreters.com/local-variables.html#another-scope-edge-case">a previous chapter</a> that we can’t <em>use</em> the variable until it’s <em>defined</em>. For classes, we define the variable before the body. That way, users can refer to the containing class inside the bodies of its own methods. That’s useful for things like factory methods that produce new instances of the class.</p>
+</blockquote>
+<p>在此之後，但是在編譯類主體之前，我們使用類名定義變數。<em>宣告</em>變數會將其新增到作用域中，但請回想一下前一章的內容，在定義變數之前我們不能使用它。對於類，我們在解析主體之前定義變數。這樣，使用者就可以在類自己的方法主體中引用類本身。這對於產生類的新例項的工廠方法等場景來說是很有用的。</p>
+<blockquote>
+<p>Finally, we compile the body. We don’t have methods yet, so right now it’s simply an empty pair of braces. Lox doesn’t require fields to be declared in the class, so we’re done with the body—and the parser—for now.</p>
+</blockquote>
+<p>最後，我們編譯主體。我們現在還沒有方法，所以現在它只是一對空的大括號。Lox不要求在類中宣告欄位，因此我們目前已經完成了主體（和解析器）的工作。</p>
+<blockquote>
+<p>The compiler is emitting a new instruction, so let’s define that.</p>
+</blockquote>
+<p>編譯器會發出一條新指令，所以我們來定義它。</p>
+<p><em><u>chunk.h，在列舉OpCode中新增程式碼：</u></em></p>
+<pre><code class="language-c">  OP_RETURN,
+  // 新增部分開始
+  OP_CLASS,
+  // 新增部分結束
+} OpCode;
+</code></pre>
+<blockquote>
+<p>And add it to the disassembler:</p>
+</blockquote>
+<p>然後將其新增到反彙編程式中：</p>
+<p><em><u>debug.c，在disassembleInstruction()方法中新增程式碼：</u></em></p>
+<pre><code class="language-c">    case OP_RETURN:
+      return simpleInstruction("OP_RETURN", offset);
+    // 新增部分開始
+    case OP_CLASS:
+      return constantInstruction("OP_CLASS", chunk, offset);
+    // 新增部分結束
+    default:
+</code></pre>
+<blockquote>
+<p>For such a large-seeming feature, the interpreter support is minimal.</p>
+</blockquote>
+<p>對於這樣一個看起來很大的特性，直譯器支援是最小的。</p>
+<p><em><u>vm.c，在run()方法中新增程式碼：</u></em></p>
+<pre><code class="language-c">        break;
+      }
+      // 新增部分開始
+      case OP_CLASS:
+        push(OBJ_VAL(newClass(READ_STRING())));
+        break;
+      // 新增部分結束  
+    }
+</code></pre>
+<blockquote>
+<p>We load the string for the class’s name from the constant table and pass that to <code>newClass()</code>. That creates a new class object with the given name. We push that onto the stack and we’re good. If the class is bound to a global variable, then the compiler’s call to <code>defineVariable()</code> will emit code to store that object from the stack into the global variable table. Otherwise, it’s right where it needs to be on the stack for a new local variable.</p>
+</blockquote>
+<p>我們從常量表中載入類名的字串，並將其傳遞給<code>newClass()</code>。這將建立一個具有給定名稱的新類物件。我們把它推入棧中就可以了。如果該類被繫結到一個全域性變數上，那麼編譯器對<code>defineVariable()</code>的呼叫就會生成位元組碼，將該物件從棧中儲存到全域性變量表。否則，它就正好位於棧中新的區域性變數所在的位置<sup class="footnote-reference" id="fr-4-1"><a href="#footnote-4">4</a></sup>。</p>
+<blockquote>
+<p>There you have it, our VM supports classes now. You can run this:</p>
+</blockquote>
+<p>好了，我們的虛擬機器現在支援類了。你可以執行這段程式碼：</p>
+<pre><code class="language-c">class Brioche {}
+print Brioche;
+</code></pre>
+<blockquote>
+<p>Unfortunately, printing is about <em>all</em> you can do with classes, so next is making them more useful.</p>
+</blockquote>
+<p>不幸的是，列印是你對類所能做的全部事情，所以接下來是讓它們更有用。</p>
+<blockquote>
+<h2 id="27--3-instances-of-classes"><a class="header" href="#27--3-instances-of-classes">27 . 3 Instances of Classes</a></h2>
+</blockquote>
+<h2 id="273-類的例項"><a class="header" href="#273-類的例項">27.3 類的例項</a></h2>
+<blockquote>
+<p>Classes serve two main purposes in a language:</p>
+</blockquote>
+<p>類在一門語言中主要有兩個作用：</p>
+<blockquote>
+<ul>
+<li><strong>They are how you create new instances.</strong> Sometimes this involves a <code>new</code> keyword, other times it’s a method call on the class object, but you usually mention the class by name <em>somehow</em> to get a new instance.</li>
+<li><strong>They contain methods.</strong> These define how all instances of the class behave.</li>
+</ul>
+</blockquote>
+<ul>
+<li><strong>它們是你建立新例項的方式</strong>。有時這會涉及到<code>new</code>關鍵字，有時則是對類物件的方法呼叫，但是你通常會以某種方式透過類的名稱來獲得一個新的例項。</li>
+<li><strong>它們包含方法</strong>。這些方法定義了類的所有例項的行為方式。</li>
+</ul>
+<blockquote>
+<p>We won’t get to methods until the next chapter, so for now we will only worry about the first part. Before classes can create instances, we need a representation for them.</p>
+</blockquote>
+<p>我們要到下一章才會講到方法，所以我們現在只關心第一部分。在類能夠建立例項之前，我們需要為它們提供一個表示形式。</p>
+<p><em><u>object.h，在結構體ObjClass後新增程式碼：</u></em></p>
+<pre><code class="language-c">} ObjClass;
+// 新增部分開始
+typedef struct {
+  Obj obj;
+  ObjClass* klass;
+  Table fields; 
+} ObjInstance;
+// 新增部分結束
+ObjClass* newClass(ObjString* name);
+</code></pre>
+<blockquote>
+<p>Instances know their class—each instance has a pointer to the class that it is an instance of. We won’t use this much in this chapter, but it will become critical when we add methods.</p>
+</blockquote>
+<p>例項知道它們的類——每個例項都有一個指向它所屬類的指標。在本章中我們不會過多地使用它，但是等我們新增方法時，它將會變得非常重要。</p>
+<blockquote>
+<p>More important to this chapter is how instances store their state. Lox lets users freely add fields to an instance at runtime. This means we need a storage mechanism that can grow. We could use a dynamic array, but we also want to look up fields by name as quickly as possible. There’s a data structure that’s just perfect for quickly accessing a set of values by name and—even more conveniently—we’ve already implemented it. Each instance stores its fields using a hash table.</p>
+</blockquote>
+<p>對本章來說，更重要的是例項如何儲存它們的狀態。Lox允許使用者在執行時自由地向例項中新增欄位。這意味著我們需要一種可以增長的儲存機制。我們可以使用動態陣列，但我們也希望儘可能快地按名稱查詢欄位。有一種資料結構非常適合於按名稱快速訪問一組值——甚至更方便的是——我們已經實現了它。每個例項都使用雜湊表來儲存其欄位<sup class="footnote-reference" id="fr-5-1"><a href="#footnote-5">5</a></sup>。</p>
+<blockquote>
+<p>We only need to add an include, and we’ve got it.</p>
+</blockquote>
+<p>我們只需要新增一個標頭檔案引入，就可以了。</p>
+<p><em><u>object.h，新增程式碼：</u></em></p>
+<pre><code class="language-c">#include "chunk.h"
+// 新增部分開始
+#include "table.h"
+// 新增部分結束
+#include "value.h"
+</code></pre>
+<blockquote>
+<p>This new struct gets a new object type.</p>
+</blockquote>
+<p>新結構體有新的物件型別。</p>
+<p><em><u>object.h，在列舉ObjType中新增程式碼：</u></em></p>
+<pre><code class="language-c">  OBJ_FUNCTION,
+  // 新增部分開始
+  OBJ_INSTANCE,
+  // 新增部分結束
+  OBJ_NATIVE,
+</code></pre>
+<blockquote>
+<p>I want to slow down a bit here because the Lox <em>language’s</em> notion of “type” and the VM <em>implementation’s</em> notion of “type” brush against each other in ways that can be confusing. Inside the C code that makes clox, there are a number of different types of Obj—ObjString, ObjClosure, etc. Each has its own internal representation and semantics.</p>
+</blockquote>
+<p>這裡我想放慢一點速度，因為Lox<em>語言</em>中的“type”概念和<em>虛擬機器實現</em>中的“type”概念是相互牴觸的，可能會造成混淆。在生成clox 的C語言程式碼中，有許多不同型別的Obj——ObjString、ObjClosure等等。每個都有自己的內部表示和語義。</p>
+<blockquote>
+<p>In the Lox <em>language</em>, users can define their own classes—say Cake and Pie—and then create instances of those classes. From the user’s perspective, an instance of Cake is a different type of object than an instance of Pie. But, from the VM’s perspective, every class the user defines is simply another value of type ObjClass. Likewise, each instance in the user’s program, no matter what class it is an instance of, is an ObjInstance. That one VM object type covers instances of all classes. The two worlds map to each other something like this:</p>
+</blockquote>
+<p>在Lox<em>語言</em>中，使用者可以定義自己的類——比如Cake和Pie——然後建立這些類的例項。從使用者的角度來看，Cake例項與Pie例項是不同型別的物件。但是，從虛擬機器的角度來看，使用者定義的每個類都只是另一個ObjClass型別的值。同樣，使用者程式中的每個例項，無論它是什麼類的例項，都是一個ObjInstance。這一虛擬機器物件型別涵蓋了所有類的例項。這兩個世界之間的對映是這樣的：</p>
+<p><img src="27.%E9%A1%9E%E8%88%87%E4%BE%8B%E9%A0%85/lox-clox.png" alt="A set of class declarations and instances, and the runtime representations each maps to." /></p>
+<blockquote>
+<p>Got it? OK, back to the implementation. We also get our usual macros.</p>
+</blockquote>
+<p>明白了嗎？好了，回到實現中。我們新增了一些熟悉的宏。</p>
+<p><em><u>object.h，新增程式碼：</u></em></p>
+<pre><code class="language-c">#define IS_FUNCTION(value)     isObjType(value, OBJ_FUNCTION)
+// 新增部分開始
+#define IS_INSTANCE(value)     isObjType(value, OBJ_INSTANCE)
+// 新增部分結束
+#define IS_NATIVE(value)       isObjType(value, OBJ_NATIVE)
+</code></pre>
+<blockquote>
+<p>And:</p>
+</blockquote>
+<p>以及：</p>
+<p><em><u>object.h，新增程式碼：</u></em></p>
+<pre><code class="language-c">#define AS_FUNCTION(value)     ((ObjFunction*)AS_OBJ(value))
+// 新增部分開始
+#define AS_INSTANCE(value)     ((ObjInstance*)AS_OBJ(value))
+// 新增部分結束
+#define AS_NATIVE(value) \
+</code></pre>
+<blockquote>
+<p>Since fields are added after the instance is created, the “constructor” function only needs to know the class.</p>
+</blockquote>
+<p>因為欄位是在例項建立之後新增的，所以“構造器”函式只需要知道類。</p>
+<p><em><u>object.h，在newFunction()方法後新增程式碼：</u></em></p>
+<pre><code class="language-c">ObjFunction* newFunction();
+// 新增部分開始
+ObjInstance* newInstance(ObjClass* klass);
+// 新增部分結束
+ObjNative* newNative(NativeFn function);
+</code></pre>
+<blockquote>
+<p>We implement that function here:</p>
+</blockquote>
+<p>我們在這裡實現該函式：</p>
+<p><em><u>object.c，在newFunction()方法後新增程式碼：</u></em></p>
+<pre><code class="language-c">ObjInstance* newInstance(ObjClass* klass) {
+  ObjInstance* instance = ALLOCATE_OBJ(ObjInstance, OBJ_INSTANCE);
+  instance-&gt;klass = klass;
+  initTable(&amp;instance-&gt;fields);
+  return instance;
+}
+</code></pre>
+<blockquote>
+<p>We store a reference to the instance’s class. Then we initialize the field table to an empty hash table. A new baby object is born!</p>
+</blockquote>
+<p>我們儲存了對例項的類的引用。然後我們將欄位表初始化為一個空的雜湊表。一個全新的物件誕生了！</p>
+<blockquote>
+<p>At the sadder end of the instance’s lifespan, it gets freed.</p>
+</blockquote>
+<p>在例項生命週期的最後階段，它被釋放了。</p>
+<p><em><u>memory.c，在freeObject()方法中新增程式碼：</u></em></p>
+<pre><code class="language-c">      FREE(ObjFunction, object);
+      break;
+    }
+    // 新增部分開始
+    case OBJ_INSTANCE: {
+      ObjInstance* instance = (ObjInstance*)object;
+      freeTable(&amp;instance-&gt;fields);
+      FREE(ObjInstance, object);
+      break;
+    }
+    // 新增部分結束
+    case OBJ_NATIVE:
+</code></pre>
+<blockquote>
+<p>The instance owns its field table so when freeing the instance, we also free the table. We don’t explicitly free the entries <em>in</em> the table, because there may be other references to those objects. The garbage collector will take care of those for us. Here we free only the entry array of the table itself.</p>
+</blockquote>
+<p>例項擁有自己的欄位表，所以當釋放例項時，我們也會釋放該表。我們沒有顯式地釋放表中的條目，因為可能存在對這些物件的其它引用。垃圾回收器會幫我們處理這些問題。這裡我們只釋放表本身的條目陣列。</p>
+<blockquote>
+<p>Speaking of the garbage collector, it needs support for tracing through instances.</p>
+</blockquote>
+<p>說到垃圾回收，它需要支援透過例項進行跟蹤。</p>
+<p><em><u>memory.c，在blackenObject()方法中新增程式碼：</u></em></p>
+<pre><code class="language-c">      markArray(&amp;function-&gt;chunk.constants);
+      break;
+    }
+    // 新增部分開始
+    case OBJ_INSTANCE: {
+      ObjInstance* instance = (ObjInstance*)object;
+      markObject((Obj*)instance-&gt;klass);
+      markTable(&amp;instance-&gt;fields);
+      break;
+    }
+    // 新增部分結束
+    case OBJ_UPVALUE:
+</code></pre>
+<blockquote>
+<p>If the instance is alive, we need to keep its class around. Also, we need to keep every object referenced by the instance’s fields. Most live objects that are not roots are reachable because some instance refers to the object in a field. Fortunately, we already have a nice <code>markTable()</code> function to make tracing them easy.</p>
+</blockquote>
+<p>如果這個例項是活動的，我們需要保留它的類。此外，我們還需要保留每個被例項欄位引用的物件。大多數不是根的活動物件都是可達的，因為某些例項會在某個欄位中引用該物件。幸運的是，我們已經有了一個很好的<code>markTable()</code>函式，可以輕鬆地跟蹤它們。</p>
+<blockquote>
+<p>Less critical but still important is printing.</p>
+</blockquote>
+<p>不太關鍵但仍然重要的是列印。</p>
+<p><em><u>object.c，在printObject()方法中新增程式碼：</u></em></p>
+<pre><code class="language-c">      break;
+    // 新增部分開始  
+    case OBJ_INSTANCE:
+      printf("%s instance",
+             AS_INSTANCE(value)-&gt;klass-&gt;name-&gt;chars);
+      break;
+    // 新增部分結束  
+    case OBJ_NATIVE:
+</code></pre>
+<blockquote>
+<p>An instance prints its name followed by “instance”. (The “instance” part is mainly so that classes and instances don’t print the same.)</p>
+</blockquote>
+<p>例項會列印它的名稱，並在後面加上“instance”<sup class="footnote-reference" id="fr-6-1"><a href="#footnote-6">6</a></sup>。（“instance”部分主要是為了使類和例項不會打印出相同的內容）</p>
+<blockquote>
+<p>The real fun happens over in the interpreter. Lox has no special <code>new</code> keyword. The way to create an instance of a class is to invoke the class itself as if it were a function. The runtime already supports function calls, and it checks the type of object being called to make sure the user doesn’t try to invoke a number or other invalid type.</p>
+</blockquote>
+<p>真正有趣的部分在直譯器中，Lox沒有特殊的<code>new</code>關鍵字。建立類例項的方法是呼叫類本身，就像呼叫函式一樣。執行時已經支援函式呼叫，它會檢查被呼叫物件的型別，以確保使用者不會試圖呼叫數字或其它無效型別。</p>
+<blockquote>
+<p>We extend that runtime checking with a new case.</p>
+</blockquote>
+<p>我們用一個新的case分支來擴充套件執行時的檢查。</p>
+<p><em><u>vm.c，在callValue()方法中新增程式碼：</u></em></p>
+<pre><code class="language-c">    switch (OBJ_TYPE(callee)) {
+      // 新增部分開始
+      case OBJ_CLASS: {
+        ObjClass* klass = AS_CLASS(callee);
+        vm.stackTop[-argCount - 1] = OBJ_VAL(newInstance(klass));
+        return true;
+      }
+      // 新增部分結束
+      case OBJ_CLOSURE:
+</code></pre>
+<blockquote>
+<p>If the value being called—the object that results when evaluating the expression to the left of the opening parenthesis—is a class, then we treat it as a constructor call. We create a new instance of the called class and store the result on the stack.</p>
+</blockquote>
+<p>如果被呼叫的值（在左括號左邊的表示式求值得到的物件）是一個類，則將其視為一個建構函式呼叫。我們建立一個被呼叫類的新例項，並將結果儲存在棧中<sup class="footnote-reference" id="fr-7-1"><a href="#footnote-7">7</a></sup>。</p>
+<blockquote>
+<p>We’re one step farther. Now we can define classes and create instances of them.</p>
+</blockquote>
+<p>我們又前進了一步。現在我們可以定義類並建立它們的例項了。</p>
+<pre><code class="language-c">class Brioche {}
+print Brioche();
+</code></pre>
+<blockquote>
+<p>Note the parentheses after <code>Brioche</code> on the second line now. This prints “Brioche instance”.</p>
+</blockquote>
+<p>注意第二行<code>Brioche</code>後面的括號。這裡會列印“Brioche instance”。</p>
+<blockquote>
+<h2 id="27--4-get-and-set-expressions"><a class="header" href="#27--4-get-and-set-expressions">27 . 4 Get and Set Expressions</a></h2>
+</blockquote>
+<h2 id="274-get和set表示式"><a class="header" href="#274-get和set表示式">27.4 Get和SET表示式</a></h2>
+<blockquote>
+<p>Our object representation for instances can already store state, so all that remains is exposing that functionality to the user. Fields are accessed and modified using get and set expressions. Not one to break with tradition, Lox uses the classic “dot” syntax:</p>
+</blockquote>
+<p>例項的物件表示形式已經可以儲存狀態了，所以剩下的就是把這個功能暴露給使用者。欄位是使用get和set表示式進行訪問和修改的。Lox並不喜歡打破傳統，這裡也沿用了經典的“點”語法：</p>
+<pre><code class="language-c">eclair.filling = "pastry creme";
+print eclair.filling;
+</code></pre>
+<blockquote>
+<p>The period—full stop for my English friends—works sort of like an infix operator. There is an expression to the left that is evaluated first and produces an instance. After that is the <code>.</code> followed by a field name. Since there is a preceding operand, we hook this into the parse table as an infix expression.</p>
+</blockquote>
+<p>句號——對英國朋友來說是句號——其作用有點像一箇中綴運算子<sup class="footnote-reference" id="fr-8-1"><a href="#footnote-8">8</a></sup>。左邊有一個表示式，首先被求值併產生一個例項。之後是<code>.</code>後跟一個欄位名稱。由於前面有一個運算元，我們將其作為中綴表示式放到解析表中。</p>
+<p><em><u>compiler.c，替換1行：</u></em></p>
+<pre><code class="language-c">  [TOKEN_COMMA]         = {NULL,     NULL,   PREC_NONE},
+  // 替換部分開始
+  [TOKEN_DOT]           = {NULL,     dot,    PREC_CALL},
+  // 替換部分結束
+  [TOKEN_MINUS]         = {unary,    binary, PREC_TERM},
+</code></pre>
+<blockquote>
+<p>As in other languages, the <code>.</code> operator binds tightly, with precedence as high as the parentheses in a function call. After the parser consumes the dot token, it dispatches to a new parse function.</p>
+</blockquote>
+<p>和其它語言一樣，<code>.</code>運算子繫結緊密，其優先順序和函式呼叫中的括號一樣高。解析器消費了點標識之後，會分發給一個新的解析函式。</p>
+<p><em><u>compiler.c，在call()方法後新增程式碼：</u></em></p>
+<pre><code class="language-c">static void dot(bool canAssign) {
+  consume(TOKEN_IDENTIFIER, "Expect property name after '.'.");
+  uint8_t name = identifierConstant(&amp;parser.previous);
+
+  if (canAssign &amp;&amp; match(TOKEN_EQUAL)) {
+    expression();
+    emitBytes(OP_SET_PROPERTY, name);
+  } else {
+    emitBytes(OP_GET_PROPERTY, name);
+  }
+}
+</code></pre>
+<blockquote>
+<p>The parser expects to find a property name immediately after the dot. We load that token’s lexeme into the constant table as a string so that the name is available at runtime.</p>
+</blockquote>
+<p>解析器希望在點運算子後面立即找到一個屬性名稱<sup class="footnote-reference" id="fr-9-1"><a href="#footnote-9">9</a></sup>。我們將該詞法標識的詞素作為字串載入到常量表中，這樣該名稱在執行時就是可用的。</p>
+<blockquote>
+<p>We have two new expression forms—getters and setters—that this one function handles. If we see an equals sign after the field name, it must be a set expression that is assigning to a field. But we don’t <em>always</em> allow an equals sign after the field to be compiled. Consider:</p>
+</blockquote>
+<p>我們將兩種新的表示式形式——getter和setter——都交由這一個函式處理。如果我們看到欄位名稱後有一個等號，那麼它一定是一個賦值給欄位的set表示式。但我們並不總是允許編譯欄位後面的等號。考慮一下：</p>
+<pre><code class="language-c">a + b.c = 3
+</code></pre>
+<blockquote>
+<p>This is syntactically invalid according to Lox’s grammar, which means our Lox implementation is obligated to detect and report the error. If <code>dot()</code> silently parsed the <code>= 3</code> part, we would incorrectly interpret the code as if the user had written:</p>
+</blockquote>
+<p>根據Lox的文法，這在語法上是無效的，這意味著我們的Lox實現有義務檢測和報告這個錯誤。如果<code>dot()</code>默默地解析<code>=3</code>的部分，我們就會錯誤地解釋程式碼，就像使用者寫的是：</p>
+<pre><code class="language-c">a + (b.c = 3)
+</code></pre>
+<blockquote>
+<p>The problem is that the <code>=</code> side of a set expression has much lower precedence than the <code>.</code> part. The parser may call <code>dot()</code> in a context that is too high precedence to permit a setter to appear. To avoid incorrectly allowing that, we parse and compile the equals part only when <code>canAssign</code> is true. If an equals token appears when <code>canAssign</code> is false, <code>dot()</code> leaves it alone and returns. In that case, the compiler will eventually unwind up to <code>parsePrecedence()</code>, which stops at the unexpected <code>=</code> still sitting as the next token and reports an error.</p>
+</blockquote>
+<p>問題是，set表示式中的<code>=</code>側優先順序遠低於<code>.</code>部分。解析器有可能會在一個優先順序高到不允許出現setter的上下文中呼叫<code>dot()</code>。為了避免錯誤地允許這種情況，我們只有在<code>canAssign</code>為true時才去解析和編譯等號部分。如果在<code>canAssign</code>為false時出現等號標識，<code>dot()</code>會保留它並返回。在這種情況下，編譯器最終會進入<code>parsePrecedence()</code>，而該方法會在非預期的<code>=</code>（仍然作為下一個標識）處停止，並報告一個錯誤。</p>
+<blockquote>
+<p>If we find an <code>=</code> in a context where it <em>is</em> allowed, then we compile the expression that follows. After that, we emit a new <code>OP_SET_PROPERTY</code> instruction. That takes a single operand for the index of the property name in the constant table. If we didn’t compile a set expression, we assume it’s a getter and emit an <code>OP_GET_PROPERTY</code> instruction, which also takes an operand for the property name.</p>
+</blockquote>
+<p>如果我們在允許使用等號的上下文中找到<code>=</code>，則編譯後面的表示式。之後，我們發出一條新的<code>OP_SET_PROPERTY</code>指令<sup class="footnote-reference" id="fr-10-1"><a href="#footnote-10">10</a></sup>。這條指令接受一個運算元，作為屬性名稱在常量表中的索引。如果我們沒有編譯set表示式，就假定它是getter，併發出一條<code>OP_GET_PROPERTY</code>指令，它也接受一個運算元作為屬性名。</p>
+<blockquote>
+<p>Now is a good time to define these two new instructions.</p>
+</blockquote>
+<p>現在是定義這兩條新指令的好時機。</p>
+<p><em><u>chunk.h，在列舉OpCode中新增程式碼：</u></em></p>
+<pre><code class="language-c">  OP_SET_UPVALUE,
+  // 新增部分開始
+  OP_GET_PROPERTY,
+  OP_SET_PROPERTY,
+  // 新增部分結束
+  OP_EQUAL,
+</code></pre>
+<blockquote>
+<p>And add support for disassembling them:</p>
+</blockquote>
+<p>並在反彙編程式中為它們新增支援：</p>
+<p><em><u>debug.c，在disassembleInstruction()方法中新增程式碼：</u></em></p>
+<pre><code class="language-c">      return byteInstruction("OP_SET_UPVALUE", chunk, offset);
+    // 新增部分開始
+    case OP_GET_PROPERTY:
+      return constantInstruction("OP_GET_PROPERTY", chunk, offset);
+    case OP_SET_PROPERTY:
+      return constantInstruction("OP_SET_PROPERTY", chunk, offset);
+    // 新增部分結束
+    case OP_EQUAL:
+</code></pre>
+<blockquote>
+<h3 id="27--4--1-interpreting-getter-and-setter-expressions"><a class="header" href="#27--4--1-interpreting-getter-and-setter-expressions">27 . 4 . 1 Interpreting getter and setter expressions</a></h3>
+</blockquote>
+<h3 id="2741-解釋getter和setter表示式"><a class="header" href="#2741-解釋getter和setter表示式">27.4.1 解釋getter和setter表示式</a></h3>
+<blockquote>
+<p>Sliding over to the runtime, we’ll start with get expressions since those are a little simpler.</p>
+</blockquote>
+<p>進入執行時，我們從獲取表示式開始，因為它們更簡單一些。</p>
+<p><em><u>vm.c，在run()方法中新增程式碼：</u></em></p>
+<pre><code class="language-c">      }
+      // 新增部分開始
+      case OP_GET_PROPERTY: {
+        ObjInstance* instance = AS_INSTANCE(peek(0));
+        ObjString* name = READ_STRING();
+
+        Value value;
+        if (tableGet(&amp;instance-&gt;fields, name, &amp;value)) {
+          pop(); // Instance.
+          push(value);
+          break;
+        }
+      }
+      // 新增部分結束
+      case OP_EQUAL: {
+</code></pre>
+<blockquote>
+<p>When the interpreter reaches this instruction, the expression to the left of the dot has already been executed and the resulting instance is on top of the stack. We read the field name from the constant pool and look it up in the instance’s field table. If the hash table contains an entry with that name, we pop the instance and push the entry’s value as the result.</p>
+</blockquote>
+<p>當直譯器到達這條指令時，點左邊的表示式已經被執行，得到的例項就在棧頂。我們從常量池中讀取欄位名，並在例項的欄位表中查詢該名稱。如果雜湊表中包含具有該名稱的條目，我們就彈出例項，並將該條目的值作為結果壓入棧。</p>
+<blockquote>
+<p>Of course, the field might not exist. In Lox, we’ve defined that to be a runtime error. So we add a check for that and abort if it happens.</p>
+</blockquote>
+<p>當然，這個欄位可能不存在。在Lox中，我們將其定義為執行時錯誤。所以我們添加了一個檢查，如果發生這種情況就中止。</p>
+<p><em><u>vm.c，在run()方法中新增程式碼：</u></em></p>
+<pre><code class="language-c">          push(value);
+          break;
+        }
+        // 新增部分開始
+        runtimeError("Undefined property '%s'.", name-&gt;chars);
+        return INTERPRET_RUNTIME_ERROR;
+        // 新增部分結束
+      }
+      case OP_EQUAL: {
+</code></pre>
+<blockquote>
+<p>There is another failure mode to handle which you’ve probably noticed. The above code assumes the expression to the left of the dot did evaluate to an ObjInstance. But there’s nothing preventing a user from writing this:</p>
+</blockquote>
+<p>你可能已經注意到了，還有另一種需要處理的失敗模式。上面的程式碼中假定了點左邊的表示式計算結果確實是一個ObjInstance。但是沒有什麼可以阻止使用者這樣寫：</p>
+<pre><code class="language-javascript">var obj = "not an instance";
+print obj.field;
+</code></pre>
+<blockquote>
+<p>The user’s program is wrong, but the VM still has to handle it with some grace. Right now, it will misinterpret the bits of the ObjString as an ObjInstance and, I don’t know, catch on fire or something definitely not graceful.</p>
+</blockquote>
+<p>使用者的程式是錯誤的，但是虛擬機器仍然需要以某種優雅的方式來處理它。現在，它會把ObjString 資料誤認為是一個ObjInstance ，並且，我不確定，程式碼起火或發生其它事情絕對是不優雅的。</p>
+<blockquote>
+<p>In Lox, only instances are allowed to have fields. You can’t stuff a field onto a string or number. So we need to check that the value is an instance before accessing any fields on it.</p>
+</blockquote>
+<p>在Lox中，只有例項才允許有欄位。你不能把欄位塞到字串或數字中。因此，在訪問某個值上的任何欄位之前，檢查該值是否是一個例項<sup class="footnote-reference" id="fr-11-1"><a href="#footnote-11">11</a></sup>。</p>
+<p><em><u>vm.c，在run()方法中新增程式碼：</u></em></p>
+<pre><code class="language-c">      case OP_GET_PROPERTY: {
+        // 新增部分開始
+        if (!IS_INSTANCE(peek(0))) {
+          runtimeError("Only instances have properties.");
+          return INTERPRET_RUNTIME_ERROR;
+        }
+        // 新增部分結束
+        ObjInstance* instance = AS_INSTANCE(peek(0));
+</code></pre>
+<blockquote>
+<p>If the value on the stack isn’t an instance, we report a runtime error and safely exit.</p>
+</blockquote>
+<p>如果棧中的值不是例項，則報告一個執行時錯誤並安全退出。</p>
+<blockquote>
+<p>Of course, get expressions are not very useful when no instances have any fields. For that we need setters.</p>
+</blockquote>
+<p>當然，如果例項沒有任何欄位，get表示式就不太有用了。因此，我們需要setter。</p>
+<p><em><u>vm.c，在run()方法中新增程式碼：</u></em></p>
+<pre><code class="language-c">        return INTERPRET_RUNTIME_ERROR;
+      }
+      // 新增部分開始
+      case OP_SET_PROPERTY: {
+        ObjInstance* instance = AS_INSTANCE(peek(1));
+        tableSet(&amp;instance-&gt;fields, READ_STRING(), peek(0));
+        Value value = pop();
+        pop();
+        push(value);
+        break;
+      }
+      // 新增部分結束
+      case OP_EQUAL: {
+</code></pre>
+<blockquote>
+<p>This is a little more complex than <code>OP_GET_PROPERTY</code>. When this executes, the top of the stack has the instance whose field is being set and above that, the value to be stored. Like before, we read the instruction’s operand and find the field name string. Using that, we store the value on top of the stack into the instance’s field table.</p>
+</blockquote>
+<p>這比<code>OP_GET_PROPERTY</code>要複雜一些。當執行此指令時，棧頂有待設定欄位的例項，在該例項之上有要儲存的值。與前面一樣，我們讀取指令的運算元，並查詢欄位名稱字串。使用該方法，我們將棧頂的值儲存到例項的欄位表中。</p>
+<blockquote>
+<p>After that is a little stack juggling. We pop the stored value off, then pop the instance, and finally push the value back on. In other words, we remove the <em>second</em> element from the stack while leaving the top alone. A setter is itself an expression whose result is the assigned value, so we need to leave that value on the stack. Here’s what I mean:</p>
+</blockquote>
+<p>在那之後是一些棧技巧。我們將儲存的值彈出，然後彈出例項，最後再把值壓回棧中。換句話說，我們從棧中刪除第二個元素，而保留最上面的元素。setter本身是一個表示式，其結果就是所賦的值，所以我們需要將值保留在棧上。我的意思是<sup class="footnote-reference" id="fr-12-1"><a href="#footnote-12">12</a></sup>：</p>
+<pre><code class="language-javascript">class Toast {}
+var toast = Toast();
+print toast.jam = "grape"; // Prints "grape".
+</code></pre>
+<blockquote>
+<p>Unlike when reading a field, we don’t need to worry about the hash table not containing the field. A setter implicitly creates the field if needed. We do need to handle the user incorrectly trying to store a field on a value that isn’t an instance.</p>
+</blockquote>
+<p>與讀取欄位不同，我們不需要擔心雜湊表中不包含該欄位。如果需要的話，setter會隱式地建立這個欄位。我們確實需要處理使用者不正確地試圖在非例項的值上儲存欄位的情況。</p>
+<p><em><u>vm.c，在run()方法中新增程式碼：</u></em></p>
+<pre><code class="language-c">      case OP_SET_PROPERTY: {
+        // 新增部分開始
+        if (!IS_INSTANCE(peek(1))) {
+          runtimeError("Only instances have fields.");
+          return INTERPRET_RUNTIME_ERROR;
+        }
+        // 新增部分結束
+        ObjInstance* instance = AS_INSTANCE(peek(1));
+</code></pre>
+<blockquote>
+<p>Exactly like with get expressions, we check the value’s type and report a runtime error if it’s invalid. And, with that, the stateful side of Lox’s support for object-oriented programming is in place. Give it a try:</p>
+</blockquote>
+<p>就像get表示式一樣，我們檢查值的型別，如果無效就報告一個執行時錯誤。這樣一來，Lox對面向物件程式設計中有狀態部分的支援就到位了。試一試：</p>
+<pre><code class="language-javascript">class Pair {}
+
+var pair = Pair();
+pair.first = 1;
+pair.second = 2;
+print pair.first + pair.second; // 3.
+</code></pre>
+<blockquote>
+<p>This doesn’t really feel very <em>object</em>-oriented. It’s more like a strange, dynamically typed variant of C where objects are loose struct-like bags of data. Sort of a dynamic procedural language. But this is a big step in expressiveness. Our Lox implementation now lets users freely aggregate data into bigger units. In the next chapter, we will breathe life into those inert blobs.</p>
+</blockquote>
+<p>這感覺不太面向物件。它更像是一種奇怪的、動態型別的C語言變體，其中的物件是鬆散的類似結構體的資料包。有點像動態過程化語言。但這是表達能力的一大進步。我們的Lox實現現在允許使用者自由地將資料聚合成更大的單元。在下一章中，我們將為這些遲緩的資料注入活力。</p>
+<hr />
+<h2 id="習題"><a class="header" href="#習題">習題</a></h2>
+<ol>
+<li>
+<blockquote>
+<p>Trying to access a non-existent field on an object immediately aborts the entire VM. The user has no way to recover from this runtime error, nor is there any way to see if a field exists <em>before</em> trying to access it. It’s up to the user to ensure on their own that only valid fields are read.</p>
+<p>How do other dynamically typed languages handle missing fields? What do you think Lox should do? Implement your solution.</p>
+</blockquote>
+<p>試圖訪問一個物件上不存在的欄位會立即中止整個虛擬機器。使用者沒有辦法從這個執行時錯誤中恢復過來，也沒有辦法在試圖訪問一個欄位之前看它是否存在。需要由使用者自己來確保只讀取有效欄位。</p>
+<p>其它動態型別語言是如何處理缺少欄位的？你認為Lox應該怎麼做？實現你的解決方案。</p>
+</li>
+<li>
+<blockquote>
+<p>Fields are accessed at runtime by their <em>string</em> name. But that name must always appear directly in the source code as an <em>identifier token</em>. A user program cannot imperatively build a string value and then use that as the name of a field. Do you think they should be able to? Devise a language feature that enables that and implement it.</p>
+</blockquote>
+<p>欄位在執行時是透過它們的<em>字串</em>名稱來訪問的。但是該名稱必須總是作為識別符號直接出現在原始碼中。使用者程式不能命令式地構建字串值，然後將其用作欄位名。你認為應該這樣做嗎？那就設計一種語言特性來實現它。</p>
+</li>
+<li>
+<blockquote>
+<p>Conversely, Lox offers no way to <em>remove</em> a field from an instance. You can set a field’s value to <code>nil</code>, but the entry in the hash table is still there. How do other languages handle this? Choose and implement a strategy for Lox.</p>
+</blockquote>
+<p>反過來說，Lox沒有提供從例項中<em>刪除</em>欄位的方法。你可以將一個欄位的值設定為<code>nil</code>，但雜湊表中的條目仍然存在。其它語言如何處理這個問題？為Lox選擇一個策略並實現。</p>
+</li>
+<li>
+<blockquote>
+<p>Because fields are accessed by name at runtime, working with instance state is slow. It’s technically a constant-time operation—thanks, hash tables—but the constant factors are relatively large. This is a major component of why dynamic languages are slower than statically typed ones.</p>
+<p>How do sophisticated implementations of dynamically typed languages cope with and optimize this?</p>
+</blockquote>
+<p>因為欄位在執行時是按照名稱訪問的，所以對例項狀態的操作是很慢的。從技術上講，這是一個常量時間的操作（感謝雜湊表），但是常量因子比較大。這就是動態語言比靜態語言慢的一個主要原因。</p>
+<p>動態型別語言的複雜實現是如何應對和最佳化這一問題的？</p>
+</li>
+</ol>
+<hr>
+<ol class="footnote-definition"><li id="footnote-1">
+<p>那些對面向物件程式設計有強烈看法的人——讀作“每個人”——往往認為OOP意味著一些非常具體的語言特性清單，但實際上有一個完整的空間可以探索，而每種語言都有自己的成分和配方。<BR>Self有物件但沒有類。CLOS有方法，當沒有把它們附加到特定的類中。C++最初沒有執行時多型——沒有虛方法。Python有多重繼承，但Java沒有。Ruby把方法附加在類上，但你也可以在單個物件上定義方法。 <a href="#fr-1-1">↩</a></p>
+</li>
+<li id="footnote-2">
+<p><img src="27.%E9%A1%9E%E8%88%87%E4%BE%8B%E9%A0%85/klass.png" alt="&#39;Klass&#39; in a zany kidz font." />我將變數命名為“klass”，不僅僅是為了給虛擬機器一種古怪的幼兒園的"Kidz Korner "感覺。它使得clox更容易被編譯為C++，而C++中“class”是一個保留字。 <a href="#fr-2-1">↩</a></p>
+</li>
+<li id="footnote-3">
+<p>我們可以讓類宣告成為表示式而不是語句——比較它們本質上是一個產生值的字面量。然後使用者必須自己顯式地將類繫結到一個變數，比如：<code>var Pie = class {}</code>。這有點像lambda函式，但只是針對類的。但由於我們通常希望類被命名，所以將其視為宣告是有意義的。 <a href="#fr-3-1">↩</a></p>
+</li>
+<li id="footnote-4">
+<p>“區域性（Local）”類——在函式或塊主體中宣告的類，是一個不尋常的概念。許多語言根本不允許這一特性。但由於Lox是一種動態型別指令碼語言，它會對程式的頂層程式碼和函式以及塊的主體進行統一處理。類只是另一種宣告，既然你可以在塊中宣告變數和函式，那你也可以在塊中宣告類。 <a href="#fr-4-1">↩</a></p>
+</li>
+<li id="footnote-5">
+<p>能夠在執行時自由地向物件新增欄位，是大多數動態語言和靜態語言之間的一個很大的實際區別。靜態型別語言通常要求顯式宣告欄位。這樣，編譯器就確切知道每個例項有哪些欄位。它可以利用這一點來確定每個例項所需的精確記憶體量，以及每個欄位在記憶體中的偏移量。<BR>在Lox和其它動態語言中，訪問欄位通常是一次雜湊表查詢。常量時間複雜度，但仍然是相當重的。在C++這樣的語言中，訪問一個欄位就像對指標偏移一個整數常量一樣快。 <a href="#fr-5-1">↩</a></p>
+</li>
+<li id="footnote-6">
+<p>大多數面向物件的語言允許類定義某種形式的<code>toString()</code>方法，讓該類指定如何將其例項轉換為字串並打印出來。如果Lox不是一門玩具語言，我也想要支援它。 <a href="#fr-6-1">↩</a></p>
+</li>
+<li id="footnote-7">
+<p>我們暫時忽略傳遞給呼叫的所有引數。在下一章新增對初始化器的支援時，我們會重新審視這一段程式碼。 <a href="#fr-7-1">↩</a></p>
+</li>
+<li id="footnote-8">
+<p>我說“有點”是因為<code>.</code>右邊的不是表示式，而是一個識別符號，其語義由get或set表示式本身來處理。它實際上更接近於一個字尾表示式。 <a href="#fr-8-1">↩</a></p>
+</li>
+<li id="footnote-9">
+<p>編譯器在這裡使用“屬性（property）”而不是“欄位（field）”，因為，請記住，Lox還允許你使用點語法來訪問一個方法而不呼叫它。“屬性”是一個通用術語，我們用來指代可以在例項上訪問的任何命名實體。欄位是基於例項狀態的屬性子集。 <a href="#fr-9-1">↩</a></p>
+</li>
+<li id="footnote-10">
+<p>你不能設定非欄位屬性，所以我認為這個指令本該是<code>OP_SET_FIELD</code>，但是我認為它與get指令一致看起來更漂亮。 <a href="#fr-10-1">↩</a></p>
+</li>
+<li id="footnote-11">
+<p>Lox<em>可以</em>支援向其它型別的值中新增欄位。這是我們的語言，我們可以做我們想做的。但這可能是個壞主意。它大大增加了實現的複雜性，從而損害了效能——例如，字串駐留變得更加困難。<BR>此外，它還引起了關於數值的相等和同一性的複雜語義問題。如果我給數字<code>3</code>附加一個欄位，那麼<code>1+2</code>的結果也有這個欄位嗎？如果是的話，實現上如何跟蹤它？如果不是，這兩個結果中的“3”仍然被認為是相等的嗎？ <a href="#fr-11-1">↩</a></p>
+</li>
+<li id="footnote-12">
+<p>棧的操作是這樣的：<img src="27.%E9%A1%9E%E8%88%87%E4%BE%8B%E9%A0%85/stack.png" alt="Popping two values and then pushing the first value back on the stack." /> <a href="#fr-12-1">↩</a></p>
+</li>
+</ol>
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../../content/26.垃圾回收.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../../content/28.方法和初始化器.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../../content/26.垃圾回收.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../../content/28.方法和初始化器.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+
+    </div>
+    </body>
+</html>

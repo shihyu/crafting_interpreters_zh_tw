@@ -1,0 +1,1298 @@
+<!DOCTYPE HTML>
+<html lang="zh" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>30.優化 - 手撸解释器教程</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="../highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="../tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "../";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "../searchindex.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">手撸解释器教程</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="30最佳化-optimization"><a class="header" href="#30最佳化-optimization">30.最佳化 Optimization</a></h1>
+<blockquote>
+<p>The evening’s the best part of the day. You’ve done your day’s work. Now you can put your feet up and enjoy it.</p>
+<p>​													——Kazuo Ishiguro, <em>The Remains of the Day</em></p>
+</blockquote>
+<p>夜晚是一天中最美好的時光。你已經完成了一天的工作，現在你可以雙腿擱平，享受一下。（石黑一雄，《長日將盡》）</p>
+<blockquote>
+<p>If I still lived in New Orleans, I’d call this chapter a <em>lagniappe</em>, a little something extra given for free to a customer. You’ve got a whole book and a complete virtual machine already, but I want you to have some more fun hacking on clox. This time, we’re going for pure performance. We’ll apply two very different optimizations to our virtual machine. In the process, you’ll get a feel for measuring and improving the performance of a language implementation—or any program, really.</p>
+</blockquote>
+<p>如果我還住在新奧爾良，我會把這一章稱為<em>lagniappe</em>（小贈品），即免費送給顧客的一點額外的東西。你已經有了一整本書和一個完整的虛擬機器，但我希望你能在clox上獲得更多的樂趣。這一次，我們要追求的是純粹的效能。我們將對虛擬機器應用兩種截然不同的最佳化。在這個過程中，你將瞭解如何測量和提高語言實現的效能——或者說任何程式的效能，真的。</p>
+<blockquote>
+<h2 id="30--1-measuring-performance"><a class="header" href="#30--1-measuring-performance">30 . 1 Measuring Performance</a></h2>
+</blockquote>
+<h2 id="301-測量效能"><a class="header" href="#301-測量效能">30.1 測量效能</a></h2>
+<blockquote>
+<p><strong>Optimization</strong> means taking a working application and improving its performance. An optimized program does the same thing, it just takes less resources to do so. The resource we usually think of when optimizing is runtime speed, but it can also be important to reduce memory usage, startup time, persistent storage size, or network bandwidth. All physical resources have some cost—even if the cost is mostly in wasted human time—so optimization work often pays off.</p>
+</blockquote>
+<p><strong>最佳化</strong>是指拿到一個基本可用的應用程式並提高其效能。一個最佳化後的程式能做到同樣的事情，只是需要更少的資源。我們在最佳化時通常考慮的資源是執行時速度，但減少記憶體使用、啟動時間、持久化儲存大小或網路頻寬也很重要。所有的物理資源都有一定的成本——即使成本主要是浪費人力時間，所以最佳化工作通常都能得到回報。</p>
+<blockquote>
+<p>There was a time in the early days of computing that a skilled programmer could hold the entire hardware architecture and compiler pipeline in their head and understand a program’s performance just by thinking real hard. Those days are long gone, separated from the present by microcode, cache lines, branch prediction, deep compiler pipelines, and mammoth instruction sets. We like to pretend C is a “low-level” language, but the stack of technology between</p>
+<pre><code>printf("Hello, world!");
+</code></pre>
+<p>and a greeting appearing on screen is now perilously tall.</p>
+</blockquote>
+<p>在計算機早期，曾經有一段時間，一個熟練的程式設計師可以把整個硬體架構和編譯器管道記在腦子裡，只需要認真思考就可以瞭解程式的效能。那些日子早已一去不復返了，現在已經被微碼、快取線、分支預測、深層編譯器管道和龐大的指令集所分隔。我們喜歡假裝C語言是一種“低階”語言，但在<code>printf("Hello, world!");</code>和螢幕上出現的問候語之間的技術棧現在已經很高了。</p>
+<blockquote>
+<p>Optimization today is an empirical science. Our program is a border collie sprinting through the hardware’s obstacle course. If we want her to reach the end faster, we can’t just sit and ruminate on canine physiology until enlightenment strikes. Instead, we need to <em>observe</em> her performance, see where she stumbles, and then find faster paths for her to take.</p>
+</blockquote>
+<p>今天的最佳化是一門經驗科學。我們的程式是一隻在硬體障礙賽中衝刺的邊牧。如果我們想讓她更快地到達終點，我們不能只是坐在那裡思考犬類的生理機能，等著靈光乍現。相反，我們需要<em>觀察</em>她的表現，看看她在那裡出錯，然後為她找到更快的路徑。</p>
+<blockquote>
+<p>Much like agility training is particular to one dog and one obstacle course, we can’t assume that our virtual machine optimizations will make <em>all</em> Lox programs run faster on <em>all</em> hardware. Different Lox programs stress different areas of the VM, and different architectures have their own strengths and weaknesses.</p>
+</blockquote>
+<p>就像敏捷訓練要真的一隻狗和一項障礙賽，我們不能假設我們的虛擬機器最佳化會使所有的Lox程式在所有硬體上執行得更快。不同的Lox程式側重虛擬機器的不同領域，不同的架構也有其自身的優勢和劣勢。</p>
+<h3 id="30--1--1-benchmarks"><a class="header" href="#30--1--1-benchmarks">30 . 1 . 1 Benchmarks</a></h3>
+<blockquote>
+<p>When we add new functionality, we validate correctness by writing tests—Lox programs that use a feature and validate the VM’s behavior. Tests pin down semantics and ensure we don’t break existing features when we add new ones. We have similar needs when it comes to performance:</p>
+</blockquote>
+<p>當我們新增新功能時，我們透過編寫測試來驗證正確性——使用某個特性並驗證虛擬機器行為的Lox程式。測試可以約束語義，並確保在新增新功能時，不會破壞現有的特性。在效能方面，我們也有類似的需求：</p>
+<blockquote>
+<ol>
+<li>How do we validate that an optimization <em>does</em> improve performance, and by how much?</li>
+<li>How do we ensure that other unrelated changes don’t <em>regress</em> performance?</li>
+</ol>
+</blockquote>
+<ol>
+<li>我們如何驗證一項最佳化確實提高了效能，以及提高了多少？</li>
+<li>我們如何確保其它不相關的修改不會使效能退步？</li>
+</ol>
+<blockquote>
+<p>The Lox programs we write to accomplish those goals are <strong>benchmarks</strong>. These are carefully crafted programs that stress some part of the language implementation. They measure not <em>what</em> the program does, but how <em>long</em> it takes to do it.</p>
+</blockquote>
+<p>我們為實現這些目標而編寫的Lox程式就是<strong>基準</strong>。這些都是精心設計的程式，側重於語言實現的某些部分。它們測量的不是程式<em>做了什麼</em>，而是做完這些需要<em>多久</em><sup class="footnote-reference" id="fr-1-1"><a href="#footnote-1">1</a></sup>。</p>
+<blockquote>
+<p>By measuring the performance of a benchmark before and after a change, you can see what your change does. When you land an optimization, all of the tests should behave exactly the same as they did before, but hopefully the benchmarks run faster.</p>
+</blockquote>
+<p>透過測量修改前後的基準效能，你可以看到修改的效果。當你完成最佳化時，所有測試都應該與之前的行為完全一樣，只是希望基準程式執行更快一點。</p>
+<blockquote>
+<p>Once you have an entire <em>suite</em> of benchmarks, you can measure not just <em>that</em> an optimization changes performance, but on which <em>kinds</em> of code. Often you’ll find that some benchmarks get faster while others get slower. Then you have to make hard decisions about what kinds of code your language implementation optimizes for.</p>
+</blockquote>
+<p>一旦你有了一整套的基準測試，你不僅可以衡量某個最佳化是否改變了效能，而且可以衡量改變了哪類程式碼的效能。通常，你會發現一些基準測試變得更快，而另一些則變得更慢。然後你必須作出艱難的決策：你的語言實現要對哪種程式碼進行最佳化。</p>
+<blockquote>
+<p>The suite of benchmarks you choose to write is a key part of that decision. In the same way that your tests encode your choices around what correct behavior looks like, your benchmarks are the embodiment of your priorities when it comes to performance. They will guide which optimizations you implement, so choose your benchmarks carefully, and don’t forget to periodically reflect on whether they are helping you reach your larger goals.</p>
+</blockquote>
+<p>你選擇編寫的基準套件是該決策的一部分。就像你的測試程式碼編碼了關於正確程式碼行為的選擇，你的基準測試是你在效能方面側重點的體現。它們將指導你實現哪些最佳化，所以要仔細選擇你的基準測試，並且不要忘記定期反思它們是否能幫助你實現更大的目標<sup class="footnote-reference" id="fr-2-1"><a href="#footnote-2">2</a></sup>。</p>
+<blockquote>
+<p>Benchmarking is a subtle art. Like tests, you need to balance not overfitting to your implementation while ensuring that the benchmark does actually tickle the code paths that you care about. When you measure performance, you need to compensate for variance caused by CPU throttling, caching, and other weird hardware and operating system quirks. I won’t give you a whole sermon here, but treat benchmarking as its own skill that improves with practice.</p>
+</blockquote>
+<p>基準測試是一門微妙的藝術。就像測試一樣，你需要在不過度擬合語言實現的同時，確保基準測試確實適合你所關心的程式碼路徑。在測量效能時，你需要補償由CPU節流、快取和其它奇怪的硬體和作業系統特性造成的差異。我不會在這裡給你一個完整的說教，但請把基準測試當作可以透過實踐來提高的一門技能。</p>
+<blockquote>
+<h3 id="30--1--2-profiling"><a class="header" href="#30--1--2-profiling">30 . 1 . 2 Profiling</a></h3>
+</blockquote>
+<h3 id="3012-剖析"><a class="header" href="#3012-剖析">30.1.2 剖析</a></h3>
+<blockquote>
+<p>OK, so you’ve got a few benchmarks now. You want to make them go faster. Now what? First of all, let’s assume you’ve done all the obvious, easy work. You are using the right algorithms and data structures—or, at least, you aren’t using ones that are aggressively wrong. I don’t consider using a hash table instead of a linear search through a huge unsorted array “optimization” so much as “good software engineering”.</p>
+</blockquote>
+<p>好的，現在你已經有了一些基準測試。你想讓它們走得更快，現在怎麼辦呢？首先，我們假設你已經完成了所有明顯的、簡單的工作。你使用了正確的演算法和資料結構——或者，至少你沒有使用那些嚴重錯誤的演算法和資料結構。我認為使用雜湊表代替巨大的無序陣列進行線性搜尋不是“最佳化”，而是“良好的軟體工程實現”。</p>
+<blockquote>
+<p>Since the hardware is too complex to reason about our program’s performance from first principles, we have to go out into the field. That means <em>profiling</em>. A <strong>profiler</strong>, if you’ve never used one, is a tool that runs your program and tracks hardware resource use as the code executes. Simple ones show you how much time was spent in each function in your program. Sophisticated ones log data cache misses, instruction cache misses, branch mispredictions, memory allocations, and all sorts of other metrics.</p>
+</blockquote>
+<p>由於硬體太過複雜，無法從基本原理推斷出程式的效能，所以我們必須深入實地。這意味著<em>剖析</em>。<strong>剖析器</strong>（如果你從未使用過）是一種工具，可以執行你的程式並在程式碼執行過程中跟蹤硬體資源的使用情況<sup class="footnote-reference" id="fr-3-1"><a href="#footnote-3">3</a></sup>。簡單的剖析器可以向你展示程式中每個函式花費了多少時間。複雜的剖析器則會記錄資料快取缺失、指令快取缺失、分支預測錯誤、記憶體分配和其它各種指標。</p>
+<blockquote>
+<p>There are many profilers out there for various operating systems and languages. On whatever platform you program, it’s worth getting familiar with a decent profiler. You don’t need to be a master. I have learned things within minutes of throwing a program at a profiler that would have taken me <em>days</em> to discover on my own through trial and error. Profilers are wonderful, magical tools.</p>
+</blockquote>
+<p>現在有很多針對不同作業系統和語言的剖析器。無論你在什麼平臺上程式設計，熟悉一個像樣的剖析器都是值得的。你不需要稱為大師。我在把程式扔給剖析器的幾分鐘內就學到了很多東西，而這些東西是我自己透過反覆試驗<em>好幾天</em>才發現的。剖析器是一種絕妙、神奇的工具。</p>
+<blockquote>
+<h2 id="30--2-faster-hash-table-probing"><a class="header" href="#30--2-faster-hash-table-probing">30 . 2 Faster Hash Table Probing</a></h2>
+</blockquote>
+<h2 id="302-更快的雜湊表探測"><a class="header" href="#302-更快的雜湊表探測">30.2 更快的雜湊表探測</a></h2>
+<blockquote>
+<p>Enough pontificating, let’s get some performance charts going up and to the right. The first optimization we’ll do, it turns out, is about the <em>tiniest</em> possible change we could make to our VM.</p>
+</blockquote>
+<p>廢話說得夠多了，我們來讓效能圖表趨向右上方（提升效能）。我們要做的第一個最佳化，事實證明也是我們可以對虛擬機器所做出的最微小的改變。</p>
+<blockquote>
+<p>When I first got the bytecode virtual machine that clox is descended from working, I did what any self-respecting VM hacker would do. I cobbled together a couple of benchmarks, fired up a profiler, and ran those scripts through my interpreter. In a dynamically typed language like Lox, a large fraction of user code is field accesses and method calls, so one of my benchmarks looked something like this:</p>
+</blockquote>
+<p>當我第一次讓clox派生的位元組碼虛擬機器工作時，我做了任何有自尊心的虛擬機器駭客都會做的事情。我拼湊了幾個基準測試，啟動了一個剖析器，並透過我的直譯器運行了這些指令碼。在Lox這樣的動態型別語言中，使用者程式碼的很大一部分是欄位訪問和方法呼叫，所以我的其中一個基準測試看起來是這樣的<sup class="footnote-reference" id="fr-4-1"><a href="#footnote-4">4</a></sup>：</p>
+<pre><code class="language-typescript">class Zoo {
+  init() {
+    this.aardvark = 1;
+    this.baboon   = 1;
+    this.cat      = 1;
+    this.donkey   = 1;
+    this.elephant = 1;
+    this.fox      = 1;
+  }
+  ant()    { return this.aardvark; }
+  banana() { return this.baboon; }
+  tuna()   { return this.cat; }
+  hay()    { return this.donkey; }
+  grass()  { return this.elephant; }
+  mouse()  { return this.fox; }
+}
+
+var zoo = Zoo();
+var sum = 0;
+var start = clock();
+while (sum &lt; 100000000) {
+  sum = sum + zoo.ant()
+            + zoo.banana()
+            + zoo.tuna()
+            + zoo.hay()
+            + zoo.grass()
+            + zoo.mouse();
+}
+
+print clock() - start;
+print sum;
+</code></pre>
+<blockquote>
+<p>If you’ve never seen a benchmark before, this might seem ludicrous. <em>What</em> is going on here? The program itself doesn’t intend to do anything useful. What it does do is call a bunch of methods and access a bunch of fields since those are the parts of the language we’re interested in. Fields and methods live in hash tables, so it takes care to populate at least a <em>few</em> interesting keys in those tables. That is all wrapped in a big loop to ensure our profiler has enough execution time to dig in and see where the cycles are going.</p>
+</blockquote>
+<p>如果你以前從未見過基準測試，那這個看起來可能會很好笑。這是怎麼回事？這個程式本身並不打算做任何有用的事情。它所做的就是呼叫一堆方法和訪問一堆欄位，因為這些是語言中我們感興趣的部分。欄位和方法都在雜湊表中，因此需要小心地在這些表中至少填入幾個有趣的鍵<sup class="footnote-reference" id="fr-5-1"><a href="#footnote-5">5</a></sup>。這一切都包裝在一個大迴圈中，以確保我們的剖析器有足夠的執行時間來挖掘和檢視迴圈的走向。</p>
+<blockquote>
+<p>Before I tell you what my profiler showed me, spend a minute taking a few guesses. Where in clox’s codebase do you think the VM spent most of its time? Is there any code we’ve written in previous chapters that you suspect is particularly slow?</p>
+</blockquote>
+<p>在我告訴你剖析器顯示了什麼之前，先花點時間猜一下。你認為在clox的程式碼庫中，虛擬機器的大部分時間都花在了哪裡？我們在前幾章所寫的程式碼中，有沒有你懷疑特別慢的？</p>
+<blockquote>
+<p>Here’s what I found: Naturally, the function with the greatest inclusive time is <code>run()</code>. (<strong>Inclusive time</strong> means the total time spent in some function and all other functions it calls—the total time between when you enter the function and when it returns.) Since <code>run()</code> is the main bytecode execution loop, it drives everything.</p>
+</blockquote>
+<p>下面是我的發現：自然，非獨佔時間最大的函式是<code>run()</code>。（**非獨佔時間（Inclusive time）**是指在某個函式及其呼叫的所有其它函式中所花費的總時間——即從你進入函式到函式返回之間的總時間。）因為<code>run()</code>是主要的位元組碼執行迴圈，它驅動著一切。</p>
+<blockquote>
+<p>Inside <code>run()</code>, there are small chunks of time sprinkled in various cases in the bytecode switch for common instructions like <code>OP_POP</code>, <code>OP_RETURN</code>, and <code>OP_ADD</code>. The big heavy instructions are <code>OP_GET_GLOBAL</code> with 17% of the execution time, <code>OP_GET_PROPERTY</code> at 12%, and <code>OP_INVOKE</code> which takes a whopping 42% of the total running time.</p>
+</blockquote>
+<p>在<code>run()</code>內部，有小塊的時間視不同情況分散在如<code>OP_POP</code>、<code>OP_RETURN</code>、<code>OP_ADD</code>等常見指令中。較大的重磅指令是佔執行時間17%的<code>OP_GET_GLOBAL</code>，佔12%的<code>OP_GET_PROPERTY</code>，還有佔總執行時間的42%的<code>OP_INVOKE</code>。</p>
+<blockquote>
+<p>So we’ve got three hotspots to optimize? Actually, no. Because it turns out those three instructions spend almost all of their time inside calls to the same function: <code>tableGet()</code>. That function claims a whole 72% of the execution time (again, inclusive). Now, in a dynamically typed language, we expect to spend a fair bit of time looking stuff up in hash tables—it’s sort of the price of dynamism. But, still, <em>wow.</em></p>
+</blockquote>
+<p>所以我們有三個熱點需要最佳化？事實上，並不是。因為事實證明，這三條指令幾乎所有的時間都花在了呼叫同一個函式上：<code>tableGet()</code>。這個函式佔用了整整72%的執行時間（同樣的，非獨佔時間）。現在，在一個動態型別語言中，我們預想到會花費相當多的時間在雜湊表中查詢內容——這算是動態的代價，但是，仍舊讓人驚歎。</p>
+<blockquote>
+<h3 id="30--2--1-slow-key-wrapping"><a class="header" href="#30--2--1-slow-key-wrapping">30 . 2 . 1 Slow key wrapping</a></h3>
+</blockquote>
+<h3 id="3021-緩慢的鍵包裝"><a class="header" href="#3021-緩慢的鍵包裝">30.2.1 緩慢的鍵包裝</a></h3>
+<blockquote>
+<p>If you take a look at <code>tableGet()</code>, you’ll see it’s mostly a wrapper around a call to <code>findEntry()</code> where the actual hash table lookup happens. To refresh your memory, here it is in full:</p>
+</blockquote>
+<p>如果檢視一下<code>tableGet()</code>，你會發現它主要是對<code>findEntry()</code>呼叫的一個包裝，而<code>findEntry()</code>是真正進行雜湊表查詢的地方。為了喚起你的記憶，下面是它的全部內容：</p>
+<pre><code class="language-c">static Entry* findEntry(Entry* entries, int capacity,
+                        ObjString* key) {
+  uint32_t index = key-&gt;hash % capacity;
+  Entry* tombstone = NULL;
+
+  for (;;) {
+    Entry* entry = &amp;entries[index];
+    if (entry-&gt;key == NULL) {
+      if (IS_NIL(entry-&gt;value)) {
+        // Empty entry.
+        return tombstone != NULL ? tombstone : entry;
+      } else {
+        // We found a tombstone.
+        if (tombstone == NULL) tombstone = entry;
+      }
+    } else if (entry-&gt;key == key) {
+      // We found the key.
+      return entry;
+    }
+
+    index = (index + 1) % capacity;
+  }
+}
+</code></pre>
+<blockquote>
+<p>When running that previous benchmark—on my machine, at least—the VM spends 70% of the total execution time on <em>one line</em> in this function. Any guesses as to which one? No? It’s this:</p>
+</blockquote>
+<p>在執行之前的基準測試時——至少在我的機器上是這樣——虛擬機器將總執行時間的70%花費在這個函式的<em>一行</em>程式碼上。能猜到是哪一行嗎？猜不到？是這一行：</p>
+<pre><code class="language-c">  uint32_t index = key-&gt;hash % capacity;
+</code></pre>
+<blockquote>
+<p>That pointer dereference isn’t the problem. It’s the little <code>%</code>. It turns out the modulo operator is <em>really</em> slow. Much slower than other arithmetic operators. Can we do something better?</p>
+</blockquote>
+<p>問題不在於指標解引用，而是那個小小的<code>%</code>。事實證明，取模運算子<em>真的</em>很慢。比其它算術運算子慢得多<sup class="footnote-reference" id="fr-6-1"><a href="#footnote-6">6</a></sup>。我們能做得更好嗎？</p>
+<blockquote>
+<p>In the general case, it’s really hard to re-implement a fundamental arithmetic operator in user code in a way that’s faster than what the CPU itself can do. After all, our C code ultimately compiles down to the CPU’s own arithmetic operations. If there were tricks we could use to go faster, the chip would already be using them.</p>
+</blockquote>
+<p>在一般情況下，要想在使用者程式碼中重新實現一個算術運算子，而且要比CPU本身的運算速度更快，這是非常難的。畢竟，我們的C程式碼最終會被編譯為CPU自己的算術運算。如果有什麼技巧可以加速運算，晶片早就在使用了。</p>
+<blockquote>
+<p>However, we can take advantage of the fact that we know more about our problem than the CPU does. We use modulo here to take a key string’s hash code and wrap it to fit within the bounds of the table’s entry array. That array starts out at eight elements and grows by a factor of two each time. We know—and the CPU and C compiler do not—that our table’s size is always a power of two.</p>
+</blockquote>
+<p>然而，我們可以利用這一事實：我們比CPU更瞭解我們的問題。我們在這裡使用取模將鍵字串的雜湊碼包裝到表的項陣列的大小範圍內。該陣列開始時有8個元素，每次增加2倍。我們知道（CPU和C編譯器都不知道）我們的表大小總是2的冪。</p>
+<blockquote>
+<p>Because we’re clever bit twiddlers, we know a faster way to calculate the remainder of a number modulo a power of two: <strong>bit masking</strong>. Let’s say we want to calculate 229 modulo 64. The answer is 37, which is not particularly apparent in decimal, but is clearer when you view those numbers in binary:</p>
+</blockquote>
+<p>因為我們是聰明的位操作者，我們知道一個更快的方法來計算一個數以2的冪為模的餘數：<strong>位掩碼</strong>。假設我們要計算229對64取模。答案是37，這在十進制中不是特別明顯，但當你用二進位制檢視這些數字時，就會更清楚：</p>
+<p><img src="30.%E6%9C%80%E4%BD%B3%E5%8C%96/mask.png" alt="The bit patterns resulting from 229 % 64 = 37 and 229 &amp; 63 = 37." /></p>
+<blockquote>
+<p>On the left side of the illustration, notice how the result (37) is simply the dividend (229) with the highest two bits shaved off? Those two highest bits are the bits at or to the left of the divisor’s single 1 bit.</p>
+</blockquote>
+<p>在圖的左側，注意結果（37）是如何簡單地將除數（229）的最高兩位削除？這兩個最高的位是被除數第一個1及其左側的位元位。</p>
+<blockquote>
+<p>On the right side, we get the same result by taking 229 and bitwise AND-ing it with 63, which is one less than our original power of two divisor. Subtracting one from a power of two gives you a series of 1 bits. That is exactly the mask we need in order to strip out those two leftmost bits.</p>
+</blockquote>
+<p>在右邊，我們將299和63（原來的2的冪除數減一）進行按位與操作，也可以得到同樣的結果。2的冪減去1會得到一系列的1位元。這正是我們需要的掩碼，以便剝離掉最左側的兩個位元。</p>
+<blockquote>
+<p>In other words, you can calculate a number modulo any power of two by simply AND-ing it with that power of two minus one. I’m not enough of a mathematician to <em>prove</em> to you that this works, but if you think it through, it should make sense. We can replace that slow modulo operator with a very fast decrement and bitwise AND. We simply change the offending line of code to this:</p>
+</blockquote>
+<p>換句話說，要計算某個數與任何2的冪的模數，你可以簡單地將該數與2的冪減1進行位相與。我不是一個數學家，無法向你證明這一點，但如果你仔細想想，這應該是有道理的。我們可以用一個非常快的減法和按位與運算來替換那個緩慢的模運算。我們只是簡單地將那行程式碼改為：</p>
+<p><em><u>table.c，在findEntry()方法中替換1行：</u></em></p>
+<pre><code class="language-c">static Entry* findEntry(Entry* entries, int capacity,
+                        ObjString* key) {  
+  // 替換部分開始
+  uint32_t index = key-&gt;hash &amp; (capacity - 1);
+  // 替換部分結束
+  Entry* tombstone = NULL;
+</code></pre>
+<blockquote>
+<p>CPUs love bitwise operators, so it’s hard to improve on that.</p>
+</blockquote>
+<p>CPU喜歡位運算，因此很難在此基礎上進行改進<sup class="footnote-reference" id="fr-7-1"><a href="#footnote-7">7</a></sup>。</p>
+<blockquote>
+<p>Our linear probing search may need to wrap around the end of the array, so there is another modulo in <code>findEntry()</code> to update.</p>
+</blockquote>
+<p>我們的線性探測搜尋可能需要在陣列的末尾繞回起點，所以在<code>findEntry()</code>中還有一個模運算需要更新。</p>
+<p><em><u>table.c，在findEntry()方法中替換1行：</u></em></p>
+<pre><code class="language-c">    // We found the key.
+      return entry;
+    }
+    // 替換部分開始
+    index = (index + 1) &amp; (capacity - 1);
+    // 替換部分結束
+  }
+</code></pre>
+<blockquote>
+<p>This line didn’t show up in the profiler since most searches don’t wrap.</p>
+</blockquote>
+<p>這一行沒有出現在剖析器中，是因為大部分搜尋都不需要繞回。</p>
+<blockquote>
+<p>The <code>findEntry()</code> function has a sister function, <code>tableFindString()</code> that does a hash table lookup for interning strings. We may as well apply the same optimizations there too. This function is called only when interning strings, which wasn’t heavily stressed by our benchmark. But a Lox program that created lots of strings might noticeably benefit from this change.</p>
+</blockquote>
+<p><code>findEntry()</code>函式有一個姊妹函式，<code>tableFindString()</code>，它為駐留的字串做雜湊表查詢。我們不妨在這裡也應用同樣的最佳化。該函式只在對字串進行駐留時才會被呼叫，我們的基準測試中沒有特別側重這一點。但是一個建立大量字串的Lox程式可能會從這個調整中明顯受益。</p>
+<p><em><u>table.c，在tableFindString()方法中替換1行：</u></em></p>
+<pre><code class="language-c">  if (table-&gt;count == 0) return NULL;
+  // 替換部分開始
+  uint32_t index = hash &amp; (table-&gt;capacity - 1);
+  // 替換部分結束
+  for (;;) {
+    Entry* entry = &amp;table-&gt;entries[index];
+</code></pre>
+<blockquote>
+<p>And also when the linear probing wraps around.</p>
+</blockquote>
+<p>當線性探索繞回起點時也是如此。</p>
+<p><em><u>table.c，在tableFindString()方法中替換1行：</u></em></p>
+<pre><code class="language-c">    return entry-&gt;key;
+    }
+    // 替換部分開始
+    index = (index + 1) &amp; (table-&gt;capacity - 1);
+    // 替換部分結束
+  }
+</code></pre>
+<blockquote>
+<p>Let’s see if our fixes were worth it. I tweaked that zoological benchmark to count how many batches of 10,000 calls it can run in ten seconds. More batches equals faster performance. On my machine using the unoptimized code, the benchmark gets through 3,192 batches. After this optimization, that jumps to 6,249.</p>
+</blockquote>
+<p>來看看我們的修補是否值得。我調整了前面的動物學基準測試，計算它能在10秒內執行多少批的10000次呼叫<sup class="footnote-reference" id="fr-8-1"><a href="#footnote-8">8</a></sup>。處理批次越多，效能越快。在我的機器上，使用未最佳化的程式碼，基準測試可以執行3192個批次。經過最佳化之後，這個數字躍升到了6249。</p>
+<p><img src="30.%E6%9C%80%E4%BD%B3%E5%8C%96/hash-chart.png" alt="Bar chart comparing the performance before and after the optimization." /></p>
+<blockquote>
+<p>That’s almost exactly twice as much work in the same amount of time. We made the VM twice as fast (usual caveat: on this benchmark). That is a massive win when it comes to optimization. Usually you feel good if you can claw a few percentage points here or there. Since methods, fields, and global variables are so prevalent in Lox programs, this tiny optimization improves performance across the board. Almost every Lox program benefits.</p>
+</blockquote>
+<p>在同樣的時間內，工作量幾乎是原來的兩倍。我們讓虛擬機器的速度提高了一倍（警告：在這個基準測試中）。對於最佳化來說，這是一個巨大的勝利。通常情況下，如果你能在這裡或那裡提升幾個百分點，你都會感覺很好。因為方法、欄位和全域性變數在Lox程式中非常普遍，因此這個微小的最佳化可以全面提高效能。幾乎每個Lox程式都會受益。</p>
+<blockquote>
+<p>Now, the point of this section is <em>not</em> that the modulo operator is profoundly evil and you should stamp it out of every program you ever write. Nor is it that micro-optimization is a vital engineering skill. It’s rare that a performance problem has such a narrow, effective solution. We got lucky.</p>
+</blockquote>
+<p>現在，本節的重點不是說取模運算子非常邪惡，你要把它從你寫的每個程式中剔除。也不是說微最佳化是一項重要的工程技能。很少有一個效能問題具有如此狹窄、有效的解決方案。我們很幸運。</p>
+<blockquote>
+<p>The point is that we didn’t <em>know</em> that the modulo operator was a performance drain until our profiler told us so. If we had wandered around our VM’s codebase blindly guessing at hotspots, we likely wouldn’t have noticed it. What I want you to take away from this is how important it is to have a profiler in your toolbox.</p>
+</blockquote>
+<p>關鍵在於，直到剖析器告訴我們，我們才知道取模運算子是一個效能損耗。如果我們在虛擬機器的程式碼庫中盲目地猜測熱點，我們可能不會注意到它。我想讓你從中學到的是，在你的工具箱中擁有一個剖析器是多麼重要。</p>
+<blockquote>
+<p>To reinforce that point, let’s go ahead and run the original benchmark in our now-optimized VM and see what the profiler shows us. On my machine, <code>tableGet()</code> is still a fairly large chunk of execution time. That’s to be expected for a dynamically typed language. But it has dropped from 72% of the total execution time down to 35%. That’s much more in line with what we’d like to see and shows that our optimization didn’t just make the program faster, but made it faster <em>in the way we expected</em>. Profilers are as useful for verifying solutions as they are for discovering problems.</p>
+</blockquote>
+<p>為了強化這一點，我們繼續在現在已最佳化的虛擬機器中執行最初的基準測試，看看剖析器會顯示什麼。在我的機器上，<code>tableGet()</code>仍然佔用了相當大的執行時間。對於動態型別的語言來說，這是可以預期的結果。但是它已經從72%下降到了35%。這更符合我們希望看到的情況，表明我們的最佳化不僅使程式更快，而且是以預期的方式使它更快。剖析器在驗證解決方法時和發現問題時一樣有用。</p>
+<blockquote>
+<h2 id="30--3-nan-boxing"><a class="header" href="#30--3-nan-boxing">30 . 3 NaN Boxing</a></h2>
+</blockquote>
+<h2 id="303-nan裝箱"><a class="header" href="#303-nan裝箱">30.3 NaN裝箱</a></h2>
+<blockquote>
+<p>This next optimization has a very different feel. Thankfully, despite the odd name, it does not involve punching your grandmother. It’s different, but not, like, <em>that</em> different. With our previous optimization, the profiler told us where the problem was, and we merely had to use some ingenuity to come up with a solution.</p>
+</blockquote>
+<p>接下來的這個最佳化有著非常不同的感覺。值得慶幸的是，雖然它的名字很奇怪，但它並不會推翻一切。確實不同，但不會那麼不同。在我們之前的最佳化中，剖析器會告訴我們問題出在哪裡，而我們只需要發揮一些聰明才智就可以想出解決方案。</p>
+<blockquote>
+<p>This optimization is more subtle, and its performance effects more scattered across the virtual machine. The profiler won’t help us come up with this. Instead, it was invented by someone thinking deeply about the lowest levels of machine architecture.</p>
+</blockquote>
+<p>這個最佳化更加微妙，它對效能的影響在虛擬機器在更加分散。剖析器無法幫我們找到它。相反，它是由一個對機器架構底層進行深入思考的人發明的<sup class="footnote-reference" id="fr-9-1"><a href="#footnote-9">9</a></sup>。</p>
+<blockquote>
+<p>Like the heading says, this optimization is called <strong>NaN boxing</strong> or sometimes <strong>NaN tagging</strong>. Personally I like the latter name because “boxing” tends to imply some kind of heap-allocated representation, but the former seems to be the more widely used term. This technique changes how we represent values in the VM.</p>
+</blockquote>
+<p>正如標題所說，這種最佳化稱為<strong>NaN裝箱</strong>，有時也被稱為<strong>NaN標記</strong>。我個人更喜歡後者，因為“裝箱”往往意味著某種堆分配的表示形式，但前者似乎是使用廣泛的術語。這種技術改變了我們在虛擬機器中表示值的方式。</p>
+<blockquote>
+<p>On a 64-bit machine, our Value type takes up 16 bytes. The struct has two fields, a type tag and a union for the payload. The largest fields in the union are an Obj pointer and a double, which are both 8 bytes. To keep the union field aligned to an 8-byte boundary, the compiler adds padding after the tag too:</p>
+</blockquote>
+<p>在64位機器上，我們的Value型別佔用了16個位元組。該結構體中有兩個欄位，一個型別標籤和一個儲存有效載荷的聯合體。聯合體中最大的欄位是一個Obj指標和一個double值，都是8位元組。為了使聯合體欄位與8位元組邊界對齊，編譯器也在標籤後面添加了填充：</p>
+<p><img src="30.%E6%9C%80%E4%BD%B3%E5%8C%96/union.png" alt="Byte layout of the 16-byte tagged union Value." /></p>
+<blockquote>
+<p>That’s pretty big. If we could cut that down, then the VM could pack more values into the same amount of memory. Most computers have plenty of RAM these days, so the direct memory savings aren’t a huge deal. But a smaller representation means more Values fit in a cache line. That means fewer cache misses, which affects <em>speed</em>.</p>
+</blockquote>
+<p>真可真夠大的。如果我們能把它減少，那虛擬機器就能在相同的記憶體中裝入更多的值。現在大多數計算機都有足夠的RAM，所以節省直接記憶體不是什麼大問題。但是更小的表示方式意味著有更多的值可以放入快取行中。這意味著更少的快取失誤，從而影響<em>速度</em>。</p>
+<blockquote>
+<p>If Values need to be aligned to their largest payload size, and a Lox number or Obj pointer needs a full 8 bytes, how can we get any smaller? In a dynamically typed language like Lox, each value needs to carry not just its payload, but enough additional information to determine the value’s type at runtime. If a Lox number is already using the full 8 bytes, where could we squirrel away a couple of extra bits to tell the runtime “this is a number”?</p>
+</blockquote>
+<p>既然Value需要與最大的有效載荷對齊，而且Lox數值或Obj指標需要完整的8個位元組，那我們如何才能變得更小呢？在Lox這樣的動態型別語言中，每個值不僅需要攜帶其有效載荷，還需要攜帶足夠多的附加資訊，以便在執行時確定值的型別。如果一個Lox的數字已經用了整整8個位元組，那我們可以在哪裡偷取兩個額外的位元來告訴執行時“這是一個數字”？</p>
+<blockquote>
+<p>This is one of the perennial problems for dynamic language hackers. It particularly bugs them because statically typed languages don’t generally have this problem. The type of each value is known at compile time, so no extra memory is needed at runtime to track it. When your C compiler compiles a 32-bit int, the resulting variable gets <em>exactly</em> 32 bits of storage.</p>
+</blockquote>
+<p>這是動態語言駭客長期面臨的問題之一。因為靜態型別語言通常不存在這個問題，所以這讓他們特別困擾。每個值的型別在編譯時就已經知道了，所以在執行時不需要額外的記憶體來記錄這些資訊。當你的C語言編譯器編譯一個32位的int時，產生的變數會得到<em>正好</em>32位的儲存空間。</p>
+<blockquote>
+<p>Dynamic language folks hate losing ground to the static camp, so they’ve come up with a number of very clever ways to pack type information and a payload into a small number of bits. NaN boxing is one of those. It’s a particularly good fit for languages like JavaScript and Lua, where all numbers are double-precision floating point. Lox is in that same boat.</p>
+</blockquote>
+<p>動態語言的人討厭輸給靜態陣營，所以他們想出了許多非常聰明的方法，將型別資訊和有效載荷打包到少量的位元中。NaN裝箱就是其中之一。它特別適合於像JavaScript和Lua這樣的語言，在這些語言中，所有數字都是雙精度浮點數。Lox也是如此。</p>
+<blockquote>
+<h3 id="30--3--1-what-is-and-is-not-a-number"><a class="header" href="#30--3--1-what-is-and-is-not-a-number">30 . 3 . 1 What is (and is not) a number?</a></h3>
+</blockquote>
+<h3 id="3031-什麼是以及不是數值"><a class="header" href="#3031-什麼是以及不是數值">30.3.1 什麼是（以及不是）數值？</a></h3>
+<blockquote>
+<p>Before we start optimizing, we need to really understand how our friend the CPU represents floating-point numbers. Almost all machines today use the same scheme, encoded in the venerable scroll <a href="https://en.wikipedia.org/wiki/IEEE_754">IEEE 754</a>, known to mortals as the “IEEE Standard for Floating-Point Arithmetic”.</p>
+</blockquote>
+<p>在開始最佳化之前，我們需要真正瞭解我們的朋友CPU是如何表示浮點數的。現在幾乎所有的機器都使用相同的方案，編碼在古老的卷軸<a href="https://en.wikipedia.org/wiki/IEEE_754">IEEE 754</a>中，凡人們稱之為“IEEE浮點運算標準”。</p>
+<blockquote>
+<p>In the eyes of your computer, a 64-bit, double-precision, IEEE floating-point number looks like this:</p>
+</blockquote>
+<p>在你的計算機看來，一個64位、雙精度的IEEE浮點數是這樣的：</p>
+<p><img src="30.%E6%9C%80%E4%BD%B3%E5%8C%96/double.png" alt="Bit representation of an IEEE 754 double." /></p>
+<blockquote>
+<ul>
+<li>Starting from the right, the first 52 bits are the <strong>fraction</strong>, <strong>mantissa</strong>, or <strong>significand</strong> bits. They represent the significant digits of the number, as a binary integer.</li>
+<li>Next to that are 11 <strong>exponent</strong> bits. These tell you how far the mantissa is shifted away from the decimal (well, binary) point.</li>
+<li>The highest bit is the <strong>sign bit</strong>, which indicates whether the number is positive or negative.</li>
+</ul>
+</blockquote>
+<ul>
+<li>從右邊開始，前52位是<strong>分數</strong>、<strong>尾數</strong>或<strong>有效位</strong>。它們以二進位制整數形式表示數值的有效數字。</li>
+<li>接下來是11個<strong>指數</strong>位。它們會告訴你尾數中的小數點要移動多少位。</li>
+<li>最高的位是<strong>符號</strong>位，表示這個數值是正數還是負數<sup class="footnote-reference" id="fr-10-1"><a href="#footnote-10">10</a></sup>。</li>
+</ul>
+<blockquote>
+<p>I know that’s a little vague, but this chapter isn’t a deep dive on floating point representation. If you want to know how the exponent and mantissa play together, there are already better explanations out there than I could write.</p>
+</blockquote>
+<p>我知道這有一點模糊，但這一章並不是對浮點數表示法的深入探討。如果你想知道指數和尾數是如何互相作用的，外面已經有比我寫得更好的解釋了。</p>
+<blockquote>
+<p>The important part for our purposes is that the spec carves out a special case exponent. When all of the exponent bits are set, then instead of just representing a really big number, the value has a different meaning. These values are “Not a Number” (hence, <strong>NaN</strong>) values. They represent concepts like infinity or the result of division by zero.</p>
+</blockquote>
+<p>對於我們的目的來說，重要的部分是該規範列出了一個特殊情況下的指數。當指數位全部置為1，這個值就不再表示一個非常大的數字了，而是有著不同的含義。這些值是“非數字”（Not a Number，即<strong>NaN</strong>）值。它們代表了像無窮或除0結果這樣的概念。</p>
+<blockquote>
+<p><em>Any</em> double whose exponent bits are all set is a NaN, regardless of the mantissa bits. That means there’s lots and lots of <em>different</em> NaN bit patterns. IEEE 754 divides those into two categories. Values where the highest mantissa bit is 0 are called <strong>signalling NaNs</strong>, and the others are <strong>quiet NaNs</strong>. Signalling NaNs are intended to be the result of erroneous computations, like division by zero. A chip may detect when one of these values is produced and abort a program completely. They may self-destruct if you try to read one.</p>
+</blockquote>
+<p>任何指數位全部被置為1的double數都是NaN，無論尾數位是什麼。這意味著有很多<em>不同</em>的NaN模式。IEEE 754將其分為兩類。最高尾數位為0的值被稱為<strong>訊號NaN</strong>，其它的是<strong>靜默NaN</strong>。訊號NaN是錯誤計算的結果，如除以0。當這些值被生成時，晶片可以檢測到並完全中止程式<sup class="footnote-reference" id="fr-11-1"><a href="#footnote-11">11</a></sup>。如果你試圖讀取這些值，它們可能會自毀。</p>
+<blockquote>
+<p>Quiet NaNs are supposed to be safer to use. They don’t represent useful numeric values, but they should at least not set your hand on fire if you touch them.</p>
+</blockquote>
+<p>靜默NaN使用起來更安全。它們不代表有用的數值，但它們至少不會一碰就著。</p>
+<blockquote>
+<p>Every double with all of its exponent bits set and its highest mantissa bit set is a quiet NaN. That leaves 52 bits unaccounted for. We’ll avoid one of those so that we don’t step on Intel’s “QNaN Floating-Point Indefinite” value, leaving us 51 bits. Those remaining bits can be anything. We’re talking 2,251,799,813,685,248 unique quiet NaN bit patterns.</p>
+</blockquote>
+<p>每一個所有指數位置1、最高尾數位置1的double都是一個靜默NaN。這就留下了52個未解釋的位。我們會避開其中一個，這樣我們就不會踩到Intel的“QNaN浮點不確定”值，剩下51位。這些剩餘的位元可以是任何東西。我們現在說的是2,251,799,813,685,248獨一無二的靜默NaN位模式。</p>
+<p><img src="30.%E6%9C%80%E4%BD%B3%E5%8C%96/nan.png" alt="The bits in a double that make it a quiet NaN." /></p>
+<blockquote>
+<p>This means a 64-bit double has enough room to store all of the various different numeric floating-point values and <em>also</em> has room for another 51 bits of data that we can use however we want. That’s plenty of room to set aside a couple of bit patterns to represent Lox’s <code>nil</code>, <code>true</code>, and <code>false</code> values. But what about Obj pointers? Don’t pointers need a full 64 bits too?</p>
+</blockquote>
+<p>這意味著一個64位的double有足夠的框架儲存所有不同的浮點數值，<em>還</em>有52位的資料空間供我們隨意使用。這樣就有足夠的空間來預留幾個位來表示Lox的<code>nil</code>、<code>true</code>和<code>false</code>值。但是Obj的指標呢？指標不是也需要64位嗎？</p>
+<blockquote>
+<p>Fortunately, we have another trick up our other sleeve. Yes, technically pointers on a 64-bit architecture are 64 bits. But, no architecture I know of actually uses that entire address space. Instead, most widely used chips today only ever use the low 48 bits. The remaining 16 bits are either unspecified or always zero.</p>
+</blockquote>
+<p>幸運的是，我們還有另一個妙招。是的，從技術上講，64位架構上的指標是64位的。但是，我所知道的架構中沒有一個真正使用了整個地址空間。相反，如今大多數廣泛使用的晶片只使用低48位<sup class="footnote-reference" id="fr-12-1"><a href="#footnote-12">12</a></sup>。剩餘16位要麼未指定，要麼始終為零。</p>
+<blockquote>
+<p>If we’ve got 51 bits, we can stuff a 48-bit pointer in there with three bits to spare. Those three bits are just enough to store tiny type tags to distinguish between <code>nil</code>, Booleans, and Obj pointers.</p>
+</blockquote>
+<p>如果我們有51位元位，可以把一個48位的指標塞進去，還有3位元位的空閒。這三個位元位剛好可以用來儲存微小的型別標記來區分<code>nil</code>、布林值和Obj指標。</p>
+<blockquote>
+<p>That’s NaN boxing. Within a single 64-bit double, you can store all of the different floating-point numeric values, a pointer, or any of a couple of other special sentinel values. Half the memory usage of our current Value struct, while retaining all of the fidelity.</p>
+</blockquote>
+<p>這就是NaN裝箱。在一個64位的double中，你可以儲存所有不同的浮點數值、一個指標或其它一些特殊的標示值。這比我們當前Value結構體少了一半的記憶體佔用量，同時保留了所有的精確性。</p>
+<blockquote>
+<p>What’s particularly nice about this representation is that there is no need to <em>convert</em> a numeric double value into a “boxed” form. Lox numbers <em>are</em> just normal, 64-bit doubles. We still need to <em>check</em> their type before we use them, since Lox is dynamically typed, but we don’t need to do any bit shifting or pointer indirection to go from “value” to “number”.</p>
+</blockquote>
+<p>這種表示方法的特別之處在於，不需要將數值型別的double值<em>轉換</em>為一個“裝箱後的”形式。Lox中的數字只是普通的64位double。在使用之前，我們仍然需要<em>檢查</em>它們的型別，因為Lox是動態型別的，但我們不需要做任何的數位偏移或指標引用來完成從“值”到“數”的轉換。</p>
+<blockquote>
+<p>For the other value types, there is a conversion step, of course. But, fortunately, our VM hides all of the mechanism to go from values to raw types behind a handful of macros. Rewrite those to implement NaN boxing, and the rest of the VM should just work.</p>
+</blockquote>
+<p>對於其它的值型別，當然有一個轉換步驟。但幸運的是，我們的虛擬機器將從值到原始型別的所有機制都隱藏在少數幾個宏後面。重寫這些宏來實現NaN裝箱，虛擬機器的其它部分就可以正常工作了。</p>
+<blockquote>
+<h3 id="30--3--2-conditional-support"><a class="header" href="#30--3--2-conditional-support">30 . 3 . 2 Conditional support</a></h3>
+</blockquote>
+<h3 id="3032-有條件地支援"><a class="header" href="#3032-有條件地支援">30.3.2 有條件地支援</a></h3>
+<blockquote>
+<p>I know the details of this new representation aren’t clear in your head yet. Don’t worry, they will crystallize as we work through the implementation. Before we get to that, we’re going to put some compile-time scaffolding in place.</p>
+</blockquote>
+<p>我知道這個新表示形式的細節在你的腦子裡還不清晰。不用擔心，它們會在我們的實現過程中逐步具現化。在此之前，我們要放置一些編譯時的腳手架。</p>
+<blockquote>
+<p>For our previous optimization, we rewrote the previous slow code and called it done. This one is a little different. NaN boxing relies on some very low-level details of how a chip represents floating-point numbers and pointers. It <em>probably</em> works on most CPUs you’re likely to encounter, but you can never be totally sure.</p>
+</blockquote>
+<p>對於我們之前的最佳化，我們重寫之前的慢程式碼就可以宣告完成了。這一次則有點不同。NaN裝箱依賴於晶片如何表示浮點數和指標等一些非常底層的細節。它也許適用於你可能遇到的大多數CPU，但你永遠無法完全確定。</p>
+<blockquote>
+<p>It would suck if our VM completely lost support for an architecture just because of its value representation. To avoid that, we’ll maintain support for <em>both</em> the old tagged union implementation of Value and the new NaN-boxed form. We select which representation we want at compile time using this flag:</p>
+</blockquote>
+<p>如果我們的虛擬機器僅僅因為某個架構的值表示形式而完全失去對它的支援，那就太糟糕了。為了避免這種情況，我們會保留對Value的舊的帶標記聯合體實現方式以及新的NaN裝箱形式的支援。我們在編譯時使用這個標誌來選擇我們想要的方法：</p>
+<p><em><u>common.h，新增程式碼：</u></em></p>
+<pre><code class="language-c">#include &lt;stdint.h&gt;
+// 新增部分開始
+#define NAN_BOXING
+// 新增部分結束
+#define DEBUG_PRINT_CODE
+</code></pre>
+<blockquote>
+<p>If that’s defined, the VM uses the new form. Otherwise, it reverts to the old style. The few pieces of code that care about the details of the value representation—mainly the handful of macros for wrapping and unwrapping Values—vary based on whether this flag is set. The rest of the VM can continue along its merry way.</p>
+</blockquote>
+<p>如果定義了這個值，虛擬機器就會使用新的形式。否則，它就會恢復舊的風格。少數關心值表示形式細節的幾段程式碼——主要是用於包裝和解包Value的少數幾個宏——會根據這個標誌是否被設定而有所不同。虛擬機器的其它部分可以繼續快樂的旅程。</p>
+<blockquote>
+<p>Most of the work happens in the “value” module where we add a section for the new type.</p>
+</blockquote>
+<p>大部分工作都發生在“value”模組中，我們在其中為新型別新增一些程式碼。</p>
+<p><em><u>value.h，新增程式碼：</u></em></p>
+<pre><code class="language-c">typedef struct ObjString ObjString;
+// 新增部分開始
+#ifdef NAN_BOXING
+
+typedef uint64_t Value;
+
+#else
+// 新增部分結束
+typedef enum {
+</code></pre>
+<blockquote>
+<p>When NaN boxing is enabled, the actual type of a Value is a flat, unsigned 64-bit integer. We could use double instead, which would make the macros for dealing with Lox numbers a little simpler. But all of the other macros need to do bitwise operations and uint64_t is a much friendlier type for that. Outside of this module, the rest of the VM doesn’t really care one way or the other.</p>
+</blockquote>
+<p>當啟用NaN裝箱時，Value的實際型別是一個扁平的、無符號的64位整數。我們可以用double代替，這會使處理Lox數字的宏更簡單一些。但所有其它宏都需要進行位操作，而uint_64是一個更友好的型別。在這個模組之外，虛擬機器的其它部分並不真正關心這一點。</p>
+<blockquote>
+<p>Before we start re-implementing those macros, we close the <code>#else</code> branch of the <code>#ifdef</code> at the end of the definitions for the old representation.</p>
+</blockquote>
+<p>在我們開始重新實現這些宏之前，我們先關閉舊錶示形式的定義末尾的<code>#ifdef</code>的<code>#else</code>分支。</p>
+<p><em><u>value.h，新增程式碼：</u></em></p>
+<pre><code class="language-c">#define OBJ_VAL(object)   ((Value){VAL_OBJ, {.obj = (Obj*)object}})
+// 新增部分開始
+#endif
+// 新增部分結束
+typedef struct {
+</code></pre>
+<blockquote>
+<p>Our remaining task is simply to fill in that first <code>#ifdef</code> section with new implementations of all the stuff already in the <code>#else</code> side. We’ll work through it one value type at a time, from easiest to hardest.</p>
+</blockquote>
+<p>我們剩下的任務只是在第一個<code>#ifdef</code>部分中填入已經在<code>#else</code>部分存在的所有內容的新實現。我們會從最簡單到最難，依次完成每個值型別的工作。</p>
+<blockquote>
+<h3 id="30--3--3-numbers"><a class="header" href="#30--3--3-numbers">30 . 3 . 3 Numbers</a></h3>
+</blockquote>
+<h3 id="3033-數字"><a class="header" href="#3033-數字">30.3.3 數字</a></h3>
+<blockquote>
+<p>We’ll start with numbers since they have the most direct representation under NaN boxing. To “convert” a C double to a NaN-boxed clox Value, we don’t need to touch a single bit—the representation is exactly the same. But we do need to convince our C compiler of that fact, which we made harder by defining Value to be uint64_t.</p>
+</blockquote>
+<p>我們會從數字開始，因為它們在NaN裝箱方式中有最直接的表示形式。要將C語言中的double“轉換”為一個NaN裝箱後的clox Value，我們不需要改動任何一個位元——其表示方式是完全相同的。但我們確實需要說服我們的C編譯器相信這一事實，我們將Value定義為uint64_t使之變得更加困難。</p>
+<blockquote>
+<p>We need to get the compiler to take a set of bits that it thinks are a double and use those same bits as a uint64_t, or vice versa. This is called <strong>type punning</strong>. C and C++ programmers have been doing this since the days of bell bottoms and 8-tracks, but the language specifications have hesitated to say which of the many ways to do this is officially sanctioned.</p>
+</blockquote>
+<p>我們需要讓編譯器接受一組它認為是double的位元，並作為uint64_t來使用，反之亦然。這就是所謂的<strong>型別雙關</strong>。C和C++程式設計師早在喇叭褲和8音軌的時代就開始這樣做了，但語言規範卻一直猶豫不決，不知道哪種方法是官方認可的<sup class="footnote-reference" id="fr-13-1"><a href="#footnote-13">13</a></sup>。</p>
+<blockquote>
+<p>I know one way to convert a <code>double</code> to <code>Value</code> and back that I believe is supported by both the C and C++ specs. Unfortunately, it doesn’t fit in a single expression, so the conversion macros have to call out to helper functions. Here’s the first macro:</p>
+</blockquote>
+<p>我知道一種將<code>double</code>轉換為<code>Value</code>並反向轉換的方法，我相信C和C++規範都支援該方法。不幸的是，它不適合在一個表示式中使用，因此轉換宏必須呼叫輔助函式。下面是第一個宏：</p>
+<p><em><u>value.h，新增程式碼：</u></em></p>
+<pre><code class="language-c">typedef uint64_t Value;
+// 新增部分開始
+#define NUMBER_VAL(num) numToValue(num)
+// 新增部分結束
+#else
+</code></pre>
+<blockquote>
+<p>That macro passes the double here:</p>
+</blockquote>
+<p>這個宏會將double傳遞到這裡：</p>
+<p><em><u>value.h，新增程式碼：</u></em></p>
+<pre><code class="language-c">#define NUMBER_VAL(num) numToValue(num)
+// 新增部分開始
+static inline Value numToValue(double num) {
+  Value value;
+  memcpy(&amp;value, &amp;num, sizeof(double));
+  return value;
+}
+// 新增部分結束
+#else
+</code></pre>
+<blockquote>
+<p>I know, weird, right? The way to treat a series of bytes as having a different type without changing their value at all is <code>memcpy()</code>? This looks horrendously slow: Create a local variable. Pass its address to the operating system through a syscall to copy a few bytes. Then return the result, which is the exact same bytes as the input. Thankfully, because this <em>is</em> the supported idiom for type punning, most compilers recognize the pattern and optimize away the <code>memcpy()</code> entirely.</p>
+</blockquote>
+<p>我知道，很奇怪，對嗎？在不改變值的情況下，將一系列位元組視為具有不同型別的方式是<code>memcpy()</code>？這看起來慢的可怕：建立一個區域性變數；透過系統呼叫 將其地址傳遞給作業系統，以複製幾個位元組；然後返回結果，這個結果與輸入的位元組完全相同。值得慶幸的是，由於這是型別雙關的習慣用法，大部分編譯器都能識別這種模式，並完全最佳化掉<code>memcpy()</code>。</p>
+<blockquote>
+<p>“Unwrapping” a Lox number is the mirror image.</p>
+</blockquote>
+<p>“拆包”一個Lox數字就是映象操作。</p>
+<p><em><u>value.h，新增程式碼：</u></em></p>
+<pre><code class="language-c">typedef uint64_t Value;
+// 新增部分開始
+#define AS_NUMBER(value)    valueToNum(value)
+// 新增部分結束
+#define NUMBER_VAL(num) numToValue(num)
+</code></pre>
+<blockquote>
+<p>That macro calls this function:</p>
+</blockquote>
+<p>這個宏會呼叫下面的函式：</p>
+<p><em><u>value.h，新增程式碼：</u></em></p>
+<pre><code class="language-c">#define NUMBER_VAL(num) numToValue(num)
+// 新增部分開始
+static inline double valueToNum(Value value) {
+  double num;
+  memcpy(&amp;num, &amp;value, sizeof(Value));
+  return num;
+}
+// 新增部分結束
+static inline Value numToValue(double num) {
+</code></pre>
+<blockquote>
+<p>It works exactly the same except we swap the types. Again, the compiler will eliminate all of it. Even though those calls to <code>memcpy()</code> will disappear, we still need to show the compiler <em>which</em> <code>memcpy()</code> we’re calling so we also need an include.</p>
+</blockquote>
+<p>它的工作原理完全一樣，只是交換了型別。同樣，編譯器會消除所有這些。儘管對<code>memcpy()</code>的那些呼叫會消失，我們仍然需要向編譯器顯示我們正在呼叫<em>哪個</em><code>memcpy()</code>，因此我們也需要引入一下<sup class="footnote-reference" id="fr-14-1"><a href="#footnote-14">14</a></sup>。</p>
+<p><em><u>value.h，新增程式碼：</u></em></p>
+<pre><code class="language-c">#define clox_value_h
+// 新增部分開始
+#include &lt;string.h&gt;
+// 新增部分結束
+#include "common.h"
+</code></pre>
+<blockquote>
+<p>That was a lot of code to ultimately do nothing but silence the C type checker. Doing a runtime type <em>test</em> on a Lox number is a little more interesting. If all we have are exactly the bits for a double, how do we tell that it <em>is</em> a double? It’s time to get bit twiddling.</p>
+</blockquote>
+<p>其中是大量的程式碼，最終除了讓C語言型別檢查器保持沉默之外，什麼也沒做。對一個Lox數字進行執行時型別<em>測試</em>就比較有趣了。如果我們拿到的所有位元位正好是一個double，如何判斷它是一個double呢？是時候玩一些位操作技巧了。</p>
+<p><em><u>value.h，新增程式碼：</u></em></p>
+<pre><code class="language-c">typedef uint64_t Value;
+// 新增部分開始
+#define IS_NUMBER(value)    (((value) &amp; QNAN) != QNAN)
+// 新增部分結束
+#define AS_NUMBER(value)    valueToNum(value)
+</code></pre>
+<blockquote>
+<p>We know that every Value that is <em>not</em> a number will use a special quiet NaN representation. And we presume we have correctly avoided any of the meaningful NaN representations that may actually be produced by doing arithmetic on numbers.</p>
+</blockquote>
+<p>我們知道，每個<em>不是</em>數字的Value都會使用一個特殊的靜默NaN表示形式。而且假定我們已經正確地避免了任何有意義的NaN表示形式（這些實際上可能是透過對數字進行算術運算產生的）。</p>
+<blockquote>
+<p>If the double has all of its NaN bits set, and the quiet NaN bit set, and one more for good measure, we can be pretty certain it is one of the bit patterns we ourselves have set aside for other types. To check that, we mask out all of the bits except for our set of quiet NaN bits. If <em>all</em> of those bits are set, it must be a NaN-boxed value of some other Lox type. Otherwise, it is actually a number.</p>
+</blockquote>
+<p>如果某個double值的NaN位元位置為1，而且靜默NaN位元位也置為1，還有一個位元位也被置為1，那我們就可以非常肯定它是我們為其它型別預留的位元模式之一<sup class="footnote-reference" id="fr-15-1"><a href="#footnote-15">15</a></sup>。為了驗證這一點，我們遮蔽掉除靜默NaN置為1的位元之外的所有其它位元位，如果這些位都被置為1了，那它一定是某個其它Lox型別的已NaN裝箱的值。否則，它就是一個數字。</p>
+<blockquote>
+<p>The set of quiet NaN bits are declared like this:</p>
+</blockquote>
+<p>靜默NaN的位元集合是這樣宣告的：</p>
+<p><em><u>value.h，新增程式碼：</u></em></p>
+<pre><code class="language-c">#ifdef NAN_BOXING
+// 新增部分開始
+#define QNAN     ((uint64_t)0x7ffc000000000000)
+// 新增部分結束
+typedef uint64_t Value;
+</code></pre>
+<blockquote>
+<p>It would be nice if C supported binary literals. But if you do the conversion, you’ll see that value is the same as this:</p>
+</blockquote>
+<p>如果C支援二進位制字面量就好了。但如果你做了轉換，你會看到那個值是這樣的：</p>
+<p><img src="30.%E6%9C%80%E4%BD%B3%E5%8C%96/qnan.png" alt="The quiet NaN bits." /></p>
+<blockquote>
+<p>This is exactly all of the exponent bits, plus the quiet NaN bit, plus one extra to dodge that Intel value.</p>
+</blockquote>
+<p>這正是所有的指數位，加上靜默NaN位元位，再加上一個額外的用來規避英特爾值的位元位。</p>
+<blockquote>
+<h3 id="30--3--4-nil-true-and-false"><a class="header" href="#30--3--4-nil-true-and-false">30 . 3 . 4 Nil, true, and false</a></h3>
+</blockquote>
+<h3 id="30--3--4-niltrue和false"><a class="header" href="#30--3--4-niltrue和false">30 . 3 . 4 Nil、true和false</a></h3>
+<blockquote>
+<p>The next type to handle is <code>nil</code>. That’s pretty simple since there’s only one <code>nil</code> value and thus we need only a single bit pattern to represent it. There are two other singleton values, the two Booleans, <code>true</code> and <code>false</code>. This calls for three total unique bit patterns.</p>
+</blockquote>
+<p>下一個要處理的型別是<code>nil</code>。這非常簡單，因為只有一個<code>nil</code>值，因此我們只需要1 個位元位模式來表示它。還有另外兩個單例值，即兩個布林值，<code>true</code>和<code>false</code>。這總共需要三種唯一的位元位模式。</p>
+<blockquote>
+<p>Two bits give us four different combinations, which is plenty. We claim the two lowest bits of our unused mantissa space as a “type tag” to determine which of these three singleton values we’re looking at. The three type tags are defined like so:</p>
+</blockquote>
+<p>兩個位元可以得到四種不同的組合，這已經足夠了。我們要求將未使用的尾數中的兩個最低位作為“型別標籤”，以確定我們正面對的是這三個單例值中的哪一個。這三個型別標籤定義如下：</p>
+<p><em><u>value.h，新增程式碼：</u></em></p>
+<pre><code class="language-c">#define QNAN     ((uint64_t)0x7ffc000000000000)
+// 新增部分開始
+#define TAG_NIL   1 // 01.
+#define TAG_FALSE 2 // 10.
+#define TAG_TRUE  3 // 11.
+// 新增部分結束
+typedef uint64_t Value;
+</code></pre>
+<blockquote>
+<p>Our representation of <code>nil</code> is thus all of the bits required to define our quiet NaN representation along with the <code>nil</code> type tag bits:</p>
+</blockquote>
+<p>因此，我們的<code>nil</code>表示形式的所有位元位就是定義靜默NaN表示形式所需的所有位元位，以及<code>nil</code>型別的標記位：</p>
+<p><img src="30.%E6%9C%80%E4%BD%B3%E5%8C%96/nil.png" alt="The bit representation of the nil value." /></p>
+<blockquote>
+<p>In code, we check the bits like so:</p>
+</blockquote>
+<p>在程式碼中，我們這樣來檢查：</p>
+<p><em><u>value.h，新增程式碼：</u></em></p>
+<pre><code class="language-c">#define AS_NUMBER(value)    valueToNum(value)
+// 新增部分開始
+#define NIL_VAL         ((Value)(uint64_t)(QNAN | TAG_NIL))
+// 新增部分結束
+#define NUMBER_VAL(num) numToValue(num)
+</code></pre>
+<blockquote>
+<p>We simply bitwise OR the quiet NaN bits and the type tag, and then do a little cast dance to teach the C compiler what we want those bits to mean.</p>
+</blockquote>
+<p>我們只是將靜默NaN位元位與型別標籤進行按位或運算，然後做一點強制轉換來告訴C編譯器我們希望這些位表示什麼意思。</p>
+<blockquote>
+<p>Since <code>nil</code> has only a single bit representation, we can use equality on uint64_t to see if a Value is <code>nil</code>.</p>
+</blockquote>
+<p>由於<code>nil</code>只有一個位元表示形式，我們可以對uint64_t使用等號來判斷某個Value是否是<code>nil</code>。</p>
+<p><em><u>value.h，新增程式碼：</u></em></p>
+<pre><code class="language-c">typedef uint64_t Value;
+// 新增部分開始
+#define IS_NIL(value)       ((value) == NIL_VAL)
+// 新增部分結束
+#define IS_NUMBER(value)    (((value) &amp; QNAN) != QNAN)
+</code></pre>
+<blockquote>
+<p>You can guess how we define the <code>true</code> and <code>false</code> values.</p>
+</blockquote>
+<p>你可以猜到我們如何定義<code>true</code>和<code>false</code>值。</p>
+<p><em><u>value.h，新增程式碼：</u></em></p>
+<pre><code class="language-c">#define AS_NUMBER(value)    valueToNum(value)
+// 新增部分開始
+#define FALSE_VAL       ((Value)(uint64_t)(QNAN | TAG_FALSE))
+#define TRUE_VAL        ((Value)(uint64_t)(QNAN | TAG_TRUE))
+// 新增部分結束
+#define NIL_VAL         ((Value)(uint64_t)(QNAN | TAG_NIL))
+</code></pre>
+<blockquote>
+<p>The bits look like this:</p>
+</blockquote>
+<p>位元位看起來是這樣的：</p>
+<p><img src="30.%E6%9C%80%E4%BD%B3%E5%8C%96/bools.png" alt="The bit representation of the true and false values." /></p>
+<blockquote>
+<p>To convert a C bool into a Lox Boolean, we rely on these two singleton values and the good old conditional operator.</p>
+</blockquote>
+<p>為了將C語言bool轉換為Lox的Boolean，我們依靠這兩個單例值和古老的條件運算子。</p>
+<p><em><u>value.h，新增程式碼：</u></em></p>
+<pre><code class="language-c">#define AS_NUMBER(value)    valueToNum(value)
+// 新增部分開始
+#define BOOL_VAL(b)     ((b) ? TRUE_VAL : FALSE_VAL)
+// 新增部分結束
+#define FALSE_VAL       ((Value)(uint64_t)(QNAN | TAG_FALSE))
+</code></pre>
+<blockquote>
+<p>There’s probably a cleverer bitwise way to do this, but my hunch is that the compiler can figure one out faster than I can. Going the other direction is simpler.</p>
+</blockquote>
+<p>可能有更聰明的位運算方式來實現這一點，但我的直覺是，編譯器可以比我更快地找到一個方法。反過來就簡單多了。</p>
+<p><em><u>value.h，新增程式碼：</u></em></p>
+<pre><code class="language-c">#define IS_NUMBER(value)    (((value) &amp; QNAN) != QNAN)
+// 新增部分開始
+#define AS_BOOL(value)      ((value) == TRUE_VAL)
+// 新增部分結束
+#define AS_NUMBER(value)    valueToNum(value)
+</code></pre>
+<blockquote>
+<p>Since we know there are exactly two Boolean bit representations in Lox—unlike in C where any non-zero value can be considered “true”—if it ain’t <code>true</code>, it must be <code>false</code>. This macro does assume you call it only on a Value that you know <em>is</em> a Lox Boolean. To check that, there’s one more macro.</p>
+</blockquote>
+<p>因為我們知道在Lox中正好有兩個Boolean的位表示形式——不像C語言中，任何非零值都可以被認為是“true”——如果它不是<code>true</code>，就一定是<code>false</code>。這個宏假設你只會在明知是Lox布林值型別的Value上呼叫該方法。為了檢查這一點，還有一個宏。</p>
+<p><em><u>value.h，新增程式碼：</u></em></p>
+<pre><code class="language-c">typedef uint64_t Value;
+// 新增部分開始
+#define IS_BOOL(value)      (((value) | 1) == TRUE_VAL)
+// 新增部分結束
+#define IS_NIL(value)       ((value) == NIL_VAL)
+</code></pre>
+<blockquote>
+<p>That looks a little strange. A more obvious macro would look like this:</p>
+</blockquote>
+<p>這裡看起來有點奇怪。一個更直觀的宏看起來應該是這樣的：</p>
+<pre><code class="language-c">#define IS_BOOL(v) ((v) == TRUE_VAL || (v) == FALSE_VAL)
+</code></pre>
+<blockquote>
+<p>Unfortunately, that’s not safe. The expansion mentions <code>v</code> twice, which means if that expression has any side effects, they will be executed twice. We could have the macro call out to a separate function, but, ugh, what a chore.</p>
+</blockquote>
+<p>不幸的是，這並不安全。展開式中兩次使用了<code>v</code>，這意味著如果表示式有任何副作用，它們將被執行兩次。我們可以讓宏呼叫到一個單獨的函式，但是，唉，真麻煩。</p>
+<blockquote>
+<p>Instead, we bitwise OR a 1 onto the value to merge the only two valid Boolean bit patterns. That leaves three potential states the value can be in:</p>
+</blockquote>
+<p>相反，我們在值上按位或1，來合併僅有的兩個有效的Boolean位元位模式。這樣，值就剩下了三種可能的狀態：</p>
+<blockquote>
+<ol>
+<li>It was <code>FALSE_VAL</code> and has now been converted to <code>TRUE_VAL</code>.</li>
+<li>It was <code>TRUE_VAL</code> and the <code>| 1</code> did nothing and it’s still <code>TRUE_VAL</code>.</li>
+<li>It’s some other, non-Boolean value.</li>
+</ol>
+</blockquote>
+<ol>
+<li>之前是<code>FALSE_VAL</code>，現在轉換為<code>TRUE_VAL</code>。</li>
+<li>之前是<code>TRUE_VAL</code>，<code>| 1</code>沒有起任何作用，結果仍然是<code>TRUE_VAL</code>。</li>
+<li>它是其它的非布林值。</li>
+</ol>
+<blockquote>
+<p>At that point, we can simply compare the result to <code>TRUE_VAL</code> to see if we’re in the first two states or the third.</p>
+</blockquote>
+<p>在此基礎上，我們可以簡單地將結果與<code>TRUE_VAL</code>進行比較，看看我們是處於前兩個狀態還是第三個狀態。</p>
+<blockquote>
+<h3 id="30--3--5-objects"><a class="header" href="#30--3--5-objects">30 . 3 . 5 Objects</a></h3>
+</blockquote>
+<h3 id="3035-物件"><a class="header" href="#3035-物件">30.3.5 物件</a></h3>
+<blockquote>
+<p>The last value type is the hardest. Unlike the singleton values, there are billions of different pointer values we need to box inside a NaN. This means we need both some kind of tag to indicate that these particular NaNs <em>are</em> Obj pointers, and room for the addresses themselves.</p>
+</blockquote>
+<p>最後一種值型別是最難的。與單例值不同，我們需要在NaN中包含數十億個不同的指標值。這意味著我們既需要某種標籤來表明這些特定的NaN<em>是</em>Obj指標，也需要為這些地址本身留出空間。</p>
+<blockquote>
+<p>The tag bits we used for the singleton values are in the region where I decided to store the pointer itself, so we can’t easily use a different bit there to indicate that the value is an object reference. However, there is another bit we aren’t using. Since all our NaN values are not numbers—it’s right there in the name—the sign bit isn’t used for anything. We’ll go ahead and use that as the type tag for objects. If one of our quiet NaNs has its sign bit set, then it’s an Obj pointer. Otherwise, it must be one of the previous singleton values.</p>
+</blockquote>
+<p>我們用於單例值的標籤位元位處於我決定儲存指標本身的區域，所以我們不能輕易地在那裡使用不同的位來表明該值是一個物件引用<sup class="footnote-reference" id="fr-16-1"><a href="#footnote-16">16</a></sup>。不過，還有一個位我們沒有用到。因為所有的NaN值都不是數字——正如其名——符號位沒有任何用途。我們會繼續使用它來作為物件的型別標籤。如果某個靜默NaN的符號位被置為1，那麼它就是一個Obj指標。否則，它一定是前面的單例值之一。</p>
+<blockquote>
+<p>If the sign bit is set, then the remaining low bits store the pointer to the Obj:</p>
+</blockquote>
+<p>如果符號位被置1，那麼剩餘的低位元位會儲存Obj指標：</p>
+<p><img src="30.%E6%9C%80%E4%BD%B3%E5%8C%96/obj.png" alt="Bit representation of an Obj* stored in a Value." /></p>
+<blockquote>
+<p>To convert a raw Obj pointer to a Value, we take the pointer and set all of the quiet NaN bits and the sign bit.</p>
+</blockquote>
+<p>為了將一個原生Obj指標轉換為Value，我們會接受指標並將所有的靜默NaN位元位和符號位置1。</p>
+<p><em><u>value.h，新增程式碼：</u></em></p>
+<pre><code class="language-c">#define NUMBER_VAL(num) numToValue(num)
+// 新增部分開始
+#define OBJ_VAL(obj) \
+    (Value)(SIGN_BIT | QNAN | (uint64_t)(uintptr_t)(obj))
+// 新增部分結束
+static inline double valueToNum(Value value) {
+</code></pre>
+<blockquote>
+<p>The pointer itself is a full 64 bits, and in principle, it could thus overlap with some of those quiet NaN and sign bits. But in practice, at least on the architectures I’ve tested, everything above the 48th bit in a pointer is always zero. There’s a lot of casting going on here, which I’ve found is necessary to satisfy some of the pickiest C compilers, but the end result is just jamming some bits together.</p>
+</blockquote>
+<p>指標本身是一個完整的64位，原則上，它可能因此與某些靜默NaN和符號位衝突。但實際上，至少在我測試過的架構中，指標中48位以上的所有內容都是零。這裡進行了大量的型別轉換。我們發現這對於滿足一些最挑剔的C語言編譯器來說是必要的，但最終的結果只是將這些位元位塞在一起<sup class="footnote-reference" id="fr-17-1"><a href="#footnote-17">17</a></sup>。</p>
+<blockquote>
+<p>We define the sign bit like so:</p>
+</blockquote>
+<p>我們這樣定義符號位：</p>
+<p><em><u>value.h，新增程式碼：</u></em></p>
+<pre><code class="language-c">#ifdef NAN_BOXING
+// 新增部分開始
+#define SIGN_BIT ((uint64_t)0x8000000000000000)
+// 新增部分結束
+#define QNAN     ((uint64_t)0x7ffc000000000000)
+</code></pre>
+<blockquote>
+<p>To get the Obj pointer back out, we simply mask off all of those extra bits.</p>
+</blockquote>
+<p>為了取出Obj指標，我們只需把所有這些額外的位元位遮蔽掉。</p>
+<p><em><u>value.h，新增程式碼：</u></em></p>
+<pre><code class="language-c">#define AS_NUMBER(value)    valueToNum(value)
+// 新增部分開始
+#define AS_OBJ(value) \
+    ((Obj*)(uintptr_t)((value) &amp; ~(SIGN_BIT | QNAN)))
+// 新增部分結束
+#define BOOL_VAL(b)     ((b) ? TRUE_VAL : FALSE_VAL)
+</code></pre>
+<blockquote>
+<p>The tilde (<code>~</code>), if you haven’t done enough bit manipulation to encounter it before, is bitwise NOT. It toggles all ones and zeroes in its operand. By masking the value with the bitwise negation of the quiet NaN and sign bits, we <em>clear</em> those bits and let the pointer bits remain.</p>
+</blockquote>
+<p>如果你沒有做過足夠多的位運算就可能沒有遇到過，波浪號（<code>~</code>）是位運算中的NOT（按位取非）。它會切換運算元中所有的1和0。使用靜默NaN和符號位按位取非的值作為掩碼，對值進行遮蔽，我們可以<em>清除</em>這些位元位，並將指標位元保留下來。</p>
+<blockquote>
+<p>One last macro:</p>
+</blockquote>
+<p>最後一個宏：</p>
+<p><em><u>value.h，新增程式碼：</u></em></p>
+<pre><code class="language-c">#define IS_NUMBER(value)    (((value) &amp; QNAN) != QNAN)
+// 新增部分開始
+#define IS_OBJ(value) \
+    (((value) &amp; (QNAN | SIGN_BIT)) == (QNAN | SIGN_BIT))
+// 新增部分結束
+#define AS_BOOL(value)      ((value) == TRUE_VAL)
+</code></pre>
+<blockquote>
+<p>A Value storing an Obj pointer has its sign bit set, but so does any negative number. To tell if a Value is an Obj pointer, we need to check that both the sign bit and all of the quiet NaN bits are set. This is similar to how we detect the type of the singleton values, except this time we use the sign bit as the tag.</p>
+</blockquote>
+<p>儲存Obj指標的Value的符號位被置1，但任意負數也是如此。為了判斷Value是否為Obj指標，我們需要同時檢查符號位和所有的靜默NaN位元位。這與我們檢測單例值型別的方法類似，這不過這次我們使用符號位作為標籤。</p>
+<blockquote>
+<h3 id="30--3--6-value-functions"><a class="header" href="#30--3--6-value-functions">30 . 3 . 6 Value functions</a></h3>
+</blockquote>
+<h3 id="3036-value函式"><a class="header" href="#3036-value函式">30.3.6 Value函式</a></h3>
+<blockquote>
+<p>The rest of the VM usually goes through the macros when working with Values, so we are almost done. However, there are a couple of functions in the “value” module that peek inside the otherwise black box of Value and work with its encoding directly. We need to fix those too.</p>
+</blockquote>
+<p>VM的其餘部分在處理Value時通常都是透過宏，所以我們基本上已經完成了。但是，在“value”模組中，有幾個函式會窺探Value黑匣子內部，並直接處理器編碼。我們也需要修復這些問題。</p>
+<blockquote>
+<p>The first is <code>printValue()</code>. It has separate code for each value type. We no longer have an explicit type enum we can switch on, so instead we use a series of type tests to handle each kind of value.</p>
+</blockquote>
+<p>第一個是<code>printValue()</code>。它針對每個值型別都有單獨的程式碼。我們不再有一個明確的型別列舉進行switch，因此我們使用一系列的型別檢查來處理每一種值。</p>
+<p><em><u>value.c，在printValue()方法中新增程式碼：</u></em></p>
+<pre><code class="language-c">void printValue(Value value) {
+// 新增部分開始
+#ifdef NAN_BOXING
+  if (IS_BOOL(value)) {
+    printf(AS_BOOL(value) ? "true" : "false");
+  } else if (IS_NIL(value)) {
+    printf("nil");
+  } else if (IS_NUMBER(value)) {
+    printf("%g", AS_NUMBER(value));
+  } else if (IS_OBJ(value)) {
+    printObject(value);
+  }
+#else
+// 新增部分結束
+  switch (value.type) {
+</code></pre>
+<blockquote>
+<p>This is technically a tiny bit slower than a switch, but compared to the overhead of actually writing to a stream, it’s negligible.</p>
+</blockquote>
+<p>從技術上講，這比switch語句稍微慢一點點，但是與實際寫入流的開銷相比，它可以忽略不計。</p>
+<blockquote>
+<p>We still support the original tagged union representation, so we keep the old code and enclose it in the <code>#else</code> conditional section.</p>
+</blockquote>
+<p>我們仍然支援原先的帶標籤聯合體表示形式，因此我們保留舊程式碼，並將其包含在<code>#else</code>條件部分。</p>
+<p><em><u>value.c，在printValue()方法中新增程式碼：</u></em></p>
+<pre><code class="language-c">  }
+// 新增部分開始
+#endif
+// 新增部分結束
+}
+</code></pre>
+<blockquote>
+<p>The other operation is testing two values for equality.</p>
+</blockquote>
+<p>另一個操作是測試兩個值是否相等。</p>
+<p><em><u>value.c，在valuesEqual()方法中新增程式碼：</u></em></p>
+<pre><code class="language-c">bool valuesEqual(Value a, Value b) {
+// 新增部分開始
+#ifdef NAN_BOXING
+  return a == b;
+#else
+// 新增部分結束
+  if (a.type != b.type) return false;
+</code></pre>
+<blockquote>
+<p>It doesn’t get much simpler than that! If the two bit representations are identical, the values are equal. That does the right thing for the singleton values since each has a unique bit representation and they are only equal to themselves. It also does the right thing for Obj pointers, since objects use identity for equality—two Obj references are equal only if they point to the exact same object.</p>
+</blockquote>
+<p>沒有比這更簡單的了！如果兩個位元表示形式是相同的，則值就是相等的。這對於單例值來說是正確的，因為每個單例值都有唯一的位表示形式，而且它們只等於自己。對於Obj指標，它也做了正確的事情，因為物件使用本體來判斷相等——只有當兩個Obj指向完全相同的物件時，它們才相等。</p>
+<blockquote>
+<p>It’s <em>mostly</em> correct for numbers too. Most floating-point numbers with different bit representations are distinct numeric values. Alas, IEEE 754 contains a pothole to trip us up. For reasons that aren’t entirely clear to me, the spec mandates that NaN values are <em>not</em> equal to <em>themselves</em>. This isn’t a problem for the special quiet NaNs that we are using for our own purposes. But it’s possible to produce a “real” arithmetic NaN in Lox, and if we want to correctly implement IEEE 754 numbers, then the resulting value is not supposed to be equal to itself. More concretely:</p>
+</blockquote>
+<p>對於數字來說，也<em>基本</em>是正確的。大多數具有不同位表示形式的浮點數是不同的數值。然而，IEEE 754中有一個坑，會讓我們陷入困境。由於我不太清楚的原因，該規範規定NaN值<em>不</em>等於<em>自身</em>。對於我們自己使用的特殊的靜默NaN來說，這不是問題。但是在Lox中產生一個“真正的”算術型NaN是有可能的，如果我們想正確地實現IEEE 754數字，那麼產生的結果值就不等於它自身。更具體地說：</p>
+<pre><code class="language-typescript">var nan = 0/0;
+print nan == nan;
+</code></pre>
+<blockquote>
+<p>IEEE 754 says this program is supposed to print “false”. It does the right thing with our old tagged union representation because the <code>VAL_NUMBER</code> case applies <code>==</code> to two values that the C compiler knows are doubles. Thus the compiler generates the right CPU instruction to perform an IEEE floating-point equality.</p>
+</blockquote>
+<p>IEEE 754表明，這個程式應該列印“false”。對於我們原先的帶標籤聯合體表示形式來說，它是正確的，因為<code>VAL_NUMBER</code>將<code>==</code>應用於兩個C編譯器知道是double的值。因此，編譯器會生成正確的CPU指令來執行IEEE浮點運算。</p>
+<blockquote>
+<p>Our new representation breaks that by defining Value to be a uint64_t. If we want to be <em>fully</em> compliant with IEEE 754, we need to handle this case.</p>
+</blockquote>
+<p>我們的新表示形式由於將Value定義為uint64_t而打破了這一點。如果我們想完全符合IEEE 754的要求，就需要處理這種情況。</p>
+<p><em><u>value.c，在valuesEqual()方法中新增程式碼：</u></em></p>
+<pre><code class="language-c">#ifdef NAN_BOXING  
+  // 新增部分開始
+  if (IS_NUMBER(a) &amp;&amp; IS_NUMBER(b)) {
+    return AS_NUMBER(a) == AS_NUMBER(b);
+  }
+  // 新增部分結束
+  return a == b;
+</code></pre>
+<blockquote>
+<p>I know, it’s weird. And there is a performance cost to doing this type test every time we check two Lox values for equality. If we are willing to sacrifice a little compatibility—who <em>really</em> cares if NaN is not equal to itself?—we could leave this off. I’ll leave it up to you to decide how pedantic you want to be.</p>
+</blockquote>
+<p>我知道，這很奇怪。而且每次我們檢查兩個Lox值是否相等時，都要進行這種型別測試，這是有效能代價的。如果我們願意犧牲一點相容性——誰會<em>真正</em>關心NaN是否等於其本身呢？——我們可以忽略它。我把這個問題留給你，看看你想要有多“迂腐”<sup class="footnote-reference" id="fr-18-1"><a href="#footnote-18">18</a></sup>。</p>
+<blockquote>
+<p>Finally, we close the conditional compilation section around the old implementation.</p>
+</blockquote>
+<p>最後，我們關閉舊實現中的條件編譯部分。</p>
+<p><em><u>value.c，在valuesEqual()方法中新增程式碼：</u></em></p>
+<pre><code class="language-c">  }
+// 新增部分開始
+#endif
+// 新增部分結束
+}
+</code></pre>
+<blockquote>
+<p>And that’s it. This optimization is complete, as is our clox virtual machine. That was the last line of new code in the book.</p>
+</blockquote>
+<p>就是這樣。這個最佳化完成了，我們的clox虛擬機器也完成了。這是本書中最後一行新程式碼。</p>
+<blockquote>
+<h3 id="30--3--7-evaluating-performance"><a class="header" href="#30--3--7-evaluating-performance">30 . 3 . 7 Evaluating performance</a></h3>
+</blockquote>
+<h3 id="3037-評估效能"><a class="header" href="#3037-評估效能">30.3.7 評估效能</a></h3>
+<blockquote>
+<p>The code is done, but we still need to figure out if we actually made anything better with these changes. Evaluating an optimization like this is very different from the previous one. There, we had a clear hotspot visible in the profiler. We fixed that part of the code and could instantly see the hotspot get faster.</p>
+</blockquote>
+<p>程式碼完成了，但我們仍然需要弄清楚，我們是否真的透過這些修改獲得了一些改進。評估這樣的最佳化與之前的最佳化有很大不同。之前，我們可以在剖析器中看到一個明顯的熱點。我們修復了這部分程式碼，並立即看到熱點部分變快了。</p>
+<blockquote>
+<p>The effects of changing the value representation are more diffused. The macros are expanded in place wherever they are used, so the performance changes are spread across the codebase in a way that’s hard for many profilers to track well, especially in an optimized build.</p>
+</blockquote>
+<p>改變值表示形式的影響更加分散。在宏的任何地方都會進行對應的擴充套件，所以效能的變化會分散到整個程式碼庫中，這對很多剖析器來說是很難跟蹤的，尤其是在最佳化的構建中<sup class="footnote-reference" id="fr-19-1"><a href="#footnote-19">19</a></sup>。</p>
+<blockquote>
+<p>We also can’t easily <em>reason</em> about the effects of our change. We’ve made values smaller, which reduces cache misses all across the VM. But the actual real-world performance effect of that change is highly dependent on the memory use of the Lox program being run. A tiny Lox microbenchmark may not have enough values scattered around in memory for the effect to be noticeable, and even things like the addresses handed out to us by the C memory allocator can impact the results.</p>
+</blockquote>
+<p>我們也無法輕易推斷出我們的改變所帶來的影響。我們讓Value變得更小，這就減少了虛擬機器中的快取丟失。但是，這一改變在真實世界中的實際效能影響在很大程式上取決於正在執行的Lox程式的記憶體使用情況。一個很小的Lox微基準測試可能沒有足夠的值分散在記憶體中，因此效果也許不明顯，甚至類似C語言地址分配器為我們提供的地址這樣的東西也會影響結果。</p>
+<blockquote>
+<p>If we did our job right, basically everything gets a little faster, especially on larger, more complex Lox programs. But it is possible that the extra bitwise operations we do when NaN-boxing values nullify the gains from the better memory use. Doing performance work like this is unnerving because you can’t easily <em>prove</em> that you’ve made the VM better. You can’t point to a single surgically targeted microbenchmark and say, “There, see?”</p>
+</blockquote>
+<p>如果我們的工作做對了，基本上所有東西都會變快一點，尤其是在更大、更復雜的Lox程式上。但是，我們對NaN裝箱值執行的位操作可能會抵消更高效的記憶體使用所帶來的收益。做這樣的效能工作是令人不安的，因為你無法輕易地證明你已經使虛擬機器變得更好了。你不能指著一個特定的微基準測試說：“看到了嗎？”</p>
+<blockquote>
+<p>Instead, what we really need is a <em>suite</em> of larger benchmarks. Ideally, they would be distilled from real-world applications—not that such a thing exists for a toy language like Lox. Then we can measure the aggregate performance changes across all of those. I did my best to cobble together a handful of larger Lox programs. On my machine, the new value representation seems to make everything roughly 10% faster across the board.</p>
+</blockquote>
+<p>相反，我們真正需要的是一套更大的基準測試。理想情況下，這些基準測試應該是從真實世界的應用程式中提煉出來的——對於Lox這樣的玩具語言來說，不存在這樣的東西。然後我們可以測量所有這些測試的總體效能變化。我盡力拼湊了幾個較大的Lox程式。在我的機器是，新的值表示形式似乎使所有的程式碼都全面提高了大約10%。</p>
+<blockquote>
+<p>That’s not a huge improvement, especially compared to the profound effect of making hash table lookups faster. I added this optimization in large part because it’s a good example of a certain <em>kind</em> of performance work you may experience, and honestly, because I think it’s technically really cool. It might not be the first thing I would reach for if I were seriously trying to make clox faster. There is probably other, lower-hanging fruit.</p>
+</blockquote>
+<p>這並不是一個巨大的改進，尤其是與雜湊查詢加速的深遠影響相比。我新增這個最佳化，很大程度上是因為它是關於你可能遇到的<em>某種</em>效能工作的一個很好的例子，而且說實話，我認為它在技術上真的很酷。如果我真的想讓clox變得更快的話，這應該不是我首先要做的事情。可能還有其它更容易實現的目標。</p>
+<blockquote>
+<p>But, if you find yourself working on a program where all of the easy wins have been taken, then at some point you may want to think about tuning your value representation. I hope this chapter has shined a light on some of the options you have in that area.</p>
+</blockquote>
+<p>但是，如果你發現自己正在處理的程式中，所有容易贏得的東西都已經被拿走了，那麼在某些時候，你可能要考慮調整一下值表示形式。我希望這一章能對你在這方面的一些選擇有所啟發。</p>
+<blockquote>
+<h2 id="30--4-where-to-next"><a class="header" href="#30--4-where-to-next">30 . 4 Where to Next</a></h2>
+</blockquote>
+<h2 id="304-前路何方"><a class="header" href="#304-前路何方">30.4 前路何方</a></h2>
+<blockquote>
+<p>We’ll stop here with the Lox language and our two interpreters. We could tinker on it forever, adding new language features and clever speed improvements. But, for this book, I think we’ve reached a natural place to call our work complete. I won’t rehash everything we’ve learned in the past many pages. You were there with me and you remember. Instead, I’d like to take a minute to talk about where you might go from here. What is the next step in your programming language journey?</p>
+</blockquote>
+<p>關於Lox語言和我們的兩個直譯器，就到此為止了。我們可以一直對它進行修補，新增新的語言功能和巧妙的速度改進。但是，對於本書來說，我認為我們已經達到了一個可以宣告工作完成的狀態。我不會重述我們在過去的許多章節中所學到的一切。你和我一起從那裡過來，你都記得。相反，我想花點時間談談你今後的發展方向。你的程式語言之旅的下一步是什麼？</p>
+<blockquote>
+<p>Most of you probably won’t spend a significant part of your career working in compilers or interpreters. It’s a pretty small slice of the computer science academia pie, and an even smaller segment of software engineering in industry. That’s OK. Even if you never work on a compiler again in your life, you will certainly <em>use</em> one, and I hope this book has equipped you with a better understanding of how the programming languages you use are designed and implemented.</p>
+</blockquote>
+<p>你們中的大多數人可能不會把職業生涯的大部分時間花在編譯器或直譯器上。這在電腦科學學術界中的一個相當小的部分，在工業軟體工程中則是一個更小的部分。這也沒關係。即使你一生中不再從事編譯器工作，你也一定會使用它，而我希望這本書能讓你更好地理解你所使用的程式語言是如何設計與實現的。</p>
+<blockquote>
+<p>You have also learned a handful of important, fundamental data structures and gotten some practice doing low-level profiling and optimization work. That kind of expertise is helpful no matter what domain you program in.</p>
+</blockquote>
+<p>你還學習了一些重要的、基本的資料結構，並進行了一些底層剖析和最佳化工作的實踐。無論你在哪個領域程式設計，這種專業知識都是有幫助的。</p>
+<blockquote>
+<p>I also hope I gave you a new way of looking at and solving problems. Even if you never work on a language again, you may be surprised to discover how many programming problems can be seen as language-<em>like</em>. Maybe that report generator you need to write can be modeled as a series of stack-based “instructions” that the generator “executes”. That user interface you need to render looks an awful lot like traversing an AST.</p>
+</blockquote>
+<p>我也希望我為你們提供了一種看待問題和解決問題的新方法。即使你不再從事語言工作，你也可能會驚訝地發現，有多少程式設計問題可以被視為<em>類似於</em>語言的問題<sup class="footnote-reference" id="fr-20-1"><a href="#footnote-20">20</a></sup>。也許你需要編寫的報告生成器可以被建模為一系列由生成器“執行”的、基於堆疊的“指令”。你需要渲染的使用者介面看起來非常像遍歷AST。</p>
+<blockquote>
+<p>If you do want to go further down the programming language rabbit hole, here are some suggestions for which branches in the tunnel to explore:</p>
+</blockquote>
+<p>如果你確實想在程式語言領域中走得更遠，這裡有一些關於哪些方面可以探索的建議：</p>
+<ul>
+<li>
+<blockquote>
+<p>Our simple, single-pass bytecode compiler pushed us towards mostly runtime optimization. In a mature language implementation, compile-time optimization is generally more important, and the field of compiler optimizations is incredibly rich. Grab a classic compilers book, and rebuild the front end of clox or jlox to be a sophisticated compilation pipeline with some interesting intermediate representations and optimization passes.</p>
+<p>Dynamic typing will place some restrictions on how far you can go, but there is still a lot you can do. Or maybe you want to take a big leap and add static types and a type checker to Lox. That will certainly give your front end a lot more to chew on.</p>
+</blockquote>
+<p>我們這個簡單的、單遍位元組碼編譯器將我們推向了執行時最佳化。在一個成熟的語言實現中，編譯時最佳化通常更重要，而且編譯器最佳化的領域也非常豐富。找一本經典的編譯器書籍<sup class="footnote-reference" id="fr-21-1"><a href="#footnote-21">21</a></sup>，將clox或jlox的前端重構為一個複雜的編譯管道，其中要包含一些有趣的中間表示形式和最佳化遍歷。</p>
+<p>動態型別會對你能走多遠加以限制，但你仍然可以做很多事情。或者你想要來個大躍進，給Lox新增靜態型別和型別檢查器。這肯定會讓你的前端有更多的東西可以細細咀嚼。</p>
+</li>
+<li>
+<blockquote>
+<p>In this book, I aim to be correct, but not particularly rigorous. My goal is mostly to give you an <em>intuition</em> and a feel for doing language work. If you like more precision, then the whole world of programming language academia is waiting for you. Languages and compilers have been studied formally since before we even had computers, so there is no shortage of books and papers on parser theory, type systems, semantics, and formal logic. Going down this path will also teach you how to read CS papers, which is a valuable skill in its own right.</p>
+</blockquote>
+<p>在本書中，我的目標是正確，但不是特別嚴謹。我的目標主要是給你一個<em>直觀感受</em>和做語言工作的感覺。如果你想要更精確的感覺，那麼整個程式語言學術界都在等著你。在我們擁有計算機之前，語言和編譯器就已經被正式研究過了，因此在解析器理論、型別系統、語義學和形式邏輯方面並不缺乏書籍和論文。沿著這條路走下去也會教你如何閱讀CS論文，這本身就是一項有價值的技能。</p>
+</li>
+<li>
+<blockquote>
+<p>Or, if you just really enjoy hacking on and making languages, you can take Lox and turn it into your own plaything. Change the syntax to something that delights your eye. Add missing features or remove ones you don’t like. Jam new optimizations in there.</p>
+<p>Eventually you may get to a point where you have something you think others could use as well. That gets you into the very distinct world of programming language <em>popularity</em>. Expect to spend a ton of time writing documentation, example programs, tools, and useful libraries. The field is crowded with languages vying for users. To thrive in that space you’ll have to put on your marketing hat and <em>sell</em>. Not everyone enjoys that kind of public-facing work, but if you do, it can be incredibly gratifying to see people use your language to express themselves.</p>
+</blockquote>
+<p>或者，如果你真的喜歡鑽研和製造語言，你可以把Lox變成你自己的玩物。把語法改成能讓你滿意的東西。增加缺失的功能或刪除你不喜歡的功能。在其中新增新的最佳化<sup class="footnote-reference" id="fr-22-1"><a href="#footnote-22">22</a></sup>。</p>
+<p>最終，你會達到某個境地，有了一些你認為其他人也可以使用的東西。這會帶你進入非常獨特的程式語言<em>流行度</em>的世界。預計你將花費大量的時間來編寫文件、示例程式、工具和有用的庫。這個領域充斥著很多爭奪使用者的語言。要想在這個領域取得成功，你將必須帶上營銷的帽子，進行銷售。不是每個人都喜歡這種面對公眾的工作，但如果你喜歡，能夠看到人們使用你的語言來表達自己，你會感到無比欣慰。</p>
+</li>
+</ul>
+<blockquote>
+<p>Or maybe this book has satisfied your craving and you’ll stop here. Whichever way you go, or don’t go, there is one lesson I hope to lodge in your heart. Like I was, you may have initially been intimidated by programming languages. But in these chapters, you’ve seen that even really challenging material can be tackled by us mortals if we get our hands dirty and take it a step at a time. If you can handle compilers and interpreters, you can do anything you put your mind to.</p>
+</blockquote>
+<p>或者，也許這本書已經滿足了你的需求，你會在這裡停下來。無論你走哪條路，或者不走哪條路，我都希望能把這個教訓留在你心裡。像我一樣，你可能一開始就被程式語言嚇到了。但在這些章節中，你已經看到，即使是真正具有挑戰性的事情，只要親自動手，一步一步來，我們這些凡人也可以解決。如果你能處理好編譯器和直譯器，你就可以做到任何你想做的事情。</p>
+<hr />
+<h2 id="習題"><a class="header" href="#習題">習題</a></h2>
+<blockquote>
+<p>Assigning homework on the last day of school seems cruel but if you really want something to do during your summer vacation:</p>
+</blockquote>
+<p>在學校的最後一天佈置家庭作業似乎很殘酷，但如果你真的想在暑假做點什麼的話：</p>
+<ol>
+<li>
+<blockquote>
+<p>Fire up your profiler, run a couple of benchmarks, and look for other hotspots in the VM. Do you see anything in the runtime that you can improve?</p>
+</blockquote>
+<p>啟動你的剖析器，執行幾個基準測試，並查詢虛擬機器中的其它熱點。你在執行時中看到什麼可以改進的地方嗎？</p>
+</li>
+<li>
+<blockquote>
+<p>Many strings in real-world user programs are small, often only a character or two. This is less of a concern in clox because we intern strings, but most VMs don’t. For those that don’t, heap allocating a tiny character array for each of those little strings and then representing the value as a pointer to that array is wasteful. Often, the pointer is larger than the string’s characters. A classic trick is to have a separate value representation for small strings that stores the characters inline in the value.</p>
+<p>Starting from clox’s original tagged union representation, implement that optimization. Write a couple of relevant benchmarks and see if it helps.</p>
+</blockquote>
+<p>在現實世界的使用者程式中，許多字串都很小，通常只有一兩個字元。這種clox中不太需要考慮，因為我們會駐留字串，但大樹下虛擬機器不會這樣做。對於那些不這樣做的虛擬機器來說，為每個小字串在堆上分配一個很小的字元陣列，然後用一個指向該陣列的指標來表示該值是很浪費的。通常情況下，這個指標要比字串的字元大。一個經典的技巧是為小字串設定一個單獨的值表示形式，該形式會將字元內聯儲存在值中。</p>
+<p>從clox最初的帶標籤聯合體表示形式開始，實現這一最佳化。寫幾個相關的基準測試，看看是否有幫助。</p>
+</li>
+<li>
+<blockquote>
+<p>Reflect back on your experience with this book. What parts of it worked well for you? What didn’t? Was it easier for you to learn bottom-up or top-down? Did the illustrations help or distract? Did the analogies clarify or confuse?</p>
+<p>The more you understand your personal learning style, the more effectively you can upload knowledge into your head. You can specifically target material that teaches you the way you learn best.</p>
+</blockquote>
+<p>回顧一下你在這本書中的經歷。哪些部分對你來說很有用？哪些沒有？對你來說，自下而上的學習更容易，還是自上而下的學習更簡單？插圖有幫助還是分散了注意力？類比是澄清了還是混淆了？</p>
+<p>你越瞭解你的個人學習風格，你就能越有效地將知識輸入你的大腦中。你可以有針對性地選擇用你最擅長的方式進行教學的材料。</p>
+</li>
+</ol>
+<hr>
+<ol class="footnote-definition"><li id="footnote-1">
+<p>大多數基準程式測量的是執行時間。但是，當然，你最終會發現自己需要編寫基準測試來測量記憶體分配、垃圾回收器花費的時間、啟動時間等等。 <a href="#fr-1-1">↩</a></p>
+</li>
+<li id="footnote-2">
+<p>在JavaScript虛擬機器的早期擴散中，第一個廣泛使用的基準測試套件是WebKit的SunSpider。在瀏覽器大戰期間，營銷人員利用SunSpider的結果來宣稱他們的瀏覽器是最快的。這極大地激勵了虛擬機器專家們根據這些基準進行最佳化。<BR>不幸的是，SunSpider程式往往與真實世界的JavaScript不匹配。它們大多是微基準測試——快速結束的小玩具程式。這些基準測試對複雜的即時編譯器不利，因為它們一開始速度比較慢，但一旦JIT有足夠的時間來最佳化並重新編譯熱點程式碼，就會變得快很多。這將虛擬機器專家們置於一個不幸的境地：要麼讓SubSpider的數字變得更好，要麼實際最佳化真實使用者執行的程式型別。<BR>谷歌的V8團隊分享了他們的Octane基準測試套件，這在當時更接近於真實世界的程式碼。多年以後，隨著JavaScript使用模式的不斷發展，甚至Octane也失去了作用。期待你的基準測試隨著你的語言生態系統的發展而發展。<BR>記住，最終目標是使<em>使用者程式</em>更快，而基準測試只是實現這個目標的一個代替物。 <a href="#fr-2-1">↩</a></p>
+</li>
+<li id="footnote-3">
+<p>這裡的“你的程式”是指執行其它Lox程式的Lox虛擬機器本身。我們要最佳化的是clox，而不是使用者的Lox指令碼。當然，選擇哪一個Lox程式載入到虛擬機器中會極大地影響clox的哪些部分會受到壓力，這就是基準測試如此重要的原因。<BR>剖析器不會告訴我們正在執行的指令碼中每個Lox函式花費了多少時間。我們必須編寫自己的“Lox剖析器”才能做到這一點，這有點超出了本書的範圍。 <a href="#fr-3-1">↩</a></p>
+</li>
+<li id="footnote-4">
+<p>這個基準測試的另一個注意點是要<em>使用</em>所執行的程式碼的結果。透過計算滾動求和與列印結果，我們確保虛擬機器<em>必須</em>執行所有的Lox程式碼。這是一個重要的習慣。與我們這個簡單的Lox虛擬機器不同，很多編譯器都做了積極的死碼消除，並且聰明到會丟棄那些結果未被使用的計算邏輯。<BR>許多程式語言駭客都會對虛擬機器在某些基準測試上的驚人表現印象深刻，最後才意識到這是因為編譯器將整個基準測試程式最佳化到不存在了。 <a href="#fr-4-1">↩</a></p>
+</li>
+<li id="footnote-5">
+<p>如果你真的想要對雜湊表的效能進行基準測試，那你應該使用許多不同大小的表。我們在這裡給每個表新增的6個鍵甚至都沒有超過雜湊表中8個元素的最小閾值。但我不想向你丟擲一個龐大的基準測試指令碼。如果你喜歡，可以隨意新增更多的小動物和食物。 <a href="#fr-5-1">↩</a></p>
+</li>
+<li id="footnote-6">
+<p>流水線使得我們很難討論單個CPU指令的效能，但可以給你一個直觀感受，在x86上，除法和模運算比加法和減法運算慢30-50<em>倍</em>。 <a href="#fr-6-1">↩</a></p>
+</li>
+<li id="footnote-7">
+<p>另一個潛在的改進是透過直接儲存位掩碼而不是儲存容量值來消除減法。在我的測試中，這並沒有什麼區別。如果CPU在其它方面遇到瓶頸，指令流水線的存在使得一些操作基本上是無用的。 <a href="#fr-7-1">↩</a></p>
+</li>
+<li id="footnote-8">
+<p>我們最初的基準測試是固定工作量，然後測量時間。修改後的指令碼計算它在10秒內可以執行多少批次的呼叫，是固定時間並測量工作量。對於效能的比較，我喜歡後一種方法，因為報告的數字代表了速度。你可以直接比較最佳化前後的數字。當測量執行時間時，你必須進行一些計算，才能得到一個良好的相對效能測量。 <a href="#fr-8-1">↩</a></p>
+</li>
+<li id="footnote-9">
+<p>我不確定是誰首先提出了這個技巧。我能找到的最早的資料是David Gudeman在1993年發表的論文 《在動態型別語言中表示型別資訊（Representing Type Information in Dynamically Typed Languages）》。其他人都在引用這篇文章。但是Gudeman自己說這篇論文並不是什麼新穎的工作，而是 "收集了大量的民間傳說"。<BR>也許發明者已經消失在時間的迷霧中，也許它已經被重新發明瞭很多次。任何人對IEEE 754進行了足夠長時間的思考，都可能會開始考慮在那些未使用的NaN中加入一些有用的資訊。 <a href="#fr-9-1">↩</a></p>
+</li>
+<li id="footnote-10">
+<p>因為符號位一直存在，即使數字是零，這意味著“正零”和“負零”有不同的位表示形式，事實上，IEEE 754確實區分了它們。 <a href="#fr-10-1">↩</a></p>
+</li>
+<li id="footnote-11">
+<p>我不知道是否有CPU真正做到了捕獲訊號NaN並中止，規範中只是說它們<em>可以</em>。 <a href="#fr-11-1">↩</a></p>
+</li>
+<li id="footnote-12">
+<p>48位元位足以對262,114GB的記憶體進行尋找。現代作業系統也為每個程序提供了自己的地址空間，所以這應該足夠了。 <a href="#fr-12-1">↩</a></p>
+</li>
+<li id="footnote-13">
+<p>規範的作者不喜歡型別雙關，因為它使得最佳化變得更加困難。一個關鍵的最佳化技術是對指令進行重新排序，以填充CPU的執行管道。顯然，編譯器只有在重排序不會產生使用者可見的影響時才可以這樣做。<BR>指標使得這一點更加困難。如果兩個指標指向同一個值，那麼透過一個指標進行的寫操作和透過另一個指標進行的讀操作就不能被重新排序。但是，如果是兩個<em>不同</em>型別的指標呢？如果這些指標可以指向同一個物件，那麼基本上<em>任意</em>兩個指標都可以成為同一個值的別名。這極大地限制了編譯器可以自由地重新排列的程式碼量。<BR>為了避免這種情況，編譯器希望採用<strong>嚴格別名</strong>——不相容型別的指標不能指向相同的值。型別雙關，從本質上來說，打破了這種假設。 <a href="#fr-13-1">↩</a></p>
+</li>
+<li id="footnote-14">
+<p>如果你發現自己的編譯器沒有對<code>memcpy()</code>進行最佳化，可以試試這個：<img src="30.%E6%9C%80%E4%BD%B3%E5%8C%96/image-20221111164521148.png" alt="image-20221111164521148" /> <a href="#fr-14-1">↩</a></p>
+</li>
+<li id="footnote-15">
+<p>非常肯定，但不是嚴格保證。據我所知，沒有什麼可以阻止CPU產生一個NaN值，作為某些操作的結果，而且這些操作的位表示形式會與我們宣告的位表示形式相沖突。但在我跨多個架構的測試中，還沒有看到這種情況發生。 <a href="#fr-15-1">↩</a></p>
+</li>
+<li id="footnote-16">
+<p>實際上，即使該值是一個Obj指標，我們也<em>可以</em>使用最低位來儲存型別標籤。這是因為Obj指標總是被對齊到8位元組邊界，因為Obj包含一個64位的欄位。這反過來意味著Obj指標的最低三位始終是0。我們可以在其中儲存任何我們想要的東西，只是在解引用指標之前要將這些遮蔽掉。<BR>這是另一種被稱為<strong>指標標記</strong>的值表示形式最佳化方案。 <a href="#fr-16-1">↩</a></p>
+</li>
+<li id="footnote-17">
+<p>在涉及到本書中的程式碼時，我都試圖遵循法律條文，所以這一段是值得懷疑的。在最佳化的時候，你會遇到一個問題，那就是你不僅要突破<em>規範所規定</em>的邊界，還有突破真正的編譯器和晶片所允許的邊界。<BR>超出規範之外是有風險的，但在這個無法無天的領域也會有回報。這樣做是否值得，取決於你自己。 <a href="#fr-17-1">↩</a></p>
+</li>
+<li id="footnote-18">
+<p>事實上，jlox把NaN相等性搞錯了。當你使用<code>==</code>來比較基本型別double時，Java做的是正確的，但如果你把這些值包裝在Double或Object中，並使用<code>equals()</code>來比較它們時，就是錯的，而這正是jlox中使用相等性的方式。 <a href="#fr-18-1">↩</a></p>
+</li>
+<li id="footnote-19">
+<p>在做剖析工作時，你基本總是想剖析程式的最佳化後的“釋出”構建版本，因為這反映了終端使用者體驗的效能情況。編譯器的最佳化（如內聯）會極大地影響程式碼中哪些部分是效能熱點。手工最佳化一個除錯構建版本，可能會讓你去“修復”那些最佳化編譯器本來就會為你解決的問題。<BR>請確保你不會意外地對除錯構建版本進行基準測試和最佳化。我似乎每年都至少要犯一次這樣的錯誤。 <a href="#fr-19-1">↩</a></p>
+</li>
+<li id="footnote-20">
+<p>這也適用於其它領域。我認為我在程式設計中所學到的任何一個主題——甚至在程式設計之外——最終都發現在其它領域中是有用的。我最喜歡軟體工程的一個方面正是它對那些興趣廣泛的人的助益。 <a href="#fr-20-1">↩</a></p>
+</li>
+<li id="footnote-21">
+<p>在這方面，我喜歡Cooper和Torczon的《<em>編譯器工程，Engineering a Compiler</em>》。Appel的《<em>現代編譯器實現，Modern Compiler Implementation</em>》一書也廣受好評。 <a href="#fr-21-1">↩</a></p>
+</li>
+<li id="footnote-22">
+<p>本書的文字版權歸我所有，但jlox和clox的程式碼和實現採用了非常寬鬆的<a href="https://en.wikipedia.org/wiki/MIT_License">MIT許可</a>。我非常歡迎你使用<a href="https://github.com/munificent/craftinginterpreters">這些直譯器</a>中的任何一個，對它們做任何你想做的事。去吧。<BR>如果你對語言做了重大改動，最好也能改一下名字，主要是為了避免人們對“Lox”這個名字的含義感到困惑。 <a href="#fr-22-1">↩</a></p>
+</li>
+</ol>
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../../content/29.超類.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../../content/後記.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../../content/29.超類.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../../content/後記.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+
+    </div>
+    </body>
+</html>

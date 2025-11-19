@@ -1,0 +1,1009 @@
+<!DOCTYPE HTML>
+<html lang="zh" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>13.繼承 - 手撸解释器教程</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="../highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="../tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "../";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "../searchindex.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">手撸解释器教程</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="13繼承-inheritance"><a class="header" href="#13繼承-inheritance">13.繼承 Inheritance</a></h1>
+<blockquote>
+<p>Once we were blobs in the sea, and then fishes, and then lizards and rats and then monkeys, and hundreds of things in between. This hand was once a fin, this hand once had claws! In my human mouth I have the pointy teeth of a wolf and the chisel teeth of a rabbit and the grinding teeth of a cow! Our blood is as salty as the sea we used to live in! When we’re frightened, the hair on our skin stands up, just like it did when we had fur. We are history! Everything we’ve ever been on the way to becoming us, we still are.</p>
+<p>​																																		—— Terry Pratchett, <em>A Hat Full of Sky</em></p>
+</blockquote>
+<p>我們曾經是海里一團一團的東西，然後是魚，然後是蜥蜴、老鼠、猴子，以及介於其間的數百種形態。這隻手曾經是鰭，這隻手曾經是爪子！在我人類的嘴裡，有狼的尖牙，有兔子的鑿齒，還有牛的磨牙！我們的血和我們曾經生活的大海一樣鹹！當我們受到驚嚇時，我們皮膚上的毛髮會豎起來，就像我們有毛時一樣。我們就是歷史！我們在成為我們的路上曾擁有的一切，我們仍然擁有。</p>
+<blockquote>
+<p>Can you believe it? We’ve reached the last chapter of <a href="http://craftinginterpreters.com/a-tree-walk-interpreter.html">Part II</a>. We’re almost done with our first Lox interpreter. The <a href="http://craftinginterpreters.com/classes.html">previous chapter</a> was a big ball of intertwined object-orientation features. I couldn’t separate those from each other, but I did manage to untangle one piece. In this chapter, we’ll finish off Lox’s class support by adding inheritance.</p>
+</blockquote>
+<p>你能相信嗎？我們已經到了第二部分的最後一章。我們幾乎已經完成了第一個Lox直譯器。上一章中是一大堆錯綜複雜的面向物件特性。我無法將這些內容完全解開，但是我設法拆出來一塊。在這一章，我們會新增繼承來完成Lox中對類的支援。</p>
+<blockquote>
+<p>Inheritance appears in object-oriented languages all the way back to the first one, <a href="https://en.wikipedia.org/wiki/Simula">Simula</a>. Early on, Kristen Nygaard and Ole-Johan Dahl noticed commonalities across classes in the simulation programs they wrote. Inheritance gave them a way to reuse the code for those similar parts.</p>
+</blockquote>
+<p>繼承出現在面嚮物件語言中，可以追溯到第一種語言Simula。早些時候，克里斯汀·尼加德(Kristen Nygaard)和奧勒-約翰·達爾(Ole-Johan Dahl)注意到，在他們編寫的模擬程式中，不同類之間存在共性。繼承為他們提供了一種重用相似部分程式碼的方法。</p>
+<blockquote>
+<h2 id="13--1-superclasses-and-subclasses"><a class="header" href="#13--1-superclasses-and-subclasses">13 . 1 Superclasses and Subclasses</a></h2>
+</blockquote>
+<h2 id="131-超類和子類"><a class="header" href="#131-超類和子類">13.1 超類和子類</a></h2>
+<blockquote>
+<p>Given that the concept is “inheritance”, you would hope they would pick a consistent metaphor and call them “parent” and “child” classes, but that would be too easy. Way back when, C. A. R. Hoare coined the term “subclass” to refer to a record type that refines another type. Simula borrowed that term to refer to a <em>class</em> that inherits from another. I don’t think it was until Smalltalk came along that someone flipped the Latin prefix to get “superclass” to refer to the other side of the relationship. From C++, you also hear “base” and “derived” classes. I’ll mostly stick with “superclass” and “subclass”.</p>
+</blockquote>
+<p>鑑於這個概念叫“繼承”，你可能希望他們會選擇一個一致的比喻，把類稱為“父”類和“子”類，但這太簡單了。早在很久以前，C. A. R. Hoare就創造了“subclass”這個術語，指的是完善另一種型別的記錄型別。Simula借用了這個術語來指代一個繼承自另一個類的類。我認為直到Smalltalk出現後，才有人將這個詞的拉丁字首取反義<sup class="footnote-reference" id="fr-1-1"><a href="#footnote-1">1</a></sup>，用超類（superclass）指代這種關係的另一方。</p>
+<blockquote>
+<p>Our first step towards supporting inheritance in Lox is a way to specify a superclass when declaring a class. There’s a lot of variety in syntax for this. C++ and C# place a <code>:</code> after the subclass’s name, followed by the superclass name. Java uses <code>extends</code> instead of the colon. Python puts the superclass(es) in parentheses after the class name. Simula puts the superclass’s name <em>before</em> the <code>class</code> keyword.</p>
+</blockquote>
+<p>我們在Lox中支援繼承的第一步是找到宣告類時指定超類的方法。這方面有很多不同的語法。C++和C#在子類的名字後面加一個<code>:</code>，然後是超類的名字。Java 使用 <code>extends</code> 而不是冒號。Python 則把超類放在類名後面的小括號裡。Simula 把超類的名字放在關鍵字<code>class</code>之前。</p>
+<blockquote>
+<p>This late in the game, I’d rather not add a new reserved word or token to the lexer. We don’t have <code>extends</code> or even <code>:</code>, so we’ll follow Ruby and use a less-than sign (<code>&lt;</code>).</p>
+</blockquote>
+<p>遊戲已經到了後期，我寧願不在詞法分析器中新增新的保留字或標記。我們沒有<code>extends</code>或<code>:</code>，所以我們遵循Ruby來使用小於號（<code>&lt;</code>）。</p>
+<pre><code class="language-java">class Doughnut {
+  // General doughnut stuff...
+}
+
+class BostonCream &lt; Doughnut {
+  // Boston Cream-specific stuff...
+}
+</code></pre>
+<blockquote>
+<p>To work this into the grammar, we add a new optional clause in our existing <code>classDecl</code> rule.</p>
+</blockquote>
+<p>為了在語法中實現這一點，我們在目前的<code>classDecl</code>規則中加一個新的可選子句。</p>
+<pre><code>classDecl      → "class" IDENTIFIER ( "&lt;" IDENTIFIER )?
+                 "{" function* "}" ;
+</code></pre>
+<blockquote>
+<p>After the class name, you can have a <code>&lt;</code> followed by the superclass’s name. The superclass clause is optional because you don’t <em>have</em> to have a superclass. Unlike some other object-oriented languages like Java, Lox has no root “Object” class that everything inherits from, so when you omit the superclass clause, the class has <em>no</em> superclass, not even an implicit one.</p>
+</blockquote>
+<p>在類的名稱後面，可以有一個<code>&lt;</code>，後跟超類的名稱。超類子句是可選的，因為一個類不一定要有超類。與Java等面向物件的語言不同，Lox沒有所有東西都繼承的一個根“Object”類，所以當你省略超類子句時，該類就沒有超類，甚至連隱含的都沒有。</p>
+<blockquote>
+<p>We want to capture this new syntax in the class declaration’s AST node.</p>
+</blockquote>
+<p>我們想在類宣告的AST節點中捕捉這個新語法。</p>
+<p><em><u>tool/GenerateAst.java，在 main()方法中，替換一行：</u></em></p>
+<pre><code class="language-java">      "Block      : List&lt;Stmt&gt; statements",
+      // 替換部分開始
+      "Class      : Token name, Expr.Variable superclass, List&lt;Stmt.Function&gt; methods",
+      // 替換部分結束            
+      "Expression : Expr expression",
+</code></pre>
+<blockquote>
+<p>You might be surprised that we store the superclass name as an Expr.Variable, not a Token. The grammar restricts the superclass clause to a single identifier, but at runtime, that identifier is evaluated as a variable access. Wrapping the name in an Expr.Variable early on in the parser gives us an object that the resolver can hang the resolution information off of.</p>
+</blockquote>
+<p>你可能會驚訝，我們把超類的名字存為一個Expr.Variable，而不是一個Token。語法將一個超類子句限制為一個識別符號，但是在執行時，這個識別符號是當作變數訪問來執行的。在解析器早期將名稱封裝在Expr.Variable內部，這樣可以給我們提供一個物件，在分析器中可以將分析資訊附加在其中。</p>
+<blockquote>
+<p>The new parser code follows the grammar directly.</p>
+</blockquote>
+<p>新的解析器程式碼直接遵循語法。</p>
+<p><em><u>lox/Parser.java，在 classDeclaration()中新增：</u></em></p>
+<pre><code class="language-java">    Token name = consume(IDENTIFIER, "Expect class name.");
+    // 新增部分開始
+    Expr.Variable superclass = null;
+    if (match(LESS)) {
+      consume(IDENTIFIER, "Expect superclass name.");
+      superclass = new Expr.Variable(previous());
+    }
+    // 新增部分結束
+    consume(LEFT_BRACE, "Expect '{' before class body.");
+</code></pre>
+<blockquote>
+<p>Once we’ve (possibly) parsed a superclass declaration, we store it in the AST.</p>
+</blockquote>
+<p>一旦我們（可能）解析到一個超類宣告，就將其儲存到AST節點中。</p>
+<p><em><u>lox/Parser.java，在 classDeclaration()方法中，替換一行：</u></em></p>
+<pre><code class="language-java">    consume(RIGHT_BRACE, "Expect '}' after class body.");
+    // 替換部分開始
+    return new Stmt.Class(name, superclass, methods);
+    // 替換部分結束
+  }
+</code></pre>
+<blockquote>
+<p>If we didn’t parse a superclass clause, the superclass expression will be <code>null</code>. We’ll have to make sure the later passes check for that. The first of those is the resolver.</p>
+</blockquote>
+<p>如果我們沒有解析到超類子句，超類表示式將是<code>null</code>。我們必須確保後面的操作會對其進行檢查。首先是分析器。</p>
+<p><em><u>lox/Resolver.java，在 visitClassStmt()方法中新增：</u></em></p>
+<pre><code class="language-java">    define(stmt.name);
+    // 新增部分開始
+    if (stmt.superclass != null) {
+      resolve(stmt.superclass);
+    }
+    // 新增部分結束
+    beginScope();
+</code></pre>
+<blockquote>
+<p>The class declaration AST node has a new subexpression, so we traverse into and resolve that. Since classes are usually declared at the top level, the superclass name will most likely be a global variable, so this doesn’t usually do anything useful. However, Lox allows class declarations even inside blocks, so it’s possible the superclass name refers to a local variable. In that case, we need to make sure it’s resolved.</p>
+</blockquote>
+<p>類宣告的AST節點有一個新的子表示式，所以我們要遍歷並分析它。因為類通常是在頂層宣告的，超類的名稱很可能是一個全域性變數，所以這一步通常沒有什麼作用。然而，Lox執行在區塊內的類宣告，所以超類名稱有可能指向一個區域性變數。在那種情況下，我們需要保證能被它被分析。</p>
+<blockquote>
+<p>Because even well-intentioned programmers sometimes write weird code, there’s a silly edge case we need to worry about while we’re in here. Take a look at this:</p>
+</blockquote>
+<p>即使是善意的程式設計師有時也會寫出奇怪的程式碼，所以在這裡我們需要考慮一個愚蠢的邊緣情況。看看這個：</p>
+<pre><code class="language-ruby">class Oops &lt; Oops {}
+</code></pre>
+<blockquote>
+<p>There’s no way this will do anything useful, and if we let the runtime try to run this, it will break the expectation the interpreter has about there not being cycles in the inheritance chain. The safest thing is to detect this case statically and report it as an error.</p>
+</blockquote>
+<p>這種程式碼不可能做什麼有用的事情，如果我們嘗試讓執行時去執行它，將會打破直譯器對繼承鏈中沒有迴圈的期望。最安全的做法是靜態地檢測這種情況，並將其作為一個錯誤報告出來。</p>
+<p><em><u>lox/Resolver.java，在 visitClassStmt()方法中新增：</u></em></p>
+<pre><code class="language-java">    define(stmt.name);
+    // 新增部分開始
+    if (stmt.superclass != null &amp;&amp;
+        stmt.name.lexeme.equals(stmt.superclass.name.lexeme)) {
+      Lox.error(stmt.superclass.name,
+          "A class can't inherit from itself.");
+    }
+    // 新增部分結束
+    if (stmt.superclass != null) {
+</code></pre>
+<blockquote>
+<p>Assuming the code resolves without error, the AST travels to the interpreter.</p>
+</blockquote>
+<p>如果程式碼分析沒有問題，AST節點就會被傳遞到直譯器。</p>
+<p><em><u>lox/Interpreter.java，在 visitClassStmt()方法中新增：</u></em></p>
+<pre><code class="language-java">  public Void visitClassStmt(Stmt.Class stmt) {
+    // 新增部分開始
+    Object superclass = null;
+    if (stmt.superclass != null) {
+      superclass = evaluate(stmt.superclass);
+      if (!(superclass instanceof LoxClass)) {
+        throw new RuntimeError(stmt.superclass.name,
+            "Superclass must be a class.");
+      }
+    }
+    // 新增部分結束
+    environment.define(stmt.name.lexeme, null);
+</code></pre>
+<blockquote>
+<p>If the class has a superclass expression, we evaluate it. Since that could potentially evaluate to some other kind of object, we have to check at runtime that the thing we want to be the superclass is actually a class. Bad things would happen if we allowed code like:</p>
+</blockquote>
+<p>如果類中有超類表示式，我們就對其求值。因為我們可能會得到其它型別的物件，我們在執行時必須檢查我們希望作為超類的物件是否確實是一個類。如果我們允許下面這樣的程式碼，就會發生不好的事情：</p>
+<pre><code class="language-ruby">var NotAClass = "I am totally not a class";
+
+class Subclass &lt; NotAClass {} // ?!
+</code></pre>
+<blockquote>
+<p>Assuming that check passes, we continue on. Executing a class declaration turns the syntactic representation of a class—its AST node—into its runtime representation, a LoxClass object. We need to plumb the superclass through to that too. We pass the superclass to the constructor.</p>
+</blockquote>
+<p>假設檢查透過，我們繼續。執行類宣告語句會把類的語法表示（AST節點）轉換為其執行時表示（一個LoxClass物件）。我們也需要把超類物件傳入該類物件中。我們將超類傳遞給建構函式。</p>
+<p><em><u>lox/Interpreter.java，在 visitClassStmt()方法中替換一行：</u></em></p>
+<pre><code class="language-java">      methods.put(method.name.lexeme, function);
+    }
+    // 替換部分開始
+    LoxClass klass = new LoxClass(stmt.name.lexeme,
+        (LoxClass)superclass, methods);
+    // 替換部分結束    
+    environment.assign(stmt.name, klass);
+</code></pre>
+<blockquote>
+<p>The constructor stores it in a field.</p>
+</blockquote>
+<p>建構函式將它儲存到一個欄位中。</p>
+<p><em><u>lox/LoxClass.java， LoxClass()建構函式中，替換一行：</u></em></p>
+<pre><code class="language-java">  // 替換部分開始
+  LoxClass(String name, LoxClass superclass,
+           Map&lt;String, LoxFunction&gt; methods) {
+    this.superclass = superclass;
+    // 替換部分結束
+    this.name = name;
+</code></pre>
+<blockquote>
+<p>Which we declare here:</p>
+</blockquote>
+<p>欄位我們在這裡宣告：</p>
+<p><em><u>lox/LoxClass.java，在 LoxClass類中新增：</u></em></p>
+<pre><code class="language-java">  final String name;
+  // 新增部分開始
+  final LoxClass superclass;
+  // 新增部分結束
+  private final Map&lt;String, LoxFunction&gt; methods;
+</code></pre>
+<blockquote>
+<p>With that, we can define classes that are subclasses of other classes. Now, what does having a superclass actually <em>do?</em></p>
+</blockquote>
+<p>有了這個，我們就可以定義一個類作為其它類的子類。現在，擁有一個超類究竟有什麼用呢？</p>
+<blockquote>
+<h2 id="13--2-inheriting-methods"><a class="header" href="#13--2-inheriting-methods">13 . 2 Inheriting Methods</a></h2>
+</blockquote>
+<h2 id="132-繼承方法"><a class="header" href="#132-繼承方法">13.2 繼承方法</a></h2>
+<blockquote>
+<p>Inheriting from another class means that everything that’s true of the superclass should be true, more or less, of the subclass. In statically typed languages, that carries a lot of implications. The sub<em>class</em> must also be a sub<em>type</em>, and the memory layout is controlled so that you can pass an instance of a subclass to a function expecting a superclass and it can still access the inherited fields correctly.</p>
+</blockquote>
+<p>繼承自另一個類，意味著對於超類適用的一切，對於子類或多或少也應該適用。在靜態型別的語言中，這包含了很多含義。子類也必須是一個子型別，而且記憶體佈局是可控的，這樣你就可以把一個子類例項傳遞給一個期望超類的函式，而它仍然可以正確地訪問繼承的欄位。</p>
+<blockquote>
+<p>Lox is a dynamically typed language, so our requirements are much simpler. Basically, it means that if you can call some method on an instance of the superclass, you should be able to call that method when given an instance of the subclass. In other words, methods are inherited from the superclass.</p>
+</blockquote>
+<p>Lox是一種動態型別的語言，所以我們的要求要簡單得多。基本上，這意味著如果你能在超類的例項上呼叫某些方法，那麼當給你一個子類的例項時，你也應該能呼叫這個方法。換句話說，方法是從超類繼承的。</p>
+<blockquote>
+<p>This lines up with one of the goals of inheritance—to give users a way to reuse code across classes. Implementing this in our interpreter is astonishingly easy.</p>
+</blockquote>
+<p>這符合繼承的目標之一——為使用者提供一種跨類重用程式碼的方式。在我們的直譯器中實現這一點是非常容易的。</p>
+<p><em><u>lox/LoxClass.java，在 findMethod()方法中新增：</u></em></p>
+<pre><code class="language-java">      return methods.get(name);
+    }
+    // 新增部分開始
+    if (superclass != null) {
+      return superclass.findMethod(name);
+    }
+    // 新增部分結束
+    return null;
+</code></pre>
+<blockquote>
+<p>That’s literally all there is to it. When we are looking up a method on an instance, if we don’t find it on the instance’s class, we recurse up through the superclass chain and look there. Give it a try:</p>
+</blockquote>
+<p>這就是它的全部內容。當我們在一個例項上查詢一個方法時，如果我們在例項的類中找不到它，就沿著超類繼承鏈遞迴查詢。試一下這個：</p>
+<pre><code class="language-javascript">class Doughnut {
+  cook() {
+    print "Fry until golden brown.";
+  }
+}
+
+class BostonCream &lt; Doughnut {}
+
+BostonCream().cook();
+</code></pre>
+<blockquote>
+<p>There we go, half of our inheritance features are complete with only three lines of Java code.</p>
+</blockquote>
+<p>好了，一半的繼承特性只用了三行Java程式碼就完成了。</p>
+<blockquote>
+<h2 id="13--3-calling-superclass-methods"><a class="header" href="#13--3-calling-superclass-methods">13 . 3 Calling Superclass Methods</a></h2>
+</blockquote>
+<h2 id="133-呼叫超類方法"><a class="header" href="#133-呼叫超類方法">13.3 呼叫超類方法</a></h2>
+<blockquote>
+<p>In <code>findMethod()</code> we look for a method on the current class <em>before</em> walking up the superclass chain. If a method with the same name exists in both the subclass and the superclass, the subclass one takes precedence or <strong>overrides</strong> the superclass method. Sort of like how variables in inner scopes shadow outer ones.</p>
+</blockquote>
+<p>在<code>findMethod()</code>方法中，我們首先在當前類中查詢，然後遍歷超類鏈。如果在子類和超類中包含相同的方法，那麼子類中的方法將優先於或<strong>覆蓋</strong>超類的方法。這有點像內部作用域中的變數對外部作用域的遮蔽。</p>
+<blockquote>
+<p>That’s great i<strong>f the subclass wants to <em>replace</em> some superclass behavior completely. But, in practice, subclasses often want to <em>refine</em> the superclass’s behavior. They want to do a little work specific to the subclass, but also execute the original superclass behav</strong>ior too.</p>
+</blockquote>
+<p>如果子類想要完全<em>替換</em>超類的某些行為，那就正好。但是，在實踐中，子類通常想改進超類的行為。他們想要做一些專門針對子類的操作，但是也想要執行原來超類中的行為。</p>
+<blockquote>
+<p>However, since the subclass has overridden the method, there’s no way to refer to the original one. If the subclass method tries to call it by name, it will just recursively hit its own override. We need a way to say “Call this method, but look for it directly on my superclass and ignore my override”. Java uses <code>super</code> for this, and we’ll use that same syntax in Lox. Here is an example:</p>
+</blockquote>
+<p>然而，由於子類已經重寫了該方法，所有沒有辦法指向原始的方法。如果子類的方法試圖透過名字來呼叫它，將會遞迴到自身的重寫方法上。我們需要一種方式來表明“呼叫這個方法，但是要直接在我的超類上尋找，忽略我內部的重寫方法”。Java中使用<code>super</code>實現這一點，我們在Lox中使用相同的語法。下面是一個例子：</p>
+<pre><code class="language-javascript">class Doughnut {
+  cook() {
+    print "Fry until golden brown.";
+  }
+}
+
+class BostonCream &lt; Doughnut {
+  cook() {
+    super.cook();
+    print "Pipe full of custard and coat with chocolate.";
+  }
+}
+
+BostonCream().cook();
+</code></pre>
+<blockquote>
+<p>If you run this, it should print:</p>
+</blockquote>
+<p>如果你執行該程式碼，應該打印出：</p>
+<pre><code>Fry until golden brown.
+Pipe full of custard and coat with chocolate.
+</code></pre>
+<blockquote>
+<p>We have a new expression form. The <code>super</code> keyword, followed by a dot and an identifier, looks for a method with that name. Unlike calls on <code>this</code>, the search starts at the superclass.</p>
+</blockquote>
+<p>我們有了一個新的表示式形式。<code>super</code>關鍵字，後跟一個點和一個識別符號，以使用該名稱查詢方法。與<code>this</code>呼叫不同，該搜尋是從超類開始的。</p>
+<blockquote>
+<h3 id="13--3--1-syntax"><a class="header" href="#13--3--1-syntax">13 . 3 . 1 Syntax</a></h3>
+</blockquote>
+<h3 id="1331-語法"><a class="header" href="#1331-語法">13.3.1 語法</a></h3>
+<blockquote>
+<p>With <code>this</code>, the keyword works sort of like a magic variable, and the expression is that one lone token. But with <code>super</code>, the subsequent <code>.</code> and property name are inseparable parts of the <code>super</code> expression. You can’t have a bare <code>super</code> token all by itself.</p>
+</blockquote>
+<p>在<code>this</code>使用中，關鍵字有點像一個魔法變數，而表示式是一個單獨的標記。但是對於<code>super</code>，隨後的<code>.</code>和屬性名是<code>super</code>表示式不可分割的一部分。你不可能只有一個單獨的<code>super</code>標記。</p>
+<pre><code class="language-java">print super; // Syntax error.
+</code></pre>
+<blockquote>
+<p>So the new clause we add to the <code>primary</code> rule in our grammar includes the property access as well.</p>
+</blockquote>
+<p>因此，我們在語法中的<code>primary</code>規則新增新子句時要包含屬性訪問。</p>
+<pre><code class="language-scala">primary        → "true" | "false" | "nil" | "this"
+               | NUMBER | STRING | IDENTIFIER | "(" expression ")"
+               | "super" "." IDENTIFIER ;
+</code></pre>
+<blockquote>
+<p>Typically, a <code>super</code> expression is used for a method call, but, as with regular methods, the argument list is <em>not</em> part of the expression. Instead, a super <em>call</em> is a super <em>access</em> followed by a function call. Like other method calls, you can get a handle to a superclass method and invoke it separately.</p>
+</blockquote>
+<p>通常情況下，<code>super</code>表示式用於方法呼叫，但是，與普通方法一樣，引數列表並不是表示式的一部分。相反，<code>super</code>呼叫是一個<code>super</code>屬性訪問，然後跟一個函式呼叫。與其它方法呼叫一樣，你可以獲得超類方法的控制代碼，然後單獨執行它。</p>
+<pre><code class="language-javascript">var method = super.cook;
+method();
+</code></pre>
+<blockquote>
+<p>So the <code>super</code> expression itself contains only the token for the <code>super</code> keyword and the name of the method being looked up. The corresponding syntax tree node is thus:</p>
+</blockquote>
+<p>因此，<code>super</code>表示式本身只包含<code>super</code>關鍵字和要查詢的方法名稱。對應的語法樹節點為：</p>
+<p><em><u>tool/GenerateAst.java，在 main()方法中新增：</u></em></p>
+<pre><code class="language-java">      "Set      : Expr object, Token name, Expr value",
+      // 新增部分開始
+      "Super    : Token keyword, Token method",
+      // 新增部分結束
+      "This     : Token keyword",
+</code></pre>
+<blockquote>
+<p>Following the grammar, the new parsing code goes inside our existing <code>primary()</code> method.</p>
+</blockquote>
+<p>按照語法，需要在我們現有的<code>primary</code>方法中新增新程式碼。</p>
+<p><em><u>lox/Parser.java，在 primary()方法中新增：</u></em></p>
+<pre><code class="language-java">      return new Expr.Literal(previous().literal);
+    }
+    // 新增部分開始
+    if (match(SUPER)) {
+      Token keyword = previous();
+      consume(DOT, "Expect '.' after 'super'.");
+      Token method = consume(IDENTIFIER,
+          "Expect superclass method name.");
+      return new Expr.Super(keyword, method);
+    }
+    // 新增部分結束
+    if (match(THIS)) return new Expr.This(previous());
+</code></pre>
+<blockquote>
+<p>A leading <code>super</code> keyword tells us we’ve hit a <code>super</code> expression. After that we consume the expected <code>.</code> and method name.</p>
+</blockquote>
+<p>開頭的<code>super</code>關鍵字告訴我們遇到了一個<code>super</code>表示式，之後我們消費預期中的<code>.</code>和方法名稱。</p>
+<blockquote>
+<h3 id="13--3--2-semantics"><a class="header" href="#13--3--2-semantics">13 . 3 . 2 Semantics</a></h3>
+</blockquote>
+<h3 id="1332-語義"><a class="header" href="#1332-語義">13.3.2 語義</a></h3>
+<blockquote>
+<p>Earlier, I said a <code>super</code> expression starts the method lookup from “the superclass”, but <em>which</em> superclass? The naïve answer is the superclass of <code>this</code>, the object the surrounding method was called on. That coincidentally produces the right behavior in a lot of cases, but that’s not actually correct. Gaze upon:</p>
+</blockquote>
+<p>之前，我說過<code>super</code>表示式從“超類”開始查詢方法，但是是哪個超類？一個不太成熟的答案是方法被呼叫時的外圍物件<code>this</code>的超類。在很多情況下，這碰巧產生了正確的行為，但實際上這是不正確的。請看：</p>
+<pre><code class="language-javascript">class A {
+  method() {
+    print "A method";
+  }
+}
+
+class B &lt; A {
+  method() {
+    print "B method";
+  }
+
+  test() {
+    super.method();
+  }
+}
+
+class C &lt; B {}
+
+C().test();
+</code></pre>
+<blockquote>
+<p>Translate this program to Java, C#, or C++ and it will print “A method”, which is what we want Lox to do too. When this program runs, inside the body of <code>test()</code>, <code>this</code> is an instance of C. The superclass of C is B, but that is <em>not</em> where the lookup should start. If it did, we would hit B’s <code>method()</code>.</p>
+</blockquote>
+<p>將這個程式轉換為Java、c#或c++，它將輸出“A method”，這也是我們希望Lox做的。當這個程式執行時，在<code>test</code>方法體中，<code>this</code>是C的一個例項，C是超類是B，但這不是查詢應該開始的地方。如果是這樣，我們就會命中B的<code>method()</code>。</p>
+<blockquote>
+<p>Instead, lookup should start on the superclass of <em>the class containing the <code>super</code> expression</em>. In this case, since <code>test()</code> is defined inside B, the <code>super</code> expression inside it should start the lookup on <em>B</em>’s superclass—A.</p>
+</blockquote>
+<p>相反，查詢應該從包含<code>super</code>表示式的類的超類開始。在這個例子中，由於<code>test()</code>是在B中定義的，它內部的<code>super</code>表示式應該在B的超類A中開始查詢。</p>
+<p><img src="13.%E7%B9%BC%E6%89%BF/classes.png" alt="The call chain flowing through the classes." /></p>
+<blockquote>
+<p>The execution flow looks something like this:</p>
+</blockquote>
+<p>執行流程看起來是這樣的：</p>
+<ol>
+<li>
+<blockquote>
+<p>We call <code>test()</code> on an instance of C.</p>
+</blockquote>
+<p>我們在C的一個例項上呼叫<code>test()</code>。</p>
+</li>
+<li>
+<blockquote>
+<p>That enters the <code>test()</code> method inherited from B. That calls <code>super.method()</code>.</p>
+</blockquote>
+<p>這就進入了從B中繼承的<code>test()</code>方法，其中又會呼叫<code>super.method()</code>。</p>
+</li>
+<li>
+<blockquote>
+<p>The superclass of B is A, so that chains to <code>method()</code> on A, and the program prints “A method”.</p>
+</blockquote>
+<p>B的超類是A，所以連結到A中的<code>method()</code>，程式會打印出“A method”。</p>
+</li>
+</ol>
+<blockquote>
+<p>Thus, in order to evaluate a <code>super</code> expression, we need access to the superclass of the class definition surrounding the call. Alack and alas, at the point in the interpreter where we are executing a <code>super</code> expression, we don’t have that easily available.</p>
+</blockquote>
+<p>因此，為了對<code>super</code>表示式求值，我們需要訪問圍繞方法呼叫的類的超類。可惜的是，在直譯器中執行<code>super</code>表示式的地方，我們並沒有那麼容易獲得。</p>
+<blockquote>
+<p>We <em>could</em> add a field to LoxFunction to store a reference to the LoxClass that owns that method. The interpreter would keep a reference to the currently executing LoxFunction so that we could look it up later when we hit a <code>super</code> expression. From there, we’d get the LoxClass of the method, then its superclass.</p>
+</blockquote>
+<p>我們可以從LoxFunction新增一個欄位，以儲存指向擁有該方法的LoxClass的引用。直譯器會儲存當前正在執行的LoxFunction的引用，這樣稍後在遇到<code>super</code>表示式時就可以找到它。從它開始，可以得到方法的LoxClass，然後找到它的超類。</p>
+<blockquote>
+<p>That’s a lot of plumbing. In the <a href="http://craftinginterpreters.com/classes.html">last chapter</a>, we had a similar problem when we needed to add support for <code>this</code>. In that case, we used our existing environment and closure mechanism to store a reference to the current object. Could we do something similar for storing the superclass? Well, I probably wouldn’t be talking about it if the answer was no, so . . . yes.</p>
+</blockquote>
+<p>這需要很多管道。在上一章中，我們新增對<code>this</code>的支援時遇到了類似的問題。在那種情況下，我們使用已有的環境和閉包機制儲存了指向當前物件的引用。那我們是否可以做類似的事情來儲存超類？嗯，如果答案是否定的，我就不會問這個問題了，所以……是的。</p>
+<blockquote>
+<p>One important difference is that we bound <code>this</code> when the method was <em>accessed</em>. The same method can be called on different instances and each needs its own <code>this</code>. With <code>super</code> expressions, the superclass is a fixed property of the <em>class declaration itself</em>. Every time you evaluate some <code>super</code> expression, the superclass is always the same.</p>
+</blockquote>
+<p>一個重要的區別是，我們在方法被訪問時綁定了<code>this</code>。同一個方法可以在不同的例項上被呼叫，而且每個例項都需要有自己的<code>this</code>。對於<code>super</code>表示式，超類是<em>類宣告本身</em>的一個固定屬性。每次對某個<code>super</code>表示式求值時，超類都是同一個。</p>
+<blockquote>
+<p>That means we can create the environment for the superclass once, when the class definition is executed. Immediately before we define the methods, we make a new environment to bind the class’s superclass to the name <code>super</code>.</p>
+</blockquote>
+<p>這意味著我們可以在執行類定義時，為超類建立一個環境。在定義方法之前，我們建立一個新環境，將類的超類與名稱<code>super</code>繫結。</p>
+<p><img src="13.%E7%B9%BC%E6%89%BF/superclass.png" alt="The superclass environment." /></p>
+<blockquote>
+<p>When we create the LoxFunction runtime representation for each method, that is the environment they will capture in their closure. Later, when a method is invoked and <code>this</code> is bound, the superclass environment becomes the parent for the method’s environment, like so:</p>
+</blockquote>
+<p>當我們為每個方法建立LoxFunction執行時表示時，也就是這個方法閉包中獲取的環境。之後，放方法被呼叫時會繫結<code>this</code>，超類環境會成為方法環境的父環境，就像這樣：</p>
+<p><img src="13.%E7%B9%BC%E6%89%BF/environments.png" alt="The environment chain including the superclass environment." /></p>
+<blockquote>
+<p>That’s a lot of machinery, but we’ll get through it a step at a time. Before we can get to creating the environment at runtime, we need to handle the corresponding scope chain in the resolver.</p>
+</blockquote>
+<p>這是一個複雜的機制，但是我們會一步一步完成它。在我們可以在執行時建立環境之前，我們需要在分析器中處理對應的作用域。</p>
+<p><em><u>lox/Resolver.java，在 visitClassStmt()方法中新增：</u></em></p>
+<pre><code class="language-java">      resolve(stmt.superclass);
+    }
+    // 新增部分開始
+    if (stmt.superclass != null) {
+      beginScope();
+      scopes.peek().put("super", true);
+    }
+    // 新增部分結束
+    beginScope();
+</code></pre>
+<blockquote>
+<p>If the class declaration has a superclass, then we create a new scope surrounding all of its methods. In that scope, we define the name “super”. Once we’re done resolving the class’s methods, we discard that scope.</p>
+</blockquote>
+<p>如果該類宣告有超類，那麼我們就在其所有方法的外圍建立一個新的作用域。在這個作用域中，我們會定義名稱<code>super</code>。一旦我們完成了對該類中方法的分析，就丟棄這個作用域。</p>
+<p><em><u>lox/Resolver.java，在 visitClassStmt()方法中新增：</u></em></p>
+<pre><code class="language-java">    endScope();
+    // 新增部分開始
+    if (stmt.superclass != null) endScope();
+    // 新增部分結束
+    currentClass = enclosingClass;
+</code></pre>
+<blockquote>
+<p>It’s a minor optimization, but we only create the superclass environment if the class actually <em>has</em> a superclass. There’s no point creating it when there isn’t a superclass since there’d be no superclass to store in it anyway.</p>
+</blockquote>
+<p>這是一個小最佳化，但是我們只在類真的有超類時才會建立超類環境。在沒有超類的情況下，建立超類環境是沒有意義的，因為無論如何裡面都不會儲存超類。</p>
+<blockquote>
+<p>With “super” defined in a scope chain, we are able to resolve the <code>super</code> expression itself.</p>
+</blockquote>
+<p>在作用域鏈中定義<code>super</code>後，我們就能夠分析<code>super</code>表示式了。</p>
+<p><em><u>lox/Resolver.java，在 visitSetExpr()方法後新增：</u></em></p>
+<pre><code class="language-java">  @Override
+  public Void visitSuperExpr(Expr.Super expr) {
+    resolveLocal(expr, expr.keyword);
+    return null;
+  }
+</code></pre>
+<blockquote>
+<p>We resolve the <code>super</code> token exactly as if it were a variable. The resolution stores the number of hops along the environment chain that the interpreter needs to walk to find the environment where the superclass is stored.</p>
+</blockquote>
+<p>我們把<code>super</code>標記當作一個變數進行分析。分析結果儲存瞭直譯器要在環境鏈上找到超類所在的環境需要的跳數。</p>
+<blockquote>
+<p>This code is mirrored in the interpreter. When we evaluate a subclass definition, we create a new environment.</p>
+</blockquote>
+<p>這段程式碼在直譯器中也有對應。當我們執行子類定義時，建立一個新環境。</p>
+<p><em><u>lox/Interpreter.java，在 visitClassStmt()方法中新增：</u></em></p>
+<pre><code class="language-java">        throw new RuntimeError(stmt.superclass.name,
+            "Superclass must be a class.");
+      }
+    }
+
+    environment.define(stmt.name.lexeme, null);
+    // 新增部分開始
+    if (stmt.superclass != null) {
+      environment = new Environment(environment);
+      environment.define("super", superclass);
+    }
+    // 新增部分結束
+    Map&lt;String, LoxFunction&gt; methods = new HashMap&lt;&gt;();
+</code></pre>
+<blockquote>
+<p>Inside that environment, we store a reference to the superclass—the actual LoxClass object for the superclass which we have now that we are in the runtime. Then we create the LoxFunctions for each method. Those will capture the current environment—the one where we just bound “super”—as their closure, holding on to the superclass like we need. Once that’s done, we pop the environment.</p>
+</blockquote>
+<p>在這個環境中，我們儲存指向超類的引用——即我們在執行時現在擁有的超類的實際LoxClass物件。然後我們為每個方法建立LoxFunction。這些函式將捕獲當前環境（也就是我們剛剛繫結“super”的那個）作為其閉包，像我們需要的那樣維繫著超類。一旦這些完成，我們就彈出環境。</p>
+<p><em><u>lox/Interpreter.java，在 visitClassStmt()方法中新增：</u></em></p>
+<pre><code class="language-java">    LoxClass klass = new LoxClass(stmt.name.lexeme,
+        (LoxClass)superclass, methods);
+    // 新增部分開始    
+    if (superclass != null) {
+      environment = environment.enclosing;
+    }
+    // 新增部分結束
+    environment.assign(stmt.name, klass);
+</code></pre>
+<blockquote>
+<p>We’re ready to interpret <code>super</code> expressions themselves. There are a few moving parts, so we’ll build this method up in pieces.</p>
+</blockquote>
+<p>我們現在已經準備好解釋<code>super</code>表示式了。這會分為很多部分，所以我們逐步構建這個方法。</p>
+<p><em><u>lox/Interpreter.java，在 visitSetExpr()方法後新增：</u></em></p>
+<pre><code class="language-java">  @Override
+  public Object visitSuperExpr(Expr.Super expr) {
+    int distance = locals.get(expr);
+    LoxClass superclass = (LoxClass)environment.getAt(
+        distance, "super");
+  }
+</code></pre>
+<blockquote>
+<p>First, the work we’ve been leading up to. We look up the surrounding class’s superclass by looking up “super” in the proper environment.</p>
+</blockquote>
+<p>首先，我們要做之前鋪墊的工作。我們透過在適當環境中查詢“super”來找到外圍類的超類。</p>
+<blockquote>
+<p>When we access a method, we also need to bind <code>this</code> to the object the method is accessed from. In an expression like <code>doughnut.cook</code>, the object is whatever we get from evaluating <code>doughnut</code>. In a <code>super</code> expression like <code>super.cook</code>, the current object is implicitly the <em>same</em> current object that we’re using. In other words, <code>this</code>. Even though we are looking up the <em>method</em> on the superclass, the <em>instance</em> is still <code>this</code>.</p>
+</blockquote>
+<p>當我們訪問方法時，還需要將<code>this</code>與訪問該方法的物件進行繫結。在像<code>doughnut.cook</code>這樣的表示式中，物件是我們透過對<code>doughnut</code>求值得到的內容。在像<code>super.cook</code>這樣的<code>super</code>表示式中，當前物件隱式地與我們正使用的當前物件相同。換句話說，就是<code>this</code>。即使我們在超類中查詢方法，<em>例項</em>仍然是<code>this</code>。</p>
+<blockquote>
+<p>Unfortunately, inside the <code>super</code> expression, we don’t have a convenient node for the resolver to hang the number of hops to <code>this</code> on. Fortunately, we do control the layout of the environment chains. The environment where “this” is bound is always right inside the environment where we store “super”.</p>
+</blockquote>
+<p>不幸的是，在<code>super</code>表示式中，我們沒有一個方便的節點可以讓分析器將<code>this</code>對應的跳數儲存起來。幸運的是，我們可以控制環境鏈的佈局。繫結<code>this</code>的環境總是儲存在儲存<code>super</code>的環境中。</p>
+<p><em><u>lox/Interpreter.java，在 visitSuperExpr()方法中新增：</u></em></p>
+<pre><code class="language-java">    LoxClass superclass = (LoxClass)environment.getAt(
+        distance, "super");
+    // 新增部分開始
+    LoxInstance object = (LoxInstance)environment.getAt(
+        distance - 1, "this");
+    // 新增部分結束
+  }
+</code></pre>
+<blockquote>
+<p>Offsetting the distance by one looks up “this” in that inner environment. I admit this isn’t the most elegant code, but it works.</p>
+</blockquote>
+<p>將距離偏移1，在那個內部環境中查詢“this”。我承認這個程式碼不是最優雅的，但是它是有效的。</p>
+<blockquote>
+<p>Now we’re ready to look up and bind the method, starting at the superclass.</p>
+</blockquote>
+<p>現在我們準備查詢並繫結方法，從超類開始。</p>
+<p><em><u>lox/Interpreter.java，在 visitSuperExpr()方法中新增：</u></em></p>
+<pre><code class="language-java">    LoxInstance object = (LoxInstance)environment.getAt(
+        distance - 1, "this");
+    // 新增部分開始    
+    LoxFunction method = superclass.findMethod(expr.method.lexeme);
+    return method.bind(object);
+    // 新增部分結束
+  }
+</code></pre>
+<blockquote>
+<p>This is almost exactly like the code for looking up a method of a get expression, except that we call <code>findMethod()</code> on the superclass instead of on the class of the current object.</p>
+</blockquote>
+<p>這幾乎與查詢get表示式方法的程式碼完全一樣，區別在於，我們是在超類上呼叫<code>findMethod()</code> ，而不是在當前物件的類。</p>
+<blockquote>
+<p>That’s basically it. Except, of course, that we might <em>fail</em> to find the method. So we check for that too.</p>
+</blockquote>
+<p>基本上就是這樣了。當然，除了我們可能找不到方法之外。所以，我們要對其檢查。</p>
+<p><em><u>lox/Interpreter.java，在 visitSuperExpr()方法中新增：</u></em></p>
+<pre><code class="language-java">    LoxFunction method = superclass.findMethod(expr.method.lexeme);
+    // 新增部分開始
+    if (method == null) {
+      throw new RuntimeError(expr.method,
+          "Undefined property '" + expr.method.lexeme + "'.");
+    }
+    // 新增部分結束
+    return method.bind(object);
+  }
+</code></pre>
+<blockquote>
+<p>There you have it! Take that BostonCream example earlier and give it a try. Assuming you and I did everything right, it should fry it first, then stuff it with cream.</p>
+</blockquote>
+<p>這就對了！試著執行一下前面那個BostonCream的例子。如果你我都做對了，它的結果應該是：</p>
+<pre><code>Fry until golden brown.
+Pipe full of custard and coat with chocolate.
+</code></pre>
+<blockquote>
+<h3 id="13--3--3-invalid-uses-of-super"><a class="header" href="#13--3--3-invalid-uses-of-super">13 . 3 . 3 Invalid uses of super</a></h3>
+</blockquote>
+<h3 id="1333-super的無效使用"><a class="header" href="#1333-super的無效使用">13.3.3 super的無效使用</a></h3>
+<blockquote>
+<p>As with previous language features, our implementation does the right thing when the user writes correct code, but we haven’t bulletproofed the intepreter against bad code. In particular, consider:</p>
+</blockquote>
+<p>像以前的語言特性一樣，當使用者寫出正確的程式碼時，我們的語言實現也會做成正確的事情，但我們還沒有在直譯器中對錯誤程式碼進行防禦。具體來說，考慮以下程式碼：</p>
+<pre><code class="language-java">class Eclair {
+  cook() {
+    super.cook();
+    print "Pipe full of crème pâtissière.";
+  }
+}
+</code></pre>
+<blockquote>
+<p>This class has a <code>super</code> expression, but no superclass. At runtime, the code for evaluating <code>super</code> expressions assumes that “super” was successfully resolved and will be found in the environment. That’s going to fail here because there is no surrounding environment for the superclass since there is no superclass. The JVM will throw an exception and bring our interpreter to its knees.</p>
+</blockquote>
+<p>這個類中有一個<code>super</code>表示式，但是沒有超類。在執行時，計算<code>super</code>表示式的程式碼假定<code>super</code>已經被成功分析，並且可以在環境中找到超類。但是在這裡會失敗，因為沒有超類，也就沒有超類對應的外圍環境。JVM會丟擲一個異常，我們的直譯器也會因此崩潰。</p>
+<blockquote>
+<p>Heck, there are even simpler broken uses of super:</p>
+</blockquote>
+<p>見鬼，還有更簡單的<code>super</code>錯誤用法：</p>
+<pre><code class="language-java">super.notEvenInAClass();
+</code></pre>
+<blockquote>
+<p>We could handle errors like these at runtime by checking to see if the lookup of “super” succeeded. But we can tell statically—just by looking at the source code—that Eclair has no superclass and thus no <code>super</code> expression will work inside it. Likewise, in the second example, we know that the <code>super</code> expression is not even inside a method body.</p>
+</blockquote>
+<p>我們可以在執行時透過檢查“super”是否查詢成功而處理此類錯誤。但是我們可以只通過檢視原始碼靜態地知道，Eclair沒有超類，因此也就沒有<code>super</code>表示式可以在其中生效。同樣的，在第二個例子中，我們知道<code>super</code>表示式甚至不在方法體內。</p>
+<blockquote>
+<p>Even though Lox is dynamically typed, that doesn’t mean we want to defer <em>everything</em> to runtime. If the user made a mistake, we’d like to help them find it sooner rather than later. So we’ll report these errors statically, in the resolver.</p>
+</blockquote>
+<p>儘管Lox是動態型別的，但這並不意味著我們要將一切都推遲到執行時。如果使用者犯了錯誤，我們希望能幫助他們儘早發現，所以我們會在分析器中靜態地報告這些錯誤。</p>
+<blockquote>
+<p>First, we add a new case to the enum we use to keep track of what kind of class is surrounding the current code being visited.</p>
+</blockquote>
+<p>首先，在我們用來追蹤當前訪問程式碼外圍類的型別的列舉中新增一個新值。</p>
+<p><em><u>lox/Resolver.java，在 ClassType列舉中新增程式碼，首先在上一行後面加“,”：</u></em></p>
+<pre><code class="language-java">    NONE,
+    CLASS,
+    // 新增部分開始
+    SUBCLASS
+    // 新增部分結束
+  }
+</code></pre>
+<blockquote>
+<p>We’ll use that to distinguish when we’re inside a class that has a superclass versus one that doesn’t. When we resolve a class declaration, we set that if the class is a subclass.</p>
+</blockquote>
+<p>我們將用它來區分我們是否在一個有超類的類中。當我們分析一個類的宣告時，如果該類是一個子類，我們就設定該值。</p>
+<p><em><u>lox/Resolver.java，在 visitClassStmt()方法中新增：</u></em></p>
+<pre><code class="language-java">    if (stmt.superclass != null) {
+      // 新增部分開始
+      currentClass = ClassType.SUBCLASS;
+      // 新增部分結束
+      resolve(stmt.superclass);
+</code></pre>
+<blockquote>
+<p>Then, when we resolve a <code>super</code> expression, we check to see that we are currently inside a scope where that’s allowed.</p>
+</blockquote>
+<p>然後，當我們分析<code>super</code>表示式時，會檢查當前是否在一個允許使用<code>super</code>表示式的作用域中。</p>
+<p><em><u>lox/Resolver.java，在 visitSuperExpr()方法中新增：</u></em></p>
+<pre><code class="language-java">  public Void visitSuperExpr(Expr.Super expr) {
+    // 新增部分開始
+    if (currentClass == ClassType.NONE) {
+      Lox.error(expr.keyword,
+          "Can't use 'super' outside of a class.");
+    } else if (currentClass != ClassType.SUBCLASS) {
+      Lox.error(expr.keyword,
+          "Can't use 'super' in a class with no superclass.");
+    }
+    // 新增部分結束
+    resolveLocal(expr, expr.keyword);
+</code></pre>
+<blockquote>
+<p>If not—oopsie!—the user made a mistake.</p>
+</blockquote>
+<p>如果不是，那就是使用者出錯了。</p>
+<blockquote>
+<h2 id="13--4-conclusion"><a class="header" href="#13--4-conclusion">13 . 4 Conclusion</a></h2>
+</blockquote>
+<h2 id="134-總結"><a class="header" href="#134-總結">13.4 總結</a></h2>
+<blockquote>
+<p>We made it! That final bit of error handling is the last chunk of code needed to complete our Java implementation of Lox. This is a real accomplishment and one you should be proud of. In the past dozen chapters and a thousand or so lines of code, we have learned and implemented . . .</p>
+</blockquote>
+<p>我們成功了！最後的錯誤處理是完成Lox語言的Java實現所需的最後一塊程式碼。這是一項真正的成就，你應該為此感到自豪。在過去的十幾章和一千多行程式碼中，我們已經學習並實現了：</p>
+<ul>
+<li><a href="http://craftinginterpreters.com/scanning.html">tokens and lexing</a>,  標記與詞法</li>
+<li><a href="http://craftinginterpreters.com/representing-code.html">abstract syntax trees</a>,  抽象語法樹</li>
+<li><a href="http://craftinginterpreters.com/parsing-expressions.html">recursive descent parsing</a>,  遞迴下降分析</li>
+<li>prefix and infix expressions,  字首、中綴表示式</li>
+<li>runtime representation of objects,  物件的執行時表示</li>
+<li><a href="http://craftinginterpreters.com/evaluating-expressions.html">interpreting code using the Visitor pattern</a>, 使用Visitor模式解釋程式碼</li>
+<li><a href="http://craftinginterpreters.com/statements-and-state.html">lexical scope</a>,  詞法作用域</li>
+<li>environment chains for storing variables,  儲存變數的環境鏈</li>
+<li><a href="http://craftinginterpreters.com/control-flow.html">control flow</a>, 控制流</li>
+<li><a href="http://craftinginterpreters.com/functions.html">functions with parameters</a>, 有參函式</li>
+<li>closures, 閉包</li>
+<li><a href="http://craftinginterpreters.com/resolving-and-binding.html">static variable resolution and error detection</a>, 靜態變數分析與錯誤檢查</li>
+<li><a href="http://craftinginterpreters.com/classes.html">classes</a>, 類</li>
+<li>constructors, 建構函式</li>
+<li>fields, 欄位</li>
+<li>methods, and finally,  方法</li>
+<li>inheritance.  繼承</li>
+</ul>
+<p><img src="13.%E7%B9%BC%E6%89%BF/superhero.png" alt="You, being your bad self." /></p>
+<blockquote>
+<p>We did all of that from scratch, with no external dependencies or magic tools. Just you and I, our respective text editors, a couple of collection classes in the Java standard library, and the JVM runtime.</p>
+</blockquote>
+<p>所有這些都是我們從頭開始做的，沒有藉助外部依賴和神奇工具。只有你和我，我們的文字編輯器，Java標準庫中的幾個集合類，以及JVM執行時。</p>
+<blockquote>
+<p>This marks the end of Part II, but not the end of the book. Take a break. Maybe write a few fun Lox programs and run them in your interpreter. (You may want to add a few more native methods for things like reading user input.) When you’re refreshed and ready, we’ll embark on our <a href="http://craftinginterpreters.com/a-bytecode-virtual-machine.html">next adventure</a>.</p>
+</blockquote>
+<p>這標誌著第二部分的結束，但不是這本書的結束。休息一下，也許可以編寫幾個Lox程式在你的直譯器中執行一下（你可能需要新增一些本地方法來支援讀取使用者的輸入等操作）。當你重新振作之後，我們將開始下一次冒險。</p>
+<hr />
+<blockquote>
+<h2 id="challenges"><a class="header" href="#challenges">CHALLENGES</a></h2>
+</blockquote>
+<h2 id="習題"><a class="header" href="#習題">習題</a></h2>
+<ol>
+<li>
+<blockquote>
+<p>Lox supports only <em>single inheritance</em>—a class may have a single superclass and that’s the only way to reuse methods across classes. Other languages have explored a variety of ways to more freely reuse and share capabilities across classes: mixins, traits, multiple inheritance, virtual inheritance, extension methods, etc.</p>
+</blockquote>
+<blockquote>
+<p>If you were to add some feature along these lines to Lox, which would you pick and why? If you’re feeling courageous (and you should be at this point), go ahead and add it.</p>
+</blockquote>
+<p>Lox只支援<em>單繼承</em>——一個類可以有一個超類，這是唯一跨類複用方法的方式。其它語言中已經探索出了各種方法來更自由地跨類重用和共享功能：mixins, traits, multiple inheritance, virtual inheritance, extension methods, 等等。</p>
+<p>如果你要在Lox中新增一些類似的功能，你會選擇哪種，為什麼？如果你有勇氣的話（這時候你應該有勇氣了），那就去新增它。</p>
+</li>
+<li>
+<blockquote>
+<p>In Lox, as in most other object-oriented languages, when looking up a method, we start at the bottom of the class hierarchy and work our way up—a subclass’s method is preferred over a superclass’s. In order to get to the superclass method from within an overriding method, you use <code>super</code>.</p>
+</blockquote>
+<p>在Lox中，與其它大多數面嚮物件語言一樣，當查詢一個方法時，我們從類的底層開始向上查詢——子類的方法優先於超類的方法。為了在覆蓋方法中訪問超類方法，你可以使用<code>super</code>。</p>
+<blockquote>
+<p>The language <a href="https://beta.cs.au.dk/">BETA</a> takes the <a href="http://journal.stuffwithstuff.com/2012/12/19/the-impoliteness-of-overriding-methods/">opposite approach</a>. When you call a method, it starts at the <em>top</em> of the class hierarchy and works <em>down</em>. A superclass method wins over a subclass method. In order to get to the subclass method, the superclass method can call <code>inner</code>, which is sort of like the inverse of <code>super</code>. It chains to the next method down the hierarchy.</p>
+</blockquote>
+<p><a href="https://beta.cs.au.dk/">BEAT</a>語言採用了<a href="http://journal.stuffwithstuff.com/2012/12/19/the-impoliteness-of-overriding-methods/">相反的方法</a>。當你呼叫一個方法時，它從類繼承結構的頂層開始向下尋找。超類方法的優先順序高於子類方法。為了訪問子類的方法，超類方法可以呼叫<code>inner</code>，這有點像是<code>super</code>的反義詞。它與繼承層次結構中的下一級方法相連線。</p>
+<blockquote>
+<p>The superclass method controls when and where the subclass is allowed to refine its behavior. If the superclass method doesn’t call <code>inner</code> at all, then the subclass has no way of overriding or modifying the superclass’s behavior.</p>
+</blockquote>
+<p>超類方法控制著子類何時何地可以改進其行為。如果超類方法根本沒有呼叫<code>inner</code>，那麼子類就無法覆蓋或修改超類的行為。</p>
+<blockquote>
+<p>Take out Lox’s current overriding and <code>super</code> behavior and replace it with BETA’s semantics. In short:</p>
+</blockquote>
+<p>去掉Lox目前的覆蓋和<code>super</code>行為，用BEAT的語義來替換。簡而言之：</p>
+<ul>
+<li>
+<blockquote>
+<p>When calling a method on a class, prefer the method <em>highest</em> on the class’s inheritance chain.</p>
+</blockquote>
+<p>當呼叫類上的方法時，優先選擇類繼承鏈中最高的方法。</p>
+</li>
+<li>
+<blockquote>
+<p>Inside the body of a method, a call to <code>inner</code> looks for a method with the same name in the nearest subclass along the inheritance chain between the class containing the <code>inner</code> and the class of <code>this</code>. If there is no matching method, the <code>inner</code> call does nothing.</p>
+</blockquote>
+<p>在方法體內部，<code>inner</code>呼叫會在繼承鏈中包含<code>inner</code>的類和包含<code>this</code>的類之間，查詢具有相同名稱的最近的子類中的方法。如果沒有匹配的方法，<code>inner</code>呼叫不做任何事情。</p>
+</li>
+</ul>
+<blockquote>
+<p>For example:</p>
+</blockquote>
+<p>舉例來說：</p>
+<pre><code class="language-java">class Doughnut {
+  cook() {
+    print "Fry until golden brown.";
+    inner();
+    print "Place in a nice box.";
+  }
+}
+
+class BostonCream &lt; Doughnut {
+  cook() {
+    print "Pipe full of custard and coat with chocolate.";
+  }
+}
+
+BostonCream().cook();
+</code></pre>
+<blockquote>
+<p>This should print:</p>
+</blockquote>
+<p>這應該輸出：</p>
+<pre><code>Fry until golden brown.
+Pipe full of custard and coat with chocolate.
+Place in a nice box.
+</code></pre>
+</li>
+<li>
+<blockquote>
+<p>In the chapter where I introduced Lox, <a href="http://craftinginterpreters.com/the-lox-language.html#challenges">I challenged you</a> to come up with a couple of features you think the language is missing. Now that you know how to build an interpreter, implement one of those features.</p>
+</blockquote>
+<p>在介紹Lox的那一章，我讓你想出幾個你認為該語言缺少的功能。現在你知道了如何構建一個直譯器，請實現其中的一個功能。</p>
+</li>
+</ol>
+<hr>
+<ol class="footnote-definition"><li id="footnote-1">
+<p>“Super-”和“sub-”在拉丁語中表示“上面”和“下面”。把繼承樹想象成一個根在頂部的家族樹——在這個圖上，子類就在超類的下面。更一般地說，“sub-”指的是細化或被更一般的概念所包含的事物。在動物學中，子類指的是對更大的生物類的一個精細分類。在集合論中，子集被一個更大的超集包含，該超集中包含子集的所有元素，可能還有更多元素。集合論和程式語言在型別論中相遇，就產生了“超型別”和“子型別”。在靜態型別的面嚮物件語言中，一個子類通常也是其超類的一個子型別。 <a href="#fr-1-1">↩</a></p>
+</li>
+</ol>
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../../content/12.類.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../../content/III.A_BYTECODE_VIRTUAL_MACHINE.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../../content/12.類.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../../content/III.A_BYTECODE_VIRTUAL_MACHINE.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+
+    </div>
+    </body>
+</html>

@@ -1,0 +1,1029 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>3.Lox语言</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="../highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="../tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "../";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "../searchindex.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title"></h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="3lox語言--the-lox-language"><a class="header" href="#3lox語言--the-lox-language">3.Lox語言  The Lox Language</a></h1>
+<blockquote>
+<p>What nicer thing can you do for somebody than make them breakfast?</p>
+<p>​																						——Anthony Bourdain</p>
+</blockquote>
+<p>還有什麼能比給別人做頓早餐，更能體現你對他的好呢？</p>
+<blockquote>
+<p>We’ll spend the rest of this book illuminating every dark and sundry corner of the Lox language, but it seems cruel to have you immediately start grinding out code for the interpreter without at least a glimpse of what we’re going to end up with.</p>
+</blockquote>
+<p>我們將用本書的其餘部分來照亮Lox語言的每一個黑暗和雜亂的角落，但如果讓你在對目標一無所知的情況下，就立即開始為解釋器編寫代碼，這似乎很殘忍。</p>
+<blockquote>
+<p>At the same time, I don’t want to drag you through reams of language lawyering and specification-ese before you get to touch your text editor. So this will be a gentle, friendly introduction to Lox. It will leave out a lot of details and edge cases. We’ve got plenty of time for those later.</p>
+</blockquote>
+<p>與此同時，我也不想在您編碼之前，就把您拖入大量的語言和規範術語中。所以這是一個溫和、友好的Lox介紹，它會省去很多細節和邊緣情況<sup class="footnote-reference" id="fr-1-1"><a href="#footnote-1">1</a></sup>。後面我們有足夠的時間來解決這些問題。</p>
+<blockquote>
+<h2 id="3--1-hello-lox"><a class="header" href="#3--1-hello-lox">3 . 1 Hello, Lox</a></h2>
+</blockquote>
+<h2 id="3--1-hello-lox-1"><a class="header" href="#3--1-hello-lox-1">3 . 1 Hello, Lox</a></h2>
+<blockquote>
+<p>Here’s your very first taste of Lox:</p>
+</blockquote>
+<p>下面是你對Lox的第一次體驗：</p>
+<pre><code class="language-c">// Your first Lox program!
+print "Hello, world!";
+</code></pre>
+<blockquote>
+<p>As that <code>//</code> line comment and the trailing semicolon imply, Lox’s syntax is a member of the C family. (There are no parentheses around the string because <code>print</code> is a built-in statement, and not a library function.)</p>
+</blockquote>
+<p>正如那句<code>//</code>行註釋和後面的分號所暗示的那樣，Lox的語法是C語言家族的成員之一。（因為<code>print</code>是一個內置語句，而不是庫函數，所以字符串周圍沒有括號。）</p>
+<blockquote>
+<p>Now, I won’t claim that C has a <em>great</em> syntax. If we wanted something elegant, we’d probably mimic Pascal or Smalltalk. If we wanted to go full Scandinavian-furniture-minimalism, we’d do a Scheme. Those all have their virtues.</p>
+</blockquote>
+<p>這裡，我並不是想說C語言具有出色的語法<sup class="footnote-reference" id="fr-2-1"><a href="#footnote-2">2</a></sup>。如果我們想要一些優雅的東西，我們可能會模仿Pascal或Smalltalk。如果我們想要完全體現斯堪的納維亞傢俱的極簡主義風格，我們會實現一個Scheme。這些都有其優點。</p>
+<blockquote>
+<p>What C-like syntax has instead is something you’ll find is often more valuable in a language: <em>familiarity</em>. I know you are already comfortable with that style because the two languages we’ll be using to <em>implement</em> Lox—Java and C—also inherit it. Using a similar syntax for Lox gives you one less thing to learn.</p>
+</blockquote>
+<p>但是，類C的語法所具有的反而是一些在語言中更有價值的東西：<em>熟悉度</em>。我知道你已經對這種風格很熟悉了，因為我們將用來實現Lox的兩種語言——Java和C——也繼承了這種風格。讓Lox使用類似的語法，你就少了一件需要學習的事情。</p>
+<blockquote>
+<h2 id="3--2-a-high-level-language"><a class="header" href="#3--2-a-high-level-language">3 . 2 A High-Level Language</a></h2>
+</blockquote>
+<h2 id="32-高級語言"><a class="header" href="#32-高級語言">3.2 高級語言</a></h2>
+<blockquote>
+<p>While this book ended up bigger than I was hoping, it’s still not big enough to fit a huge language like Java in it. In order to fit two complete implementations of Lox in these pages, Lox itself has to be pretty compact.</p>
+</blockquote>
+<p>雖然這本書最終比我所希望的要大，但它仍然不夠大，無法將Java這樣一門龐大的語言放進去。為了在有限的篇幅裡容納兩個完整的Lox實現，Lox本身必須相當緊湊。</p>
+<blockquote>
+<p>When I think of languages that are small but useful, what comes to mind are high-level “scripting” languages like JavaScript, Scheme, and Lua. Of those three, Lox looks most like JavaScript, mainly because most C-syntax languages do. As we’ll learn later, Lox’s approach to scoping hews closely to Scheme. The C flavor of Lox we’ll build in <a href="http://craftinginterpreters.com/a-bytecode-virtual-machine.html">Part III</a> is heavily indebted to Lua’s clean, efficient implementation.</p>
+</blockquote>
+<p>當我想到那些小而有用的語言時，我腦海中浮現的是像JavaScript<sup class="footnote-reference" id="fr-3-1"><a href="#footnote-3">3</a></sup>、Scheme和Lua這樣的高級 "腳本 "語言。在這三種語言中，Lox看起來最像JavaScript，主要是因為大多數c語法語言都是這樣的。稍後我們將瞭解到，Lox的範圍界定方法與Scheme密切相關。 我們將在<a href="http://craftinginterpreters.com/a-bytecode-virtual-machine.html">第三部分</a>中構建的C風格的Lox很大程度上借鑑了Lua的乾淨、高效的實現。</p>
+<blockquote>
+<p>Lox shares two other aspects with those three languages:</p>
+</blockquote>
+<p>Lox與這三種語言有兩個共同之處：</p>
+<blockquote>
+<h3 id="3--2--1-dynamic-typing"><a class="header" href="#3--2--1-dynamic-typing">3 . 2 . 1 Dynamic typing</a></h3>
+</blockquote>
+<h3 id="321-動態類型"><a class="header" href="#321-動態類型">3.2.1 動態類型</a></h3>
+<blockquote>
+<p>Lox is dynamically typed. Variables can store values of any type, and a single variable can even store values of different types at different times. If you try to perform an operation on values of the wrong type—say, dividing a number by a string—then the error is detected and reported at runtime.</p>
+</blockquote>
+<p>Lox是動態類型的。變量可以存儲任何類型的值，單個變量甚至可以在不同時間存儲不同類型的值。如果嘗試對錯誤類型的值執行操作（例如，將數字除以字符串），則會在運行時檢測到錯誤並報告。</p>
+<blockquote>
+<p>There are plenty of reasons to like static types, but they don’t outweigh the pragmatic reasons to pick dynamic types for Lox. A static type system is a ton of work to learn and implement. Skipping it gives you a simpler language and a shorter book. We’ll get our interpreter up and executing bits of code sooner if we defer our type checking to runtime.</p>
+</blockquote>
+<p>喜歡靜態類型的原因有很多，但它們都比不上為Lox選擇動態類型的實際原因<sup class="footnote-reference" id="fr-4-1"><a href="#footnote-4">4</a></sup>。靜態類型系統需要學習和實現大量的工作。跳過它會讓你的語言更簡單，也可以讓本書更短。如果我們將類型檢查推遲到運行時，我們將可以更快地啟動解釋器並執行代碼。</p>
+<blockquote>
+<h3 id="3--2--2-automatic-memory-management"><a class="header" href="#3--2--2-automatic-memory-management">3 . 2 . 2 Automatic memory management</a></h3>
+</blockquote>
+<h3 id="322-自動內存管理"><a class="header" href="#322-自動內存管理">3.2.2 自動內存管理</a></h3>
+<blockquote>
+<p>High-level languages exist to eliminate error-prone, low-level drudgery and what could be more tedious than manually managing the allocation and freeing of storage? No one rises and greets the morning sun with, “I can’t wait to figure out the correct place to call <code>free()</code> for every byte of memory I allocate today!”</p>
+</blockquote>
+<p>高級語言的存在是為了消除容易出錯的低級工作，還有什麼比手動管理存儲的分配和釋放更繁瑣的呢?沒有人會抬起頭來迎接早晨的陽光，“我迫不及待想找到正確的位置去調用<code>free()</code>方法，來釋放掉今天我在內存中申請的每個字節！”</p>
+<blockquote>
+<p>There are two main techniques for managing memory: <strong>reference counting</strong> and <strong>tracing garbage collection</strong> (usually just called <strong>“garbage collection”</strong> or <strong>“GC”</strong>). Ref counters are much simpler to implement—I think that’s why Perl, PHP, and Python all started out using them. But, over time, the limitations of ref counting become too troublesome. All of those languages eventually ended up adding a full tracing GC or at least enough of one to clean up object cycles.</p>
+</blockquote>
+<p>有兩種主要的內存管理技術：<strong>引用計數</strong>和<strong>跟蹤垃圾收集</strong>（通常僅稱為“<strong>垃圾收集</strong>”或“ <strong>GC</strong>”）<sup class="footnote-reference" id="fr-5-1"><a href="#footnote-5">5</a></sup>。 引用計數器的實現要簡單得多——我想這就是為什麼Perl、PHP和Python一開始都使用該方式的原因。但是，隨著時間的流逝，引用計數的限制變得太麻煩了。 所有這些語言最終都添加了完整的跟蹤GC或至少一種足以清除對象循環引用的管理方式。</p>
+<blockquote>
+<p>Tracing garbage collection has a fearsome reputation. It <em>is</em> a little harrowing working at the level of raw memory. Debugging a GC can sometimes leave you seeing hex dumps in your dreams. But, remember, this book is about dispelling magic and slaying those monsters, so we <em>are</em> going to write our own garbage collector. I think you’ll find the algorithm is quite simple and a lot of fun to implement.</p>
+</blockquote>
+<p>追蹤式垃圾收集是一個聽起來就很可怕的名稱。在原始內存的層面上工作是有點折磨人的。調試GC的時候會讓你在夢中也能看到hex dumps。但是，請記住，這本書是關於驅散魔法和殺死那些怪物的，所以我們要寫出自己的垃圾收集器。我想你會發現這個算法相當簡單，而且實現起來很有趣。</p>
+<blockquote>
+<h2 id="3--3-data-types"><a class="header" href="#3--3-data-types">3 . 3 Data Types</a></h2>
+</blockquote>
+<h2 id="33-數據類型"><a class="header" href="#33-數據類型">3.3 數據類型</a></h2>
+<p>In Lox’s little universe, the atoms that make up all matter are the built-in data types. There are only a few:</p>
+<p>在Lox的小宇宙中，構成所有物質的原子是內置的數據類型。只有幾個：</p>
+<blockquote>
+<p><strong>Booleans –</strong> You can’t code without logic and you can’t logic without Boolean values. “True” and “false”, the yin and yang of software. Unlike some ancient languages that repurpose an existing type to represent truth and falsehood, Lox has a dedicated Boolean type. We may be roughing it on this expedition, but we aren’t <em>savages</em>.</p>
+<p>There are two Boolean values, obviously, and a literal for each one:</p>
+</blockquote>
+<p><strong>Booleans</strong>——沒有邏輯就不能編碼，沒有布爾值也就沒有邏輯<sup class="footnote-reference" id="fr-6-1"><a href="#footnote-6">6</a></sup>。 “真”和“假”，就是軟件的陰與陽。 與某些古老的語言重新利用已有類型來表示真假不同，Lox具有專用的布爾類型。在這次探險中，我們可能會有些粗暴，但我們不是野蠻人。</p>
+<p>顯然，有兩個布爾值，每個值都有一個字面量：</p>
+<pre><code class="language-c">true;  // Not false.
+false; // Not *not* false.
+</code></pre>
+<blockquote>
+<p><strong>Numbers –</strong> Lox only has one kind of number: double-precision floating point. Since floating point numbers can also represent a wide range of integers, that covers a lot of territory, while keeping things simple.</p>
+<p>Full-featured languages have lots of syntax for numbers—hexadecimal, scientific notation, octal, all sorts of fun stuff. We’ll settle for basic integer and decimal literals:</p>
+</blockquote>
+<p><strong>Numbers</strong>——Lox只有一種數字：雙精度浮點數。 由於浮點數還可以表示各種各樣的整數，因此可以覆蓋很多領域，同時保持簡單。</p>
+<p>功能齊全的語言具有多種數字語法-十六進制，科學計數法，八進制和各種有趣的東西。 我們只使用基本的整數和十進制文字：</p>
+<pre><code class="language-c">1234;  // An integer.
+12.34; // A decimal number.
+</code></pre>
+<blockquote>
+<p><strong>Strings –</strong> We’ve already seen one string literal in the first example. Like most languages, they are enclosed in double quotes:</p>
+</blockquote>
+<p><strong>Strings</strong>——在第一個示例中，我們已經看到一個字符串字面量。 與大多數語言一樣，它們用雙引號引起來：</p>
+<pre><code class="language-c">"I am a string";
+"";    // The empty string.
+"123"; // This is a string, not a number.
+</code></pre>
+<blockquote>
+<p>As we’ll see when we get to implementing them, there is quite a lot of complexity hiding in that innocuous sequence of characters.</p>
+</blockquote>
+<p>我們在實現它們時會看到，在這個看起來無害的字符序列<sup class="footnote-reference" id="fr-7-1"><a href="#footnote-7">7</a></sup>中隱藏了相當多的複雜性。</p>
+<blockquote>
+<p><strong>Nil –</strong> There’s one last built-in value who’s never invited to the party but always seems to show up. It represents “no value”. It’s called “null” in many other languages. In Lox we spell it <code>nil</code>. (When we get to implementing it, that will help distinguish when we’re talking about Lox’s <code>nil</code> versus Java or C’s <code>null</code>.)</p>
+<p>There are good arguments for not having a null value in a language since null pointer errors are the scourge of our industry. If we were doing a statically-typed language, it would be worth trying to ban it. In a dynamically-typed one, though, eliminating it is often more annoying than having it.</p>
+</blockquote>
+<p><strong>Nil</strong>——還有最後一個內置數據，它從未被邀請參加聚會，但似乎總是會出現。 它代表“沒有價值”。 在許多其他語言中稱為“null”。 在Lox中，我們將其拼寫為<code>nil</code>。 （當我們實現它時，這將有助於區分Lox的<code>nil</code>與Java或C的<code>null</code>）</p>
+<p>有一些很好的理由表明在語言中不使用空值是合理的，因為空指針錯誤是我們行業的禍害。如果我們使用的是靜態類型語言，那麼禁止它是值得的。然而，在動態類型中，消除它往往比保留它更加麻煩。</p>
+<blockquote>
+<h2 id="3--4-expressions"><a class="header" href="#3--4-expressions">3 . 4 Expressions</a></h2>
+</blockquote>
+<h2 id="34-表達式"><a class="header" href="#34-表達式">3.4 表達式</a></h2>
+<blockquote>
+<p>If built-in data types and their literals are atoms, then <strong>expressions</strong> must be the molecules. Most of these will be familiar.</p>
+</blockquote>
+<p>如果內置數據類型及其字面量是原子，那麼表達式一定是分子。其中大部分大家都很熟悉。</p>
+<blockquote>
+<h3 id="3--4--1-arithmetic"><a class="header" href="#3--4--1-arithmetic">3 . 4 . 1 Arithmetic</a></h3>
+</blockquote>
+<h3 id="341-算術運算"><a class="header" href="#341-算術運算">3.4.1 算術運算</a></h3>
+<blockquote>
+<p>Lox features the basic arithmetic operators you know and love from C and other languages:</p>
+</blockquote>
+<p>Lox具備了您從C和其他語言中瞭解到的基本算術運算符：</p>
+<pre><code class="language-c">add + me;
+subtract - me;
+multiply * me;
+divide / me;
+</code></pre>
+<blockquote>
+<p>The subexpressions on either side of the operator are <strong>operands</strong>. Because there are <em>two</em> of them, these are called <strong>binary</strong> operators. (It has nothing to do with the ones-and-zeroes use of “binary”.) Because the operator is fixed <em>in</em> the middle of the operands, these are also called <strong>infix</strong> operators as opposed to <strong>prefix</strong> operators where the operator comes before and <strong>postfix</strong> where it follows the operand.</p>
+</blockquote>
+<p>操作符兩邊的子表達式都是<strong>操作數</strong>。因為有兩個操作數，它們被稱為<strong>二元</strong>運算符(這與二進制的1和0二元沒有關聯)。由於操作符固定在操作數的中間，因此也稱為<strong>中綴</strong>操作符，相對的，還有<strong>前綴</strong>操作符(操作符在操作數前面)和<strong>後綴</strong>操作符(操作符在操作數後面)<sup class="footnote-reference" id="fr-8-1"><a href="#footnote-8">8</a></sup>。</p>
+<blockquote>
+<p>One arithmetic operator is actually <em>both</em> an infix and a prefix one. The <code>-</code> operator can also be used to negate a number:</p>
+</blockquote>
+<p>有一個數學運算符既是中綴運算符也是前綴運算符，<code>-</code>運算符可以對數字取負：</p>
+<pre><code class="language-c">-negateMe;
+</code></pre>
+<blockquote>
+<p>All of these operators work on numbers, and it’s an error to pass any other types to them. The exception is the <code>+</code> operator—you can also pass it two strings to concatenate them.</p>
+</blockquote>
+<p>所有這些操作符都是針對數字的，將任何其他類型操作數傳遞給它們都是錯誤的。唯一的例外是<code>+</code>運算符——你也可以傳給它兩個字符串將它們串接起來。</p>
+<blockquote>
+<h3 id="3--4--2-comparison-and-equality"><a class="header" href="#3--4--2-comparison-and-equality">3 . 4 . 2 Comparison and equality</a></h3>
+</blockquote>
+<h3 id="342-比較與相等"><a class="header" href="#342-比較與相等">3.4.2 比較與相等</a></h3>
+<blockquote>
+<p>Moving along, we have a few more operators that always return a Boolean result. We can compare numbers (and only numbers), using Ye Olde Comparison Operators:</p>
+</blockquote>
+<p>接下來，我們有幾個返回布爾值的操作符。我們可以使用舊的比較操作符來比較數字(並且只能比較數字)：</p>
+<pre><code class="language-c">less &lt; than;
+lessThan &lt;= orEqual;
+greater &gt; than;
+greaterThan &gt;= orEqual;
+</code></pre>
+<blockquote>
+<p>We can test two values of any kind for equality or inequality:</p>
+</blockquote>
+<p>我們可以測試兩個任意類型的值是否相等：</p>
+<pre><code class="language-c">1 == 2;         // false.
+"cat" != "dog"; // true.
+</code></pre>
+<blockquote>
+<p>Even different types:</p>
+</blockquote>
+<p>即使是不同類型也可以：</p>
+<pre><code class="language-c">314 == "pi"; // false.
+</code></pre>
+<blockquote>
+<p>Values of different types are <em>never</em> equivalent:</p>
+</blockquote>
+<p>不同類型的值<em>永遠不會</em>相等：</p>
+<pre><code class="language-c">123 == "123"; // false.
+</code></pre>
+<blockquote>
+<p>I’m generally against implicit conversions.</p>
+</blockquote>
+<p>我通常是反對隱式轉換的。</p>
+<blockquote>
+<h3 id="3--4--3-logical-operators"><a class="header" href="#3--4--3-logical-operators">3 . 4 . 3 Logical operators</a></h3>
+</blockquote>
+<h3 id="343-邏輯運算"><a class="header" href="#343-邏輯運算">3.4.3 邏輯運算</a></h3>
+<blockquote>
+<p>The not operator, a prefix <code>!</code>, returns <code>false</code> if its operand is true, and vice versa:</p>
+</blockquote>
+<p>取非操作符，是前綴操作符<code>!</code>，如果操作數是true，則返回false，反之亦然：</p>
+<pre><code class="language-c">!true;  // false.
+!false; // true.
+</code></pre>
+<blockquote>
+<p>The other two logical operators really are control flow constructs in the guise of expressions. An <code>and</code> expression determines if two values are <em>both</em> true. It returns the left operand if it’s false, or the right operand otherwise:</p>
+</blockquote>
+<p>其他兩個邏輯操作符實際上是表達式偽裝下的控制流結構。<code>and</code>表達式用於確認兩個操作數是否<em>都是</em>true。如果左側操作數是false，則返回左側操作數，否則返回右側操作數：</p>
+<pre><code class="language-c">true and false; // false.
+true and true;  // true.
+</code></pre>
+<blockquote>
+<p>And an <code>or</code> expression determines if <em>either</em> of two values (or both) are true. It returns the left operand if it is true and the right operand otherwise:</p>
+</blockquote>
+<p><code>or</code>表達式用於確認兩個操作數中任意一個（或者都是）為true。如果左側操作數為true，則返回左側操作數，否則返回右側操作數：</p>
+<pre><code class="language-c">false or false; // false.
+true or false;  // true.
+</code></pre>
+<blockquote>
+<p>The reason <code>and</code> and <code>or</code> are like control flow structures is because they <strong>short-circuit</strong>. Not only does <code>and</code> return the left operand if it is false, it doesn’t even <em>evaluate</em> the right one in that case. Conversely, (“contrapositively”?) if the left operand of an <code>or</code> is true, the right is skipped.</p>
+</blockquote>
+<p><code>and</code>和 <code>or</code>之所以像控制流結構，是因為它們會<strong>短路</strong><sup class="footnote-reference" id="fr-9-1"><a href="#footnote-9">9</a></sup>。如果左操作數為假，<code>and</code>不僅會返回左操作數，在這種情況下，它甚至不會計算右操作數。反過來，("相對的"?)如果<code>or</code>的左操作數為真，右操作數就會被跳過。</p>
+<blockquote>
+<h3 id="3--4--4-precedence-and-grouping"><a class="header" href="#3--4--4-precedence-and-grouping">3 . 4 . 4 Precedence and grouping</a></h3>
+</blockquote>
+<h3 id="344-優先級與分組"><a class="header" href="#344-優先級與分組">3.4.4 優先級與分組</a></h3>
+<blockquote>
+<p>All of these operators have the same precedence and associativity that you’d expect coming from C. (When we get to parsing, we’ll get <em>way</em> more precise about that.) In cases where the precedence isn’t what you want, you can use <code>()</code> to group stuff:</p>
+</blockquote>
+<p>所有這些操作符都具有與c語言相同的優先級和結合性(當我們開始解析時，會進行更詳細的說明)。在優先級不滿足要求的情況下，你可以使用()來分組：</p>
+<pre><code class="language-c">var average = (min + max) / 2;
+</code></pre>
+<blockquote>
+<p>Since they aren’t very technically interesting, I’ve cut the remainder of the typical operator menagerie out of our little language. No bitwise, shift, modulo, or conditional operators. I’m not grading you, but you will get bonus points in my heart if you augment your own implementation of Lox with them.</p>
+</blockquote>
+<p>我把其他典型的操作符從我們的小語言中去掉了，因為它們在技術上不是很有趣。沒有位運算、移位、取模或條件運算符。我不是在給你打分，但如果你通過自己的方式來完成支持這些運算的Lox實現，你會在我心中得到額外的加分。</p>
+<blockquote>
+<p>Those are the expression forms (except for a couple related to specific features that we’ll get to later), so let’s move up a level.</p>
+</blockquote>
+<p>這些都是表達式形式(除了一些與我們將在後面介紹的特定特性相關的)，所以讓我們繼續。</p>
+<blockquote>
+<h2 id="3--5-statements"><a class="header" href="#3--5-statements">3 . 5 Statements</a></h2>
+</blockquote>
+<h2 id="35-語句"><a class="header" href="#35-語句">3.5 語句</a></h2>
+<blockquote>
+<p>Now we’re at statements. Where an expression’s main job is to produce a <em>value</em>, a statement’s job is to produce an <em>effect</em>. Since, by definition, statements don’t evaluate to a value, to be useful they have to otherwise change the world in some way—usually modifying some state, reading input, or producing output.</p>
+</blockquote>
+<p>現在我們來看語句。表達式的主要作用是產生一個<em>值</em>，語句的主要作用是產生一個<em>效果</em>。由於根據定義，語句不求值，因此必須以某種方式改變世界（通常是修改某些狀態，讀取輸入或產生輸出）才能有用。</p>
+<blockquote>
+<p>You’ve seen a couple of kinds of statements already. The first one was:</p>
+</blockquote>
+<p>您已經看到了幾種語句。 第一個是：</p>
+<pre><code class="language-c">print "Hello, world!";
+</code></pre>
+<blockquote>
+<p>A <code>print</code> statement evaluates a single expression and displays the result to the user. You’ve also seen some statements like:</p>
+</blockquote>
+<p><code>print</code>語句計算單個表達式並將結果顯示給用戶<sup class="footnote-reference" id="fr-10-1"><a href="#footnote-10">10</a></sup>。 您還看到了一些語句，例如：</p>
+<pre><code class="language-c">"some expression";
+</code></pre>
+<blockquote>
+<p>An expression followed by a semicolon (<code>;</code>) promotes the expression to statement-hood. This is called (imaginatively enough), an <strong>expression statement</strong>.</p>
+</blockquote>
+<p>表達式後跟分號（;）可以將表達式提升為語句狀態。這被稱為(很有想象力)<strong>表達式語句</strong>。</p>
+<blockquote>
+<p>If you want to pack a series of statements where a single one is expected, you can wrap them up in a block:</p>
+</blockquote>
+<p>如果您想將一系列語句打包成一個語句，那麼可以將它們打包在一個塊中：</p>
+<pre><code class="language-c">{
+  print "One statement.";
+  print "Two statements.";
+}
+</code></pre>
+<blockquote>
+<p>Blocks also affect scoping, which leads us to the next section…</p>
+</blockquote>
+<p>塊還會影響作用域，我們將在下一節中進行說明。</p>
+<blockquote>
+<h2 id="3--6-variables"><a class="header" href="#3--6-variables">3 . 6 Variables</a></h2>
+</blockquote>
+<h2 id="36-變量"><a class="header" href="#36-變量">3.6 變量</a></h2>
+<blockquote>
+<p>You declare variables using <code>var</code> statements. If you omit the initializer, the variable’s value defaults to <code>nil</code>:</p>
+</blockquote>
+<p>你可以使用<code>var</code>語句聲明變量。如果你省略了初始化操作，變量的值默認為<code>nil</code><sup class="footnote-reference" id="fr-11-1"><a href="#footnote-11">11</a></sup>：</p>
+<pre><code class="language-c">var imAVariable = "here is my value";
+var iAmNil;
+</code></pre>
+<blockquote>
+<p>Once declared, you can, naturally, access and assign a variable using its name:</p>
+</blockquote>
+<p>一旦聲明完成，你自然就可以通過變量名對其進行訪問和賦值：</p>
+<pre><code class="language-c">var breakfast = "bagels";
+print breakfast; // "bagels".
+breakfast = "beignets";
+print breakfast; // "beignets".
+</code></pre>
+<blockquote>
+<p>I won’t get into the rules for variable scope here, because we’re going to spend a surprising amount of time in later chapters mapping every square inch of the rules. In most cases, it works like you expect coming from C or Java.</p>
+</blockquote>
+<p>我不會在這裡討論變量作用域的規則，因為我們在後面的章節中將會花費大量的時間來詳細討論這些規則。在大多數情況下，它的工作方式與您期望的C或Java一樣。</p>
+<blockquote>
+<h2 id="3--7-control-flow"><a class="header" href="#3--7-control-flow">3 . 7 Control Flow</a></h2>
+</blockquote>
+<h2 id="37-控制流"><a class="header" href="#37-控制流">3.7 控制流</a></h2>
+<blockquote>
+<p>It’s hard to write useful programs if you can’t skip some code, or execute some more than once. That means control flow. In addition to the logical operators we already covered, Lox lifts three statements straight from C.</p>
+</blockquote>
+<p>如果你不能跳過某些代碼，或者不能多次執行某些代碼，就很難寫出有用的程序<sup class="footnote-reference" id="fr-12-1"><a href="#footnote-12">12</a></sup>。這意味著控制流。除了我們已經介紹過的邏輯運算符之外，Lox直接從C中借鑑了三條語句。</p>
+<blockquote>
+<p>An <code>if</code> statement executes one of two statements based on some condition:</p>
+</blockquote>
+<p><code>if</code>語句根據某些條件執行兩條語句中的一條：</p>
+<pre><code class="language-c">if (condition) {
+  print "yes";
+} else {
+  print "no";
+}
+</code></pre>
+<blockquote>
+<p>A <code>while</code> loop executes the body repeatedly as long as the condition expression evaluates to true:</p>
+</blockquote>
+<p>只要條件表達式的計算結果為true，<code>while</code>循環就會重複執行循環體<sup class="footnote-reference" id="fr-13-1"><a href="#footnote-13">13</a></sup>：</p>
+<pre><code class="language-c">var a = 1;
+while (a &lt; 10) {
+  print a;
+  a = a + 1;
+}
+</code></pre>
+<blockquote>
+<p>Finally, we have <code>for</code> loops:</p>
+</blockquote>
+<p>最後，還有<code>for</code>循環：</p>
+<pre><code class="language-c">for (var a = 1; a &lt; 10; a = a + 1) {
+  print a;
+}
+</code></pre>
+<blockquote>
+<p>This loop does the same thing as the previous <code>while</code> loop. Most modern languages also have some sort of <code>for-in</code> or <code>foreach</code> loop for explicitly iterating over various sequence types. In a real language, that’s nicer than the crude C-style <code>for</code> loop we got here. Lox keeps it basic.</p>
+</blockquote>
+<p>這個循環與之前的 while 循環做同樣的事情。大多數現代語言也有某種for-in或foreach循環，用於顯式迭代各種序列類型<sup class="footnote-reference" id="fr-14-1"><a href="#footnote-14">14</a></sup>。在真正的語言中，這比我們在這裡使用的粗糙的C-風格for循環要好。Lox只保持了它的基本功能。</p>
+<blockquote>
+<h2 id="3--8-functions"><a class="header" href="#3--8-functions">3 . 8 Functions</a></h2>
+</blockquote>
+<h2 id="38-函數"><a class="header" href="#38-函數">3.8 函數</a></h2>
+<blockquote>
+<p>A function call expression looks the same as it does in C:</p>
+</blockquote>
+<p>函數調用表達式與C語言中一樣：</p>
+<pre><code class="language-c">makeBreakfast(bacon, eggs, toast);
+</code></pre>
+<blockquote>
+<p>You can also call a function without passing anything to it:</p>
+</blockquote>
+<p>你也可以在不傳遞任何參數的情況下調用一個函數：</p>
+<pre><code class="language-c">makeBreakfast();
+</code></pre>
+<blockquote>
+<p>Unlike, say, Ruby, the parentheses are mandatory in this case. If you leave them off, it doesn’t <em>call</em> the function, it just refers to it.</p>
+</blockquote>
+<p>與Ruby不同的是，在本例中括號是強制性的。如果你把它們去掉，就不會調用函數，只是指向該函數。</p>
+<blockquote>
+<p>A language isn’t very fun if you can’t define your own functions. In Lox, you do that with <code>fun</code>:</p>
+</blockquote>
+<p>如果你不能定義自己的函數，一門語言就不能算有趣。在Lox裡，你可以通過<code>fun</code>完成：</p>
+<pre><code class="language-c">fun printSum(a, b) {
+  print a + b;
+}
+</code></pre>
+<blockquote>
+<p>Now’s a good time to clarify some terminology. Some people throw around “parameter” and “argument” like they are interchangeable and, to many, they are. We’re going to spend a lot of time splitting the finest of downy hairs around semantics, so let’s sharpen our words. From here on out:</p>
+<ul>
+<li>An <strong>argument</strong> is an actual value you pass to a function when you call it. So a function <em>call</em> has an <em>argument</em> list. Sometimes you hear <strong>actual parameter</strong> used for these.</li>
+<li>A <strong>parameter</strong> is a variable that holds the value of the argument inside the body of the function. Thus, a function <em>declaration</em> has a <em>parameter</em> list. Others call these <strong>formal parameters</strong> or simply <strong>formals</strong>.</li>
+</ul>
+</blockquote>
+<p>現在是澄清一些術語的好時機<sup class="footnote-reference" id="fr-15-1"><a href="#footnote-15">15</a></sup>。有些人把 "parameter "和 "argument "混為一談，好像它們可以互換，而對許多人來說，它們確實可以互換。我們要花很多時間圍繞語義學來對其進行分辨，所以讓我們在這裡把話說清楚：</p>
+<ul>
+<li><strong>argument</strong>是你在調用函數時傳遞給它的實際值。所以一個函數<em>調用</em>有一個<em>argument</em>列表。有時你會聽到有人用<strong>實際參數</strong>指代這些參數。</li>
+<li><strong>parameter</strong>是一個變量，用於在函數的主體裡面存放參數的值。因此，一個函數<em>聲明</em>有一個<em>parameter</em>列表。也有人把這些稱為<strong>形式參數</strong>或者乾脆稱為<strong>形參</strong>。</li>
+</ul>
+<blockquote>
+<p>The body of a function is always a block. Inside it, you can return a value using a <code>return</code> statement:</p>
+</blockquote>
+<p>函數體總是一個塊。在其中，您可以使用<code>return</code>語句返回一個值：</p>
+<pre><code class="language-c">fun returnSum(a, b) {
+  return a + b;
+}
+</code></pre>
+<blockquote>
+<p>If execution reaches the end of the block without hitting a <code>return</code>, it implicitly returns <code>nil</code>.</p>
+</blockquote>
+<p>如果執行到達代碼塊的末尾而沒有<code>return</code>語句，則會隱式返回nil。</p>
+<blockquote>
+<h3 id="3--8--1-closures"><a class="header" href="#3--8--1-closures">3 . 8 . 1 Closures</a></h3>
+</blockquote>
+<h3 id="381-閉包"><a class="header" href="#381-閉包">3.8.1 閉包</a></h3>
+<blockquote>
+<p>Functions are <em>first class</em> in Lox, which just means they are real values that you can get a reference to, store in variables, pass around, etc. This works:</p>
+</blockquote>
+<p>在Lox中，函數是一等公民，這意味著它們都是真實的值，你可以對這些值進行引用、存儲在變量中、傳遞等等。下面的代碼是有效的：</p>
+<pre><code class="language-c">fun addPair(a, b) {
+  return a + b;
+}
+
+fun identity(a) {
+  return a;
+}
+
+print identity(addPair)(1, 2); // Prints "3".
+</code></pre>
+<blockquote>
+<p>Since function declarations are statements, you can declare local functions inside another function:</p>
+</blockquote>
+<p>由於函數聲明是語句，所以可以在另一個函數中聲明局部函數：</p>
+<pre><code class="language-c">fun outerFunction() {
+  fun localFunction() {
+    print "I'm local!";
+  }
+
+  localFunction();
+}
+</code></pre>
+<blockquote>
+<p>If you combine local functions, first-class functions, and block scope, you run into this interesting situation:</p>
+</blockquote>
+<p>如果將局部函數、頭等函數和塊作用域組合在一起，就會遇到這種有趣的情況：</p>
+<pre><code class="language-c">fun returnFunction() {
+  var outside = "outside";
+
+  fun inner() {
+    print outside;
+  }
+
+  return inner;
+}
+
+var fn = returnFunction();
+fn();
+</code></pre>
+<blockquote>
+<p>Here, <code>inner()</code> accesses a local variable declared outside of its body in the surrounding function. Is this kosher? Now that lots of languages have borrowed this feature from Lisp, you probably know the answer is yes.</p>
+</blockquote>
+<p>在這裡，<code>inner()</code>訪問了在其函數體外的外部函數中聲明的局部變量。這樣可行嗎?現在很多語言都從Lisp借鑑了這個特性，你應該也知道答案是肯定的。</p>
+<blockquote>
+<p>For that to work, <code>inner()</code> has to “hold on” to references to any surrounding variables that it uses so that they stay around even after the outer function has returned. We call functions that do this <strong>closures</strong>. These days, the term is often used for <em>any</em> first-class function, though it’s sort of a misnomer if the function doesn’t happen to close over any variables.</p>
+</blockquote>
+<p>要做到這一點，<code>inner()</code>必須“保留”對它使用的任何周圍變量的引用，這樣即使在外層函數返回之後，這些變量仍然存在。我們把能做到這一點的函數稱為<strong>閉包</strong><sup class="footnote-reference" id="fr-16-1"><a href="#footnote-16">16</a></sup>。現在，這個術語經常被用於任何頭類函數，但是如果函數沒有在任何變量上閉包，那就有點用詞不當了。</p>
+<blockquote>
+<p>As you can imagine, implementing these adds some complexity because we can no longer assume variable scope works strictly like a stack where local variables evaporate the moment the function returns. We’re going to have a fun time learning how to make these work and do so efficiently.</p>
+</blockquote>
+<p>可以想象，實現這些會增加一些複雜性，因為我們不能再假定變量作用域嚴格地像堆棧一樣工作，在函數返回時局部變量就消失了。我們將度過一段有趣的時間來學習如何使這些工作，並有效地做到這一點。</p>
+<blockquote>
+<h2 id="3--9-classes"><a class="header" href="#3--9-classes">3 . 9 Classes</a></h2>
+</blockquote>
+<h2 id="39-類"><a class="header" href="#39-類">3.9 類</a></h2>
+<blockquote>
+<p>Since Lox has dynamic typing, lexical (roughly, “block”) scope, and closures, it’s about halfway to being a functional language. But as you’ll see, it’s <em>also</em> about halfway to being an object-oriented language. Both paradigms have a lot going for them, so I thought it was worth covering some of each.</p>
+</blockquote>
+<p>因為Lox具有動態類型、詞法(粗略地說，就是塊)作用域和閉包，所以它離函數式語言只有一半的距離。但正如您將看到的，它離成為一種面向對象的語言也有一半的距離。這兩種模式都有很多優點，所以我認為有必要分別介紹一下。</p>
+<blockquote>
+<p>Since classes have come under fire for not living up to their hype, let me first explain why I put them into Lox and this book. There are really two questions:</p>
+</blockquote>
+<p>類因為沒有達到其宣傳效果而受到抨擊，所以讓我先解釋一下為什麼我把它們放到Lox和這本書中。這裡實際上有兩個問題：</p>
+<blockquote>
+<h3 id="3--9--1-why-might-any-language-want-to-be-object-oriented"><a class="header" href="#3--9--1-why-might-any-language-want-to-be-object-oriented">3 . 9 . 1 Why might any language want to be object oriented?</a></h3>
+</blockquote>
+<h3 id="391-為什麼任何語言都想要面向對象"><a class="header" href="#391-為什麼任何語言都想要面向對象">3.9.1 為什麼任何語言都想要面向對象？</a></h3>
+<blockquote>
+<p>Now that object-oriented languages like Java have sold out and only play arena shows, it’s not cool to like them anymore. Why would anyone make a <em>new</em> language with objects? Isn’t that like releasing music on 8-track?</p>
+</blockquote>
+<p>現在像Java這樣的面向對象的語言已經銷聲匿跡了，只能在舞臺上表演，喜歡它們已經不酷了。為什麼有人要用對象來做一門新的語言呢？這不就像用磁帶<sup class="footnote-reference" id="fr-21-1"><a href="#footnote-21">17</a></sup>發行音樂一樣嗎？</p>
+<blockquote>
+<p>It is true that the “all inheritance all the time” binge of the 90s produced some monstrous class hierarchies, but object-oriented programming is still pretty rad. Billions of lines of successful code have been written in OOP languages, shipping millions of apps to happy users. Likely a majority of working programmers today are using an object-oriented language. They can’t all be <em>that</em> wrong.</p>
+</blockquote>
+<p>90年代的 "一直都是繼承 "的狂潮確實產生了一些畸形的類層次結構，但面向對象的編程還是很流行的。數十億行成功的代碼都是用OOP語言編寫的，為用戶提供了數百萬個應用程序。很可能今天大多數在職程序員都在使用面嚮對象語言。他們不可能都錯得那麼離譜。</p>
+<blockquote>
+<p>In particular, for a dynamically-typed language, objects are pretty handy. We need <em>some</em> way of defining compound data types to bundle blobs of stuff together.</p>
+</blockquote>
+<p>特別是，對於動態類型語言來說，對象是非常方便的。我們需要某種方式來定義複合數據類型，用來將一堆數據組合在一起。</p>
+<blockquote>
+<p>If we can also hang methods off of those, then we avoid the need to prefix all of our functions with the name of the data type they operate on to avoid colliding with similar functions for different types. In, say, Racket, you end up having to name your functions like <code>hash-copy</code> (to copy a hash table) and <code>vector-copy</code> (to copy a vector) so that they don’t step on each other. Methods are scoped to the object, so that problem goes away.</p>
+</blockquote>
+<p>如果我們也能把方法掛在這些對象上，那麼我們就不需要把函數操作的數據類型的名字作為函數名稱的前綴，以避免與不同類型的類似函數發生衝突。比如說，在Racket中，你最終不得不將你的函數命名為hash-copy(複製一個哈希表)和vector-copy(複製一個向量)，這樣它們就不會互相覆蓋。方法的作用域是對象，所以這個問題就不存在了。</p>
+<blockquote>
+<h3 id="3--9--2-why-is-lox-object-oriented"><a class="header" href="#3--9--2-why-is-lox-object-oriented">3 . 9 . 2 Why is Lox object oriented?</a></h3>
+</blockquote>
+<h3 id="392-為什麼lox是面向對象的"><a class="header" href="#392-為什麼lox是面向對象的">3.9.2 為什麼Lox是面向對象的？</a></h3>
+<blockquote>
+<p>I could claim objects are groovy but still out of scope for the book. Most programming language books, especially ones that try to implement a whole language, leave objects out. To me, that means the topic isn’t well covered. With such a widespread paradigm, that omission makes me sad.</p>
+</blockquote>
+<p>我可以說對象確實很吸引人，但仍然超出了本書的範圍。大多數編程語言的書籍，特別是那些試圖實現一門完整語言的書籍，都忽略了對象。對我來說，這意味著這個主題沒有被很好地覆蓋。對於如此廣泛使用的範式，這種遺漏讓我感到悲傷。</p>
+<blockquote>
+<p>Given how many of us spend all day <em>using</em> OOP languages, it seems like the world could use a little documentation on how to <em>make</em> one. As you’ll see, it turns out to be pretty interesting. Not as hard as you might fear, but not as simple as you might presume, either.</p>
+</blockquote>
+<p>鑑於我們很多人整天都在使用OOP語言，似乎這個世界應該有一些關於如何製作OOP語言的文檔。正如你將看到的那樣，事實證明這很有趣。沒有你擔心的那麼難，但也沒有你想象的那麼簡單。</p>
+<blockquote>
+<h3 id="3--9--3-classes-or-prototypes"><a class="header" href="#3--9--3-classes-or-prototypes">3 . 9 . 3 Classes or prototypes?</a></h3>
+</blockquote>
+<h3 id="393-類還是原型"><a class="header" href="#393-類還是原型">3.9.3 類還是原型？</a></h3>
+<blockquote>
+<p>When it comes to objects, there are actually two approaches to them, <a href="https://en.wikipedia.org/wiki/Class-based_programming">classes</a> and <a href="https://en.wikipedia.org/wiki/Prototype-based_programming">prototypes</a>. Classes came first, and are more common thanks to C++, Java, C#, and friends. Prototypes were a virtually forgotten offshoot until JavaScript accidentally took over the world.</p>
+</blockquote>
+<p>當涉及對象時，實際上有兩種方法，<a href="https://en.wikipedia.org/wiki/Class-based_programming">類</a>和<a href="https://en.wikipedia.org/wiki/Prototype-based_programming">原型</a>。 類最先出現，由於C++、Java、C#和其它近似語言的出現，類更加普遍。直到JavaScript意外地佔領了世界之前，原型幾乎是一個被遺忘的分支。</p>
+<blockquote>
+<p>In a class-based language, there are two core concepts: instances and classes. Instances store the state for each object and have a reference to the instance’s class. Classes contain the methods and inheritance chain. To call a method on an instance, there is always a level of indirection. You look up the instance’s class and then you find the method <em>there</em>:</p>
+</blockquote>
+<p>在基於類的語言中，有兩個核心概念：實例和類。 實例存儲每個對象的狀態，並有一個對實例的類的引用。 類包含方法和繼承鏈。要在實例上調用方法，總是存在一箇中間層。您要先查找實例的類，然後在其中找到方法：</p>
+<p><img src="3.Lox%E8%AA%9E%E8%A8%80/class-lookup.png" alt="How fields and methods are looked up on classes and instances" /></p>
+<blockquote>
+<p>Prototype-based languages merge these two concepts. There are only objects—no classes—and each individual object may contain state and methods. Objects can directly inherit from each other (or “delegate to” in prototypal lingo):</p>
+</blockquote>
+<p>基於原型的語言融合了這兩個概念<sup class="footnote-reference" id="fr-17-1"><a href="#footnote-17">18</a></sup>。這裡只有對象——沒有類，而且每個對象都可以包含狀態和方法。對象之間可以直接繼承（或者用原型語言的術語說是 “委託”）：</p>
+<p><img src="3.Lox%E8%AA%9E%E8%A8%80/prototype-lookup.png" alt="How fields and methods are looked up in a prototypal system" /></p>
+<blockquote>
+<p>This means prototypal languages are more fundamental in some way than classes. They are really neat to implement because they’re <em>so</em> simple. Also, they can express lots of unusual patterns that classes steer you away from.</p>
+</blockquote>
+<p>這意味著原型語言在某些方面比類更基礎。 它們實現起來真的很整潔，因為它們很簡單。另外，它們還可以表達很多不尋常的模式，而這些模式是類所不具備的。</p>
+<blockquote>
+<p>But I’ve looked at a <em>lot</em> of code written in prototypal languages—including <a href="http://finch.stuffwithstuff.com/">some of my own devising</a>. Do you know what people generally do with all of the power and flexibility of prototypes? …They use it to reinvent classes.</p>
+</blockquote>
+<p>但是我看過很多用原型語言寫的代碼——包括<a href="http://finch.stuffwithstuff.com/">我自己設計的一些代碼</a>。你知道人們一般會怎麼使用原型的強大功能和靈活性嗎？...他們用它來重新發明類。</p>
+<blockquote>
+<p>I don’t know <em>why</em> that is, but people naturally seem to prefer a class-based (“Classic”? “Classy”?) style. Prototypes <em>are</em> simpler in the language, but they seem to accomplish that only by pushing the complexity onto the user. So, for Lox, we’ll save our users the trouble and bake classes right in.</p>
+</blockquote>
+<p>我不知道這是為什麼，但人們自然而然地似乎更喜歡基於類的（經典？優雅？）風格。原型在語言中更簡單，但它們似乎只是通過將複雜性推給用戶來實現的<sup class="footnote-reference" id="fr-18-1"><a href="#footnote-18">19</a></sup>。所以，對於Lox來說，我們將省去用戶的麻煩，直接把類包含進去。</p>
+<blockquote>
+<h3 id="3--9--4-classes-in-lox"><a class="header" href="#3--9--4-classes-in-lox">3 . 9 . 4 Classes in Lox</a></h3>
+</blockquote>
+<h3 id="394-lox中的類"><a class="header" href="#394-lox中的類">3.9.4 Lox中的類</a></h3>
+<blockquote>
+<p>Enough rationale, let’s see what we actually have. Classes encompass a constellation of features in most languages. For Lox, I’ve selected what I think are the brightest stars. You declare a class and its methods like so:</p>
+</blockquote>
+<p>理由已經說夠了，來看看我們實際上擁有什麼。在大多數語言中，類包含了一系列的特性。對於Lox，我選擇了我認為最閃亮的一點。您可以像這樣聲明一個類及其方法：</p>
+<pre><code class="language-c">class Breakfast {
+  cook() {
+    print "Eggs a-fryin'!";
+  }
+
+  serve(who) {
+    print "Enjoy your breakfast, " + who + ".";
+  }
+}
+</code></pre>
+<blockquote>
+<p>The body of a class contains its methods. They look like function declarations but without the <code>fun</code> keyword. When the class declaration is executed, Lox creates a class object and stores that in a variable named after the class. Just like functions, classes are first class in Lox:</p>
+</blockquote>
+<p>類的主體包含其方法。 它們看起來像函數聲明，但沒有<code>fun</code>關鍵字。 當類聲明生效時，Lox將創建一個類對象，並將其存儲在以該類命名的變量中。就像函數一樣，類在Lox中也是一等公民：</p>
+<pre><code class="language-c">// Store it in variables.
+var someVariable = Breakfast;
+
+// Pass it to functions.
+someFunction(Breakfast);
+</code></pre>
+<blockquote>
+<p>Next, we need a way to create instances. We could add some sort of <code>new</code> keyword, but to keep things simple, in Lox the class itself is a factory function for instances. Call a class like a function and it produces a new instance of itself:</p>
+</blockquote>
+<p>接下來，我們需要一種創建實例的方法。我們可以添加某種<code>new</code>關鍵字，但為了簡單起見，在Lox中，類本身是實例的工廠函數。像調用函數一樣調用一個類，它會生成一個自己的新實例：</p>
+<pre><code class="language-c">var breakfast = Breakfast();
+print breakfast; // "Breakfast instance".
+</code></pre>
+<blockquote>
+<h3 id="3--9--5-instantiation-and-initialization"><a class="header" href="#3--9--5-instantiation-and-initialization">3 . 9 . 5 Instantiation and initialization</a></h3>
+</blockquote>
+<h3 id="395-實例化和初始化"><a class="header" href="#395-實例化和初始化">3.9.5 實例化和初始化</a></h3>
+<blockquote>
+<p>Classes that only have behavior aren’t super useful. The idea behind object-oriented programming is encapsulating behavior <em>and state</em> together. To do that, you need fields. Lox, like other dynamically-typed languages, lets you freely add properties onto objects:</p>
+</blockquote>
+<p>只有行為的類不是非常有用。面向對象編程背後的思想是將行為和狀態封裝在一起。為此，您需要有字段。Lox和其他動態類型語言一樣，允許您自由地向對象添加屬性：</p>
+<pre><code class="language-c">breakfast.meat = "sausage";
+breakfast.bread = "sourdough";
+</code></pre>
+<blockquote>
+<p>Assigning to a field creates it if it doesn’t already exist.</p>
+</blockquote>
+<p>如果一個字段不存在，那麼對它進行賦值時就會先創建。</p>
+<blockquote>
+<p>If you want to access a field or method on the current object from within a method, you use good old <code>this</code>:</p>
+</blockquote>
+<p>如果您想從方法內部訪問當前對象上的字段或方法，可以使用<code>this</code>：</p>
+<pre><code class="language-c">class Breakfast {
+  serve(who) {
+    print "Enjoy your " + this.meat + " and " +
+        this.bread + ", " + who + ".";
+  }
+
+  // ...
+}
+</code></pre>
+<blockquote>
+<p>Part of encapsulating data within an object is ensuring the object is in a valid state when it’s created. To do that, you can define an initializer. If your class has a method named <code>init()</code>, it is called automatically when the object is constructed. Any parameters passed to the class are forwarded to its initializer:</p>
+</blockquote>
+<p>在對象中封裝數據的目的之一是確保對象在創建時處於有效狀態。為此，你可以定義一個初始化器。如果您的類中包含一個名為<code>init()</code>的方法，則在構造對象時會自動調用該方法。傳遞給類的任何參數都會轉發給它的初始化器：</p>
+<pre><code class="language-c">class Breakfast {
+  init(meat, bread) {
+    this.meat = meat;
+    this.bread = bread;
+  }
+
+  // ...
+}
+
+var baconAndToast = Breakfast("bacon", "toast");
+baconAndToast.serve("Dear Reader");
+// "Enjoy your bacon and toast, Dear Reader."
+</code></pre>
+<blockquote>
+<h3 id="3--9--6-inheritance"><a class="header" href="#3--9--6-inheritance">3 . 9 . 6 Inheritance</a></h3>
+</blockquote>
+<h3 id="396-繼承"><a class="header" href="#396-繼承">3.9.6 繼承</a></h3>
+<blockquote>
+<p>Every object-oriented language lets you not only define methods, but reuse them across multiple classes or objects. For that, Lox supports single inheritance. When you declare a class, you can specify a class that it inherits from using a less-than (<code>&lt;</code>) operator:</p>
+</blockquote>
+<p>在每一種面向對象的語言中，你不僅可以定義方法，而且可以在多個類或對象中重用它們。為此，Lox支持單繼承。當你聲明一個類時，你可以使用小於(<code>&lt;</code>)操作符指定它繼承的類<sup class="footnote-reference" id="fr-19-1"><a href="#footnote-19">20</a></sup>：</p>
+<pre><code class="language-c">class Brunch &lt; Breakfast {
+  drink() {
+    print "How about a Bloody Mary?";
+  }
+}
+</code></pre>
+<blockquote>
+<p>Here, Brunch is the <strong>derived class</strong> or <strong>subclass</strong>, and Breakfast is the <strong>base class</strong> or <strong>superclass</strong>. Every method defined in the superclass is also available to its subclasses:</p>
+</blockquote>
+<p>這裡，Brunch是<strong>派生類</strong>或<strong>子類</strong>，而Breakfast是<strong>基類</strong>或<strong>超類</strong>。父類中定義的每個方法對其子類也可用：</p>
+<pre><code class="language-c">var benedict = Brunch("ham", "English muffin");
+benedict.serve("Noble Reader");
+</code></pre>
+<blockquote>
+<p>Even the <code>init()</code> method gets inherited. In practice, the subclass usually wants to define its own <code>init()</code> method too. But the original one also needs to be called so that the superclass can maintain its state. We need some way to call a method on our own <em>instance</em> without hitting our own <em>methods</em>.</p>
+</blockquote>
+<p>即使是init()方法也會被繼承。在實踐中，子類通常也想定義自己的<code>init()</code>方法。但還需要調用原始的初始化方法，以便超類能夠維護其狀態<sup class="footnote-reference" id="fr-20-1"><a href="#footnote-20">21</a></sup>。我們需要某種方式能夠調用自己實例上的方法，而無需觸發實例自身的方法。</p>
+<blockquote>
+<p>As in Java, you use <code>super</code> for that:</p>
+</blockquote>
+<p>與Java中一樣，您可以使用<code>super</code>：</p>
+<pre><code class="language-c">class Brunch &lt; Breakfast {
+  init(meat, bread, drink) {
+    super.init(meat, bread);
+    this.drink = drink;
+  }
+}
+</code></pre>
+<blockquote>
+<p>That’s about it for object orientation. I tried to keep the feature set minimal. The structure of the book did force one compromise. Lox is not a <em>pure</em> object-oriented language. In a true OOP language every object is an instance of a class, even primitive values like numbers and Booleans.</p>
+</blockquote>
+<p>這就是面向對象的內容。我儘量將功能設置保持在最低限度。本書的結構確實迫使我做了一個妥協。Lox不是一種純粹的面向對象的語言。在真正的OOP語言中，每個對象都是一個類的實例，即使是像數字和布爾值這樣的基本類型。</p>
+<blockquote>
+<p>Because we don’t implement classes until well after we start working with the built-in types, that would have been hard. So values of primitive types aren’t real objects in the sense of being instances of classes. They don’t have methods or properties. If I were trying to make Lox a real language for real users, I would fix that.</p>
+</blockquote>
+<p>因為我們開始使用內置類型很久之後才會實現類，所以這一點很難實現。因此，從類實例的意義上說，基本類型的值並不是真正的對象。它們沒有方法或屬性。如果以後我想讓Lox成為真正的用戶使用的語言，我會解決這個問題。</p>
+<blockquote>
+<h2 id="3--10-the-standard-library"><a class="header" href="#3--10-the-standard-library">3 . 10 The Standard Library</a></h2>
+</blockquote>
+<h2 id="310-標準庫"><a class="header" href="#310-標準庫">3.10 標準庫</a></h2>
+<blockquote>
+<p>We’re almost done. That’s the whole language, so all that’s left is the “core” or “standard” library—the set of functionality that is implemented directly in the interpreter and that all user-defined behavior is built on top of.</p>
+</blockquote>
+<p>我們快結束了，這就是整個語言，所剩下的就是“核心”或“標準”庫——這是一組直接在解釋器中實現的功能集，所有用戶定義的行為都是建立在此之上。</p>
+<blockquote>
+<p>This is the saddest part of Lox. Its standard library goes beyond minimalism and veers close to outright nihilism. For the sample code in the book, we only need to demonstrate that code is running and doing what it’s supposed to do. For that, we already have the built-in <code>print</code> statement.</p>
+</blockquote>
+<p>這是Lox中最可悲的部分。它的標準庫已經超過了極簡主義，接近徹底的虛無主義。對於本書中的示例代碼，我們只需要證明代碼在運行，並且在做它應該做的事。為此，我們已經有了內置的<code>print</code>語句。</p>
+<blockquote>
+<p>Later, when we start optimizing, we’ll write some benchmarks and see how long it takes to execute code. That means we need to track time, so we’ll define one built-in function <code>clock()</code> that returns the number of seconds since the program started.</p>
+</blockquote>
+<p>稍後，當我們開始優化時，我們將編寫一些基準測試，看看執行代碼需要多長時間。這意味著我們需要跟蹤時間，因此我們將定義一個內置函數<code>clock()</code>，該函數會返回程序啟動後的秒數。</p>
+<blockquote>
+<p>And… that’s it. I know, right? It’s embarrassing.</p>
+</blockquote>
+<p>嗯...就是這樣。 我知道，有點尷尬，對吧？</p>
+<blockquote>
+<p>If you wanted to turn Lox into an actual useful language, the very first thing you should do is flesh this out. String manipulation, trigonometric functions, file I/O, networking, heck, even <em>reading input from the user</em> would help. But we don’t need any of that for this book, and adding it wouldn’t teach you anything interesting, so I left it out.</p>
+</blockquote>
+<p>如果您想將Lox變成一門實際可用的語言，那麼您應該做的第一件事就是對其充實。 字符串操作、三角函數、文件I / O、網絡、擴展，甚至讀取用戶的輸入都將有所幫助。但對於本書來說，我們不需要這些，而且加入這些也不會教給你任何有趣的東西，所以我把它省略了。</p>
+<blockquote>
+<p>Don’t worry, we’ll have plenty of exciting stuff in the language itself to keep us busy.</p>
+</blockquote>
+<p>別擔心，這門語言本身就有很多精彩的內容讓我們忙個不停。</p>
+<hr />
+<blockquote>
+<h2 id="challenges"><a class="header" href="#challenges">CHALLENGES</a></h2>
+</blockquote>
+<h2 id="習題"><a class="header" href="#習題">習題</a></h2>
+<blockquote>
+<p>1、Write some sample Lox programs and run them (you can use the implementations of Lox in <a href="https://github.com/munificent/craftinginterpreters">my repository</a>). Try to come up with edge case behavior I didn’t specify here. Does it do what you expect? Why or why not?</p>
+</blockquote>
+<p>1、編寫一些示例Lox程序並運行它們(您可以使用<a href="https://github.com/munificent/craftinginterpreters">我的Lox實現</a>)。試著想出我在這裡沒有詳細說明的邊界情況。它是否按照期望運行？為什麼？</p>
+<blockquote>
+<p>2、This informal introduction leaves a <em>lot</em> unspecified. List several open questions you have about the language’s syntax and semantics. What do you think the answers should be?</p>
+</blockquote>
+<p>2、這種非正式的介紹留下了很多未說明的東西。列出幾個關於語言語法和語義的開放問題。你認為答案應該是什麼？</p>
+<blockquote>
+<p>3、Lox is a pretty tiny language. What features do you think it is missing that would make it annoying to use for real programs? (Aside from the standard library, of course.)</p>
+</blockquote>
+<p>3、Lox是一種很小的語言。 您認為缺少哪些功能會使其不適用於實際程序？ （當然，除了標準庫。）</p>
+<hr />
+<blockquote>
+<h2 id="design-note-expressions-and-statements"><a class="header" href="#design-note-expressions-and-statements">DESIGN NOTE: EXPRESSIONS AND STATEMENTS</a></h2>
+</blockquote>
+<h2 id="設計筆記表達式和語句"><a class="header" href="#設計筆記表達式和語句">設計筆記：表達式和語句</a></h2>
+<blockquote>
+<p>Lox has both expressions and statements. Some languages omit the latter. Instead, they treat declarations and control flow constructs as expressions too. These “everything is an expression” languages tend to have functional pedigrees and include most Lisps, SML, Haskell, Ruby, and CoffeeScript.</p>
+<p>To do that, for each “statement-like” construct in the language, you need to decide what value it evaluates to. Some of those are easy:</p>
+<ul>
+<li>An <code>if</code> expression evaluates to the result of whichever branch is chosen. Likewise, a <code>switch</code> or other multi-way branch evaluates to whichever case is picked.</li>
+<li>A variable declaration evaluates to the value of the variable.</li>
+<li>A block evaluates to the result of the last expression in the sequence.</li>
+</ul>
+<p>Some get a little stranger. What should a loop evaluate to? A <code>while</code> loop in CoffeeScript evaluates to an array containing each element that the body evaluated to. That can be handy, or a waste of memory if you don’t need the array.</p>
+<p>You also have to decide how these statement-like expressions compose with other expressions—you have to fit them into the grammar’s precedence table. For example, Ruby allows:</p>
+<pre><code>puts 1 + if true then 2 else 3 end + 4
+</code></pre>
+<p>Is this what you’d expect? Is it what your <em>users</em> expect? How does this affect how you design the syntax for your “statements”? Note that Ruby has an explicit <code>end</code> to tell when the <code>if</code> expression is complete. Without it, the <code>+ 4</code> would likely be parsed as part of the <code>else</code> clause.</p>
+<p>Turning every statement into an expression forces you to answer a few hairy questions like that. In return, you eliminate some redundancy. C has both blocks for sequencing statements, and the comma operator for sequencing expressions. It has both the <code>if</code> statement and the <code>?:</code> conditional operator. If everything was an expression in C, you could unify each of those.</p>
+<p>Languages that do away with statements usually also feature <strong>implicit returns</strong>—a function automatically returns whatever value its body evaluates to without need for some explicit <code>return</code> syntax. For small functions and methods, this is really handy. In fact, many languages that do have statements have added syntax like <code>=&gt;</code> to be able to define functions whose body is the result of evaluating a single expression.</p>
+<p>But making <em>all</em> functions work that way can be a little strange. If you aren’t careful, your function will leak a return value even if you only intend it to produce a side effect. In practice, though, users of these languages don’t find it to be a problem.</p>
+<p>For Lox, I gave it statements for prosaic reasons. I picked a C-like syntax for familiarity’s sake, and trying to take the existing C statement syntax and interpret it like expressions gets weird pretty fast.</p>
+</blockquote>
+<p>Lox既有表達式也有語句。有些語言省略了後者。相對地，它們將聲明和控制流結構也視為表達式。這類 "一切都是表達式" 的語言往往具有函數式的血統，包括大多數Lisps、SML、Haskell、Ruby和CoffeeScript。</p>
+<p>要做到這一點，對於語言中的每一個 "類似於語句" 的構造，你需要決定它所計算的值是什麼。其中有些很簡單：</p>
+<ul>
+<li><code>if</code>表達式的計算結果是所選分支的結果。同樣，<code>switch</code>或其他多路分支的計算結果取決於所選擇的情況。</li>
+<li>變量聲明的計算結果是變量的值。</li>
+<li>塊的計算結果是序列中最後一個表達式的結果。</li>
+</ul>
+<p>有一些是比較複雜的。循環應該計算什麼值？在CoffeeScript中，一個<code>while</code>循環計算結果為一個數組，其中包含了循環體中計算到的每個元素。這可能很方便，但如果你不需要這個數組，就會浪費內存。</p>
+<p>您還必須決定這些類似語句的表達式如何與其他表達式組合，必須將它們放入語法的優先表中。例如，Ruby允許下面這種寫法：</p>
+<pre><code class="language-ruby">puts 1 + if true then 2 else 3 end + 4
+</code></pre>
+<p>這是你所期望的嗎？這是你的用戶所期望的嗎？這對你如何設計 "語句 "的語法有什麼影響？請注意，Ruby有一個顯式的<code>end</code>關鍵字來表明<code>if</code>表達式結束。如果沒有它，<code>+4</code>很可能會被解析為<code> else</code>子句的一部分。</p>
+<p>把每個語句都轉換成表達式會迫使你回答一些類似這樣的複雜問題。作為回報，您消除了一些冗餘。C語言中既有用於排序語句的塊，以及用於排序表達式的逗號操作符。它既有<code>if</code>語句，也有<code>?:</code>條件操作符。如果在C語言中所有東西都是表達式，你就可以把它們統一起來。</p>
+<p>取消了語句的語言通常還具有<strong>隱式返回</strong>的特點——函數自動返回其函數主體所計算得到的任何值，而不需要顯式的<code>return</code>語法。對於小型函數和方法來說，這真的很方便。事實上，許多有語句的語言都添加了類似於 <code>=&gt; </code>的語法，以便能夠定義函數體是計算單一表達式結果的函數。</p>
+<p>但是讓所有的函數以這種方式工作可能有點奇怪。即使你只是想讓函數產生副作用，如果不小心，函數也可能會洩露返回值。但實際上，這些語言的用戶並不覺得這是一個問題。</p>
+<p>對於Lox，我在其中添加語句是出於樸素的原因。為了熟悉起見，我選擇了一種類似於C的語法，而試圖把現有的C語句語法像表達式一樣解釋，會很快變得奇怪。</p>
+<hr>
+<ol class="footnote-definition"><li id="footnote-1">
+<p>如果你不親自運行代碼，那教程就毫無意義。唉，你還沒有Lox解釋器，因為你還沒有建立一個!不要害怕。你可以用<a href="https://github.com/munificent/craftinginterpreters">我的</a>。 <a href="#fr-1-1">↩</a></p>
+</li>
+<li id="footnote-2">
+<p>我肯定有偏見，但我認為Lox的語法很乾淨。 C語言最嚴重的語法問題就是關於類型的。丹尼斯·裡奇（Dennis Ritchie）有個想法叫“聲明反映使用”，其中變量聲明反映了為獲得基本類型的值而必須對變量執行的操作。這主意不錯，但是我認為實踐中效果不太好。Lox沒有靜態類型，所以我們避免了這一點。 <a href="#fr-2-1">↩</a></p>
+</li>
+<li id="footnote-3">
+<p>現在，JavaScript已席捲全球，並已用於構建大量應用程序，很難將其視為“小腳本語言”。但是Brendan Eich曾在十天內將第一個JS解釋器嵌入了Netscape Navigator，以使網頁上的按鈕具有動畫效果。 從那時起，JavaScript逐漸發展起來，但是它曾經是一種可愛的小語言。因為Eich大概只用了一集MacGyver的時間把JS糅合在一起，所以它有一些奇怪的語義，會有明顯的拼湊痕跡。比如變量提升、動態綁定<code>this</code>、數組中的漏洞和隱式轉換等。我有幸在Lox上多花了點時間，所以它應該更乾淨一些。 <a href="#fr-3-1">↩</a></p>
+</li>
+<li id="footnote-4">
+<p>畢竟，我們用於實現Lox的兩種語言都是靜態類型的。 <a href="#fr-4-1">↩</a></p>
+</li>
+<li id="footnote-5">
+<p>在實踐中，引用計數和追蹤更像是連續體的兩端，而不是對立的雙方。大多數引用計數系統最終會執行一些跟蹤來處理循環，如果你仔細觀察的話，分代收集器的寫屏障看起來有點像保留調用。有關這方面的更多信息，請參閱<a href="https://researcher.watson.ibm.com/researcher/files/us-bacon/Bacon04Unified.pdf">垃圾收集統一理論</a>(PDF)。 <a href="#fr-5-1">↩</a></p>
+</li>
+<li id="footnote-6">
+<p>布爾變量是Lox中唯一以人名George Boole命名的數據類型，這也是為什麼 "Boolean "是大寫的原因。他死於1864年，比數字計算機把他的代數變成電子信息的時間早了近一個世紀。我很好奇他看到自己的名字出現在數十億行Java代碼中時會怎麼想。 <a href="#fr-6-1">↩</a></p>
+</li>
+<li id="footnote-7">
+<p>就連那個 "character "一詞也是個騙局。是ASCII碼？是Unicode？一個碼點，還是一個 "字詞群"？字符是如何編碼的？每個字符是固定的大小，還是可以變化的？ <a href="#fr-7-1">↩</a></p>
+</li>
+<li id="footnote-8">
+<p>有些操作符有兩個以上的操作數，並且操作符與操作數之間是交錯的。唯一廣泛使用的是C及其相近語言中的“條件”或“三元”操作符:<code>condition ?thenArm: elseArm;</code>，有些人稱這些為mixfix操作符。有一些語言允許您定義自己的操作符，並控制它們的定位方式——它們的 "固定性"。。 <a href="#fr-8-1">↩</a></p>
+</li>
+<li id="footnote-9">
+<p>我使用了and和or，而不是&amp;&amp;和||，因為Lox不使用&amp;和|作為位元操作符。不存在單字符形式的情況下引入雙字符形式感覺很奇怪。我喜歡用單詞來表示運算，也是因為它們實際上是控制流結構，而不是簡單的操作符。 <a href="#fr-9-1">↩</a></p>
+</li>
+<li id="footnote-10">
+<p>將 print 融入到語言中，而不是僅僅將其作為一個核心庫函數，這是一種入侵。但對我們來說，這是一個很有用的“入侵”：這意味著在我們實現所有定義函數、按名稱查找和調用函數所需的機制之前，我們的解釋器可以就開始產生輸出。 <a href="#fr-10-1">↩</a></p>
+</li>
+<li id="footnote-11">
+<p>這是一種情況，沒有nil並強制每個變量初始化為某個值，會比處理nil本身更麻煩。 <a href="#fr-11-1">↩</a></p>
+</li>
+<li id="footnote-12">
+<p>我們已經有and和or可以進行分支處理，我們可以用遞歸來重複代碼，所以理論上這就足夠了。但是，在命令式語言中這樣編程會很尷尬。另一方面，Scheme沒有內置的循環結構。它確實依賴遞歸進行重複執行代碼。Smalltalk沒有內置的分支結構，並且依賴動態分派來選擇性地執行代碼。 <a href="#fr-12-1">↩</a></p>
+</li>
+<li id="footnote-13">
+<p>我沒有在Lox中使用do-while循環，因為它們並不常見，相比while循環也沒有多餘的內涵。如果你高興的話，就把它加入到你的實現中去吧。你自己做主。 <a href="#fr-13-1">↩</a></p>
+</li>
+<li id="footnote-14">
+<p>這是我做出的讓步，因為本書中的實現是按章節劃分的。for-in循環需要迭代器協議中的某種動態分派來處理不同類型的序列，但我們完成控制流之後才能實現這種分派。我們可以回過頭來，添加for-in循環，但我認為這樣做不會教給你什麼超級有趣的東西。 <a href="#fr-14-1">↩</a></p>
+</li>
+<li id="footnote-15">
+<p>說到術語，一些靜態類型的語言，比如C語言，會對函數的聲明和定義進行區分。聲明是將函數的類型和它的名字綁定在一起，所以調用時可以進行類型檢查，但不提供函數體。定義也會填入函數的主體，這樣就可以進行編譯。由於Lox是動態類型的，所以這種區分沒有意義。一個函數聲明完全指定了函數，包括它的主體。 <a href="#fr-15-1">↩</a></p>
+</li>
+<li id="footnote-16">
+<p>Peter J. Landin創造了這個詞。沒錯，幾乎一半的編程語言術語都是他創造的。它們中的大部分都出自一篇不可思議的論文 "<a href="https://homepages.inf.ed.ac.uk/wadler/papers/papers-we-love/landin-next-700.pdf">The Next 700 Programming Languages</a>"。為了實現這類函數，您需要創建一個數據結構，將函數代碼和它所需要的周圍變量綁定在一起。他稱它為“閉包”，是因為函數“閉合”並保留了它需要的變量。 <a href="#fr-16-1">↩</a></p>
+</li>
+<li id="footnote-21">
+<p>這裡的8軌音樂指的是磁帶。在中國大陸，通常“磁帶”或者“錄音帶”一詞都指緊湊音頻盒帶，因為它的應用非常廣泛。在中國臺灣，reel-to-reel tape被稱為盤式錄音帶、緊湊音頻盒帶（Compact audio cassette）被稱為卡式錄音帶、8軌軟片（8-track cartridges)）被稱為匣式錄音帶。 <a href="#fr-21-1">↩</a></p>
+</li>
+<li id="footnote-17">
+<p>實際上，基於類的語言和基於原型的語言之間的界限變得模糊了。JavaScript的“構造函數”概念<a href="http://gameprogrammingpatterns.com/prototype.html#what-about-javascript">使您很難</a>定義類對象。 同時，基於類的Ruby非常樂意讓您將方法附加到單個實例中。 <a href="#fr-17-1">↩</a></p>
+</li>
+<li id="footnote-18">
+<p>Perl的發明家/先知Larry Wall將其稱為“水床理論”。 某些複雜性是必不可少的，無法消除。 如果在某個位置將其向下推，則在另一個位置會出現膨脹。原型語言並沒有消除類的複雜性，因為它們確實讓用戶通過構建近似類的元編程庫來承擔這種複雜性。 <a href="#fr-18-1">↩</a></p>
+</li>
+<li id="footnote-19">
+<p>為什麼用&lt;操作符？我不喜歡引入一個新的關鍵字，比如extends。Lox不使用:來做其他事情，所以我也不想保留它。相反，我借鑑了Ruby的做法，使用了&lt;。如果你瞭解任何類型理論，你會發現這並不是一個完全任意的選擇。一個子類的每一個實例也是它的超類的一個實例，但可能有超類的實例不是子類的實例。這意味著，在對象的宇宙中，子類對象的集合比超類的集合要小，儘管類型迷們通常用&lt;:來表示這種關係。 <a href="#fr-19-1">↩</a></p>
+</li>
+<li id="footnote-20">
+<p>Lox不同於不繼承構造函數的c++、Java和c#，而是類似於Smalltalk和Ruby，它們繼承了構造函數。 <a href="#fr-20-1">↩</a></p>
+</li>
+</ol>
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../../content/2.领土地图.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../../content/II.A_TREE-WALK_INTERPRETER.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../../content/2.领土地图.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../../content/II.A_TREE-WALK_INTERPRETER.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+
+    </div>
+    </body>
+</html>
