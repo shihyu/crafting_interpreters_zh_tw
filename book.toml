@@ -1,0 +1,11 @@
+[book]
+title = "手撸解释器教程"
+subtitle = "Crafting Interpreters"
+authors = ["Bob Nystrom"]
+language = "zh"
+src = "content"
+
+[build]
+build-dir = "book"
+
+[output.html]
